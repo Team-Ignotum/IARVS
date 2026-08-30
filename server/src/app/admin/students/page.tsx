@@ -61,82 +61,9 @@ const sampleStudents: StudentRecord[] = [
     status: "Approved",
     avatar: "",
   },
-  {
-    id: "5",
-    name: "Perera, Nimal",
-    email: "s92068713@ousl.lk",
-    studentId: "STU-654321",
-    registeredCenter: "Colombo Regional Center",
-    registrationNo: "REG-654321",
-    status: "Pending",
-    avatar: "",
-  },
-  {
-    id: "6",
-    name: "Fernando, Kavindu",
-    email: "s92068714@ousl.lk",
-    studentId: "STU-734821",
-    registeredCenter: "Galle Regional Center",
-    registrationNo: "REG-734821",
-    status: "Approved",
-    avatar: "",
-  },
-  {
-    id: "7",
-    name: "Silva, Amanda",
-    email: "s92068715@ousl.lk",
-    studentId: "STU-825610",
-    registeredCenter: "Kandy Regional Center",
-    registrationNo: "REG-825610",
-    status: "Expired",
-    avatar: "",
-  },
-  {
-    id: "8",
-    name: "Raj, Kishan",
-    email: "s92068716@ousl.lk",
-    studentId: "STU-912345",
-    registeredCenter: "Jaffna Regional Center",
-    registrationNo: "REG-912345",
-    status: "Pending",
-    avatar: "",
-  },
-  {
-    id: "9",
-    name: "Jayasinghe, Malith",
-    email: "s92068717@ousl.lk",
-    studentId: "STU-112233",
-    registeredCenter: "Colombo Regional Center",
-    registrationNo: "REG-112233",
-    status: "Approved",
-    avatar: "",
-  },
-  {
-    id: "10",
-    name: "Mohamed, Ahamed",
-    email: "s92068718@ousl.lk",
-    studentId: "STU-445566",
-    registeredCenter: "Batticaloa Regional Center",
-    registrationNo: "REG-445566",
-    status: "Expired",
-    avatar: "",
-  },
-  {
-    id: "11",
-    name: "Gunawardena, Kasun",
-    email: "s92068719@ousl.lk",
-    studentId: "STU-778899",
-    registeredCenter: "Colombo Regional Center",
-    registrationNo: "REG-778899",
-    status: "Approved",
-    avatar: "",
-  },
 ];
 
-/* ======================================================
-   STUDENT PAGE
-====================================================== */
-
+//STUDENT PAGE
 export default function StudentPage() {
   const { stats } = useStudentDashboard();
 
