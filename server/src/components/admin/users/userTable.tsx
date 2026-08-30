@@ -79,7 +79,7 @@ export default function UsersTable({
             users.map((user) => (
               <TableRow key={user.id} className="bg-white hover:bg-[#fbfcff]">
                
-                  {/* DYnamic Columns */}
+                  {/* Dynamic Columns */}
                    {userColumns.map((column)=> (
                       <TableCell key={column.key}
                          className="px-4 py-3" >
