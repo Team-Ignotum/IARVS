@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
-import crest from "../../src/app/favicon.ico.jpeg";
+import crest from "../../src/app/favicon.ico";
 import {
   BriefcaseBusiness,
   CircleHelp,
