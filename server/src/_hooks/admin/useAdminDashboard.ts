@@ -1,7 +1,9 @@
 "use client";
 
 export interface AdminStats {
+  totalUsers: number;
   totalStaff: number;
+  totalStudents: number;
   centers: number;
   activeStaff: number;
   inactiveStaff: number;
@@ -29,8 +31,10 @@ export interface UseStudentDashboardResult {
 
 // Temporary mock data used for the staff dashboard until the real admin data source is connected.
 const mockStats: AdminStats = {
-  totalStaff: 1248,
-  centers: 842,
+  totalUsers: 1248,
+  totalStaff: 100,
+  totalStudents: 34,
+  centers: 19,
   activeStaff: 34,
   inactiveStaff: 18,
 };
