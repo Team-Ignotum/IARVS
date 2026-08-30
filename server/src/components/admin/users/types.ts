@@ -3,6 +3,8 @@ export type UserStatus = "Active" | "Inactive";
 
 export type ApiUserRole = "student" | "staff" | "superAdmin";
 
+export type StudentStatus = "Approved" | "Pending" | "Expired";
+
 export interface ApiUserRecord {
   id: string;
   email: string;
@@ -29,4 +31,21 @@ export interface ColumnConfig {
   key: string;
   label: string;
   render?: (user: UserRecord) => React.ReactNode;
+}
+
+export interface StudentRecord {
+  id: string;
+  name: string;
+  email: string;
+  studentId: string;
+  registeredCenter: string;
+  registrationNo: string;
+  status: StudentStatus;
+  avatar?: string;
+}
+
+export interface StudentColumnConfig {
+  key: string;
+  label: string;
+  render?: (student: StudentRecord) => React.ReactNode;
 }
