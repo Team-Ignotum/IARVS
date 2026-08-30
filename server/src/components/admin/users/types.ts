@@ -33,6 +33,8 @@ export type UserCenterFilter = "all" | "none" | UserCenter;
 
 export type ApiUserRole = "student" | "staff" | "superStaff" | "superAdmin";
 
+export type StudentStatus = "Approved" | "Pending" | "Expired";
+
 export interface ApiUserRecord {
   id: string;
   email: string;

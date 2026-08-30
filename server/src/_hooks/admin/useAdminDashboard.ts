@@ -7,6 +7,12 @@ export interface AdminStats {
   inactiveStaff: number;
 }
 
+export interface AdminStudentStats {
+  totalStudents: number;
+  approvedStudents: number;
+  pendingStudents: number;
+}
+
 export interface UseAdminDashboardResult {
   stats: AdminStats;
   recentProjects: [];
@@ -14,8 +20,14 @@ export interface UseAdminDashboardResult {
   error: string | null;
 }
 
+export interface UseStudentDashboardResult {
+  stats: AdminStudentStats;
+  recentProjects: [];
+  isLoading: boolean;
+  error: string | null;
+}
+
 // Temporary mock data used for the staff dashboard until the real admin data source is connected.
-// The page is intentionally using user-centered stats instead of project metrics to match the design.
 const mockStats: AdminStats = {
   totalStaff: 1248,
   centers: 842,
@@ -23,9 +35,24 @@ const mockStats: AdminStats = {
   inactiveStaff: 18,
 };
 
+const mockStudentStats: AdminStudentStats = {
+  totalStudents: 2000,
+  approvedStudents: 843,
+  pendingStudents: 1157,
+};
+
 export function useAdminDashboard(): UseAdminDashboardResult {
   return {
     stats: mockStats,
+    recentProjects: [],
+    isLoading: false,
+    error: null,
+  };
+}
+
+export function useStudentDashboard(): UseStudentDashboardResult {
+  return {
+    stats: mockStudentStats,
     recentProjects: [],
     isLoading: false,
     error: null,
