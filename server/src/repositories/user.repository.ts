@@ -15,9 +15,16 @@ export type UserRoleName = "student" | "admin" | "staff" | "superStaff";
 export interface CreateUserData {
   id: number;
   email: string;
-  password: string;
+  passwordHash: string;
   name: string;
   role: UserRoleName;
+}
+
+export interface UpdateUserData {
+  email?: string;
+  name?: string;
+  role?: UserRoleName;
+  isActive?: boolean;
 }
 
 export interface ListUsersOptions {
@@ -83,17 +90,31 @@ export class UserRepository {
   create(data: CreateUserData) {
     return this.db.user.create({
       data: {
-        ...data,
+        id: data.id,
+        email: data.email,
+        password: data.passwordHash,
+        name: data.name,
         role: toPrismaRole(data.role),
       },
       select: publicUserSelect,
     });
   }
 
-  update(id: number, data: Prisma.UserUpdateInput) {
+  update(id: number, data: UpdateUserData) {
     return this.db.user.update({
       where: { id },
-      data,
+      data: {
+        ...data,
+        role: data.role ? toPrismaRole(data.role) : undefined,
+      },
+      select: publicUserSelect,
+    });
+  }
+
+  setPasswordHash(id: number, passwordHash: string) {
+    return this.db.user.update({
+      where: { id },
+      data: { password: passwordHash },
       select: publicUserSelect,
     });
   }
