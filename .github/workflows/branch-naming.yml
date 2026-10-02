@@ -5,22 +5,22 @@ name: Branch Naming Convention
 run-name: "Evaluate new branch [${{ github.ref_name }}]"
 
 on:
-  create:
-    branches:
-      - "**"
+  pull_request:
+    types: [opened, synchronize, reopened]
 
 permissions:
   contents: write
 
 jobs:
   check-branch-name:
+    name: Branch Naming Convention
     runs-on: ubuntu-latest
 
     steps:
       - name: Check branch name
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          BRANCH: ${{ github.ref_name }}
+          BRANCH: ${{ github.head_ref }}
 
         run: |
           # Branches exempt from naming rules

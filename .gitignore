@@ -13,6 +13,9 @@
 # testing
 /coverage
 
+# agentic AI dir
+agenticServer/
+
 # next.js
 **/.next/
 /out/
