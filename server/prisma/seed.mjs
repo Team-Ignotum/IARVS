@@ -38,7 +38,7 @@ async function main() {
       role: "ADMIN",
     },
   });
-  console.log("✅ Seed data created successfully!");
+  console.log(" Seed data created successfully!");
   console.log({
     user: User.email,
   });
