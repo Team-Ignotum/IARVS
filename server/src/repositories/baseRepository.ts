@@ -1,34 +1,39 @@
-import { PrismaClient } from "@prisma/client/extension";
 
-export default abstract class BaseRepository<T> {
-  constructor(protected modelClient: PrismaClient) {}
+type RepositoryDelegate<T> = {
+  findMany(args?: any): Promise<T[]>;
+  findUnique(args: any): Promise<T | null>;
+  create(args: any): Promise<T>;
+  delete(args: any): Promise<T>;
+  count(args?: any): Promise<number>;
+  update(args: any): Promise<T>;
+};
 
-  getAll(options: Record<string, any> = {}): Promise<Array<T>> {
+export default abstract class BaseRepository<
+  T,
+  TCreate,
+  TId extends string | number = number
+> {
+  constructor(
+    protected readonly modelClient: RepositoryDelegate<T>
+  ) {}
+
+  getAll(options: any = {}): Promise<T[]> {
     return this.modelClient.findMany(options);
   }
 
-  getById(id: string | number): Promise<T | null> {
+  getById(id: TId): Promise<T | null> {
     return this.modelClient.findUnique({
-      where: {
-        id,
-      },
-    });
-  }
-
-  create(entity: Omit<T, "id">): Promise<T> {
-    return this.modelClient.create({
-      data: entity,
-    });
-  }
-
-  update(id: string | number, data: Partial<Omit<T, "id">>): Promise<T> {
-    return this.modelClient.update({
       where: { id },
+    });
+  }
+
+  create(data: TCreate): Promise<T> {
+    return this.modelClient.create({
       data,
     });
   }
 
-  delete(id: string | number): Promise<T> {
+  delete(id: TId): Promise<T> {
     return this.modelClient.delete({
       where: { id },
     });

@@ -1,30 +1,34 @@
+
 import { Prisma, PrismaClient } from "../generated/prisma/client";
+import BaseRepository from "./baseRepository";
 
 const publicUserSelect = {
   id: true,
   email: true,
-  name: true,
+  firstName: true,
+  lastName: true,
   role: true,
   isActive: true,
   createdAt: true,
   updatedAt: true,
 } satisfies Prisma.UserSelect;
 
-export type UserRoleName = "student" | "admin" | "staff" | "superStaff";
+type PublicUser = Prisma.UserGetPayload<{
+  select: typeof publicUserSelect;
+}>;
+
+export type UserRoleName =
+  | "student"
+  | "admin"
+  | "staff"
+  | "superStaff";
 
 export interface CreateUserData {
-  id: number;
   email: string;
   passwordHash: string;
-  name: string;
+  firstName: string;
+  lastName: string;
   role: UserRoleName;
-}
-
-export interface UpdateUserData {
-  email?: string;
-  name?: string;
-  role?: UserRoleName;
-  isActive?: boolean;
 }
 
 export interface ListUsersOptions {
@@ -47,31 +51,43 @@ function toPrismaRole(role: UserRoleName): PrismaUserRole {
   return roles[role];
 }
 
-function toUserWhereInput(options: ListUsersOptions): Prisma.UserWhereInput {
+function toUserWhereInput(
+  options: ListUsersOptions
+): Prisma.UserWhereInput {
   return {
-    role: options.role ? toPrismaRole(options.role) : undefined,
-    isActive: options.isActive,
+    ...(options.role !== undefined
+      ? { role: toPrismaRole(options.role) }
+      : {}),
+    ...(options.isActive !== undefined
+      ? { isActive: options.isActive }
+      : {}),
   };
 }
 
-export class UserRepository {
-  constructor(private readonly db: PrismaClient) {}
+export class UserRepository extends BaseRepository<
+  PublicUser,
+  Prisma.UserCreateInput,
+  number
+> {
+  constructor(private readonly db: PrismaClient) {
+    super(db.user as any);
+  }
 
-  findById(id: number) {
+  findById(id: number): Promise<PublicUser | null> {
     return this.db.user.findUnique({
       where: { id },
       select: publicUserSelect,
     });
   }
 
-  findByEmail(email: string) {
+  findByEmail(email: string): Promise<PublicUser | null> {
     return this.db.user.findUnique({
       where: { email },
       select: publicUserSelect,
     });
   }
 
-  findMany(options: ListUsersOptions = {}) {
+  findMany(options: ListUsersOptions = {}): Promise<PublicUser[]> {
     return this.db.user.findMany({
       where: toUserWhereInput(options),
       skip: options.skip,
@@ -81,37 +97,29 @@ export class UserRepository {
     });
   }
 
-  count(options: ListUsersOptions = {}) {
+  count(options: ListUsersOptions = {}): Promise<number> {
     return this.db.user.count({
       where: toUserWhereInput(options),
     });
   }
 
-  create(data: CreateUserData) {
+  createUser(data: CreateUserData): Promise<PublicUser> {
     return this.db.user.create({
       data: {
-        id: data.id,
         email: data.email,
         password: data.passwordHash,
-        name: data.name,
+        firstName: data.firstName,
+        lastName: data.lastName,
         role: toPrismaRole(data.role),
       },
       select: publicUserSelect,
     });
   }
 
-  update(id: number, data: UpdateUserData) {
-    return this.db.user.update({
-      where: { id },
-      data: {
-        ...data,
-        role: data.role ? toPrismaRole(data.role) : undefined,
-      },
-      select: publicUserSelect,
-    });
-  }
-
-  setPasswordHash(id: number, passwordHash: string) {
+  setPasswordHash(
+    id: number,
+    passwordHash: string
+  ): Promise<PublicUser> {
     return this.db.user.update({
       where: { id },
       data: { password: passwordHash },
@@ -119,10 +127,20 @@ export class UserRepository {
     });
   }
 
-  setActiveStatus(id: number, isActive: boolean) {
+  setActiveStatus(
+    id: number,
+    isActive: boolean
+  ): Promise<PublicUser> {
     return this.db.user.update({
       where: { id },
       data: { isActive },
+      select: publicUserSelect,
+    });
+  }
+
+  deleteUser(id: number): Promise<PublicUser> {
+    return this.db.user.delete({
+      where: { id },
       select: publicUserSelect,
     });
   }
