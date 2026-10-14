@@ -7,54 +7,58 @@ import {
 } from "@/components/ui/select";
 import FilterBar  from "@/components/admin/FilterBar";
 
-import { UserRole, UserStatus } from "./types";
+import { UserRole, UserStatus ,OUSL_CENTERS, UserCenterFilter } from "./types";
 
 interface UsersFiltersProps {
   roleFilter: "all" | UserRole;
   statusFilter: "all" | UserStatus;
-  batchFilter: "all" | string;
-  batchOptions: string[];
+  centerFilter: UserCenterFilter;
   search: string;
   onRoleChange: (value: "all" | UserRole) => void;
   onStatusChange: (value: "all" | UserStatus) => void;
-  onBatchChange: (value: "all" | string) => void;
+  onCenterChange: (value: UserCenterFilter) => void;
   onSearchChange: (value: string) => void;
 }
 
 export default function UsersFilters({
   roleFilter,
   statusFilter,
-  batchFilter,
-  batchOptions,
+  centerFilter,
   search,
   onRoleChange,
   onStatusChange,
-  onBatchChange,
+  onCenterChange,
   onSearchChange,
 }: UsersFiltersProps) {
+
   return (
     <FilterBar>
+      {/* Filter based on Role */}
       <FilterBar.Field label="Role">
         <Select
           value={roleFilter}
-          onValueChange={(value: string) => onRoleChange(value as "all" | UserRole)}
+          onValueChange={(value: string) =>
+            onRoleChange(value as "all" | UserRole)
+          }
         >
           <SelectTrigger className="h-8 w-32.5 bg-white">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Roles</SelectItem>
-            <SelectItem value="Student">Mentee</SelectItem>
-            <SelectItem value="Mentor">Mentor</SelectItem>
-            <SelectItem value="SuperAdmin">SuperAdmin</SelectItem>
+            <SelectItem value="Staff">Staff</SelectItem>
+            <SelectItem value="SuperStaff">SuperStaff</SelectItem>
           </SelectContent>
         </Select>
       </FilterBar.Field>
 
+      {/* Filter based on Status */}
       <FilterBar.Field label="Status">
         <Select
           value={statusFilter}
-          onValueChange={(value: string) => onStatusChange(value as "all" | UserStatus)}
+          onValueChange={(value: string) =>
+            onStatusChange(value as "all" | UserStatus)
+          }
         >
           <SelectTrigger className="h-8 w-35 bg-white">
             <SelectValue />
@@ -67,22 +71,28 @@ export default function UsersFilters({
         </Select>
       </FilterBar.Field>
 
-      <FilterBar.Field label="Batch">
+      {/* Filter based on Center */}
+      <FilterBar.Field label="Centers">
         <Select
-          value={batchFilter}
-          onValueChange={(value: string) => onBatchChange(value as "all" | string)}
+          value={centerFilter}
+          onValueChange={(value: string) =>
+            onCenterChange(value as UserCenterFilter)
+          }
         >
           <SelectTrigger className="h-8 w-35 bg-white">
             <SelectValue />
           </SelectTrigger>
+
           <SelectContent>
-            <SelectItem value="all">All Batches</SelectItem>
-            {batchOptions.map((b) => (
-              <SelectItem key={b} value={b}>
-                {b}
+            <SelectItem value="all">All Centers</SelectItem>
+
+            {OUSL_CENTERS.map((center) => (
+              <SelectItem key={center.code} value={center.code}>
+                {center.name}
               </SelectItem>
             ))}
-            <SelectItem value="__none__">No Batch</SelectItem>
+
+            <SelectItem value="none">No Center</SelectItem>
           </SelectContent>
         </Select>
       </FilterBar.Field>
