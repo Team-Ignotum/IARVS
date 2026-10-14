@@ -132,8 +132,8 @@ export default function Page() {
         </section>
 
         {/* RIGHT PANEL — LOGIN FORM */}
-        <section className="flex min-h-[600px] items-start justify-center bg-white px-6 py-14 sm:px-12 lg:min-h-screen lg:px-16 lg:pt-[155px]">
-          <div className="w-full max-w-[490px]">
+        <section className="flex min-h-150 items-start justify-center bg-white px-6 py-14 sm:px-12 lg:min-h-screen lg:px-16 lg:pt-38.75">
+          <div className="w-full max-w-122.5">
             {/* Heading */}
             <h2 className="text-[34px] font-semibold tracking-tight text-[#071936]">
               Sign In
@@ -161,7 +161,7 @@ export default function Page() {
                   placeholder="e.g. s20007000 or jperera"
                   autoComplete="username"
                   required
-                  className="h-[52px] rounded-lg border-[#d9dee6] bg-[#fafafa] px-5 text-[15px] shadow-sm focus-visible:border-[#21385f] focus-visible:ring-2 focus-visible:ring-[#21385f]/20"
+                  className="h-13 rounded-lg border-[#d9dee6] bg-[#fafafa] px-5 text-[15px] shadow-sm focus-visible:border-[#21385f] focus-visible:ring-2 focus-visible:ring-[#21385f]/20"
                 />
               </div>
 
@@ -181,7 +181,7 @@ export default function Page() {
                   placeholder="Enter your password"
                   autoComplete="current-password"
                   required
-                  className="h-[52px] rounded-lg border-[#d9dee6] bg-[#fafafa] px-5 text-[15px] shadow-sm focus-visible:border-[#21385f] focus-visible:ring-2 focus-visible:ring-[#21385f]/20"
+                  className="h-13 rounded-lg border-[#d9dee6] bg-[#fafafa] px-5 text-[15px] shadow-sm focus-visible:border-[#21385f] focus-visible:ring-2 focus-visible:ring-[#21385f]/20"
                 />
 
                 {/* Forgot Password Navigation */}
@@ -198,7 +198,7 @@ export default function Page() {
               {/* Sign In Button */}
               <Button
                 type="submit"
-                className="mt-9 h-[48px] w-full rounded-lg bg-[#1d3a66] text-[15px] font-medium text-white transition-colors hover:bg-[#152e53]"
+                className="mt-9 h-12 w-full rounded-lg bg-[#1d3a66] text-[15px] font-medium text-white transition-colors hover:bg-[#152e53]"
               >
                 Sign in
               </Button>
