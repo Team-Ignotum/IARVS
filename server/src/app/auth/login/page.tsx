@@ -11,8 +11,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-export default function LoginPage() {
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+export default function Page() {
+  const handleSubmit = (e: React.SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     // Frontend only — authentication API integration pending.
@@ -32,27 +32,26 @@ export default function LoginPage() {
               width={125}
               height={125}
               priority
-              className="h-[90px] w-[90px] shrink-0 object-contain sm:h-[125px] sm:w-[125px]"
+              className="h-28.75 w-28.75 shrink-0 object-contain sm:h-31.25 sm:w-31.25"
             />
 
-            <div className="min-w-0 pt-2 sm:pt-5">
-              <p className="text-[13px] font-medium leading-5 sm:text-[16px] sm:leading-6">
-                The Open University of Sri Lanka
+            <div className="pt-3 sm:pt-5">
+              <p className="mt-1 text-[17px] leading-6">
+                ශ්‍රී ලංකා විවෘත විශ්වවිද්‍යාලය
               </p>
-
-              <p className="mt-1 text-[13px] leading-5 sm:text-[17px] sm:leading-6">
+              <p className="mt-1 text-[17px] leading-6">
                 இலங்கை திறந்த பல்கலைக்கழகம்
               </p>
 
-              <p className="mt-1 text-[13px] leading-5 sm:text-[17px] sm:leading-6">
-                ශ්‍රී ලංකා විවෘත විශ්වවිද්‍යාලය
+              <p className="text-[16px] font-medium leading-6">
+                The Open University of Sri Lanka
               </p>
             </div>
           </div>
 
           {/* Main Heading */}
-          <div className="relative z-10 mt-12 max-w-[450px] sm:mt-14 lg:mt-14">
-            <h1 className="text-[39px] font-light leading-[1.06] tracking-tight sm:text-[48px] lg:text-[52px]">
+          <div className="mt-12 max-w-112.5 lg:mt-14">
+            <h1 className="text-[44px] font-light leading-none tracking-tight sm:text-[48px] lg:text-[52px]">
               Learning that
               <br />
               reaches
@@ -67,7 +66,7 @@ export default function LoginPage() {
               any time.
             </h1>
 
-            <p className="mt-5 max-w-[390px] text-[14px] leading-relaxed text-slate-300 sm:text-[15px]">
+            <p className="mt-4 max-w-97.5 text-[15px] leading-tight text-slate-300">
               One account for your courses, results, library
               <br className="hidden sm:block" />
               {" "}and campus services.
@@ -75,10 +74,7 @@ export default function LoginPage() {
           </div>
 
           {/* Decorative Network */}
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute bottom-[145px] left-[55%] hidden -translate-x-1/2 lg:block"
-          >
+          <div className="pointer-events-none absolute bottom-41.25 left-[55%] hidden -translate-x-1/2 md:block">
             <svg
               width="120"
               height="175"
@@ -101,27 +97,27 @@ export default function LoginPage() {
             </svg>
           </div>
 
-          {/* University Statistics */}
-          <div className="relative z-10 mt-auto pt-12">
-            <div className="border-t border-[#29415f] pt-5">
-              <div className="flex flex-wrap items-end gap-8 sm:gap-14">
-                <div>
-                  <p className="text-[24px] font-bold leading-none">
-                    40,000+
-                  </p>
-                  <p className="mt-2 text-[9px] uppercase tracking-[0.14em] text-slate-400">
-                    Learners
-                  </p>
-                </div>
+          {/* Bottom Statistics */}
+          <div className="mt-auto border-t border-[#29415f] pt-5">
+            <div className="flex items-end gap-10 sm:gap-14">
+              <div>
+                <p className="text-[24px] font-bold leading-none">40,000+</p>
 
-                <div>
-                  <p className="text-[20px] font-semibold leading-none">
-                    9
-                  </p>
-                  <p className="mt-2 text-[9px] uppercase tracking-[0.14em] text-slate-400">
-                    Regional Centres
-                  </p>
-                </div>
+                <p className="mt-2 text-[7px] uppercase tracking-[0.16em] text-slate-400">
+                  Learners
+                </p>
+              </div>
+
+              <div>
+                <p className="text-[17px] font-semibold leading-none">9</p>
+
+                <p className="mt-2 text-[6px] uppercase tracking-[0.14em] text-slate-400">
+                  Regional Centres
+                </p>
+              </div>
+
+              <div>
+                <p className="text-[17px] font-semibold leading-none">6</p>
 
                 <div>
                   <p className="text-[20px] font-semibold leading-none">
@@ -211,22 +207,14 @@ export default function LoginPage() {
 
             {/* IT Helpdesk */}
             <div className="mt-12 text-[14px] leading-6 text-neutral-600">
-              <p>
-                Trouble signing in? Contact the IT Helpdesk.
-              </p>
+              <p>Trouble signing in? Contact the IT Helpdesk.</p>
 
               <p>
-                <a
-                  href="tel:0112881378"
-                  className="text-[#20395f] underline underline-offset-2 hover:text-[#10284d]"
-                >
+                <a href="tel:0112881378" className="text-[#20395f] underline">
                   0112 881 378
-                </a>
-                {" or "}
-                <a
-                  href="tel:0112881055"
-                  className="text-[#20395f] underline underline-offset-2 hover:text-[#10284d]"
-                >
+                </a>{" "}
+                or{" "}
+                <a href="tel:0112881055" className="text-[#20395f] underline">
                   0112 881 055
                 </a>
                 , ext. 1175 / 1176
