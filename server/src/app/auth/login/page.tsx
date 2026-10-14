@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 export default function Page() {
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = (e: React.SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     // Front-end only for now
@@ -29,32 +29,30 @@ export default function Page() {
               width={120}
               height={120}
               priority
-              className="h-[115px] w-[115px] shrink-0 object-contain sm:h-[125px] sm:w-[125px]"
+              className="h-28.75 w-28.75 shrink-0 object-contain sm:h-31.25 sm:w-31.25"
             />
 
             <div className="pt-3 sm:pt-5">
-              <p className="text-[16px] font-medium leading-6">
-                The Open University of Sri Lanka
+              <p className="mt-1 text-[17px] leading-6">
+                ශ්‍රී ලංකා විවෘත විශ්වවිද්‍යාලය
               </p>
-
               <p className="mt-1 text-[17px] leading-6">
                 இலங்கை திறந்த பல்கலைக்கழகம்
               </p>
 
-              <p className="mt-1 text-[17px] leading-6">
-                ශ්‍රී ලංකා විවෘත විශ්වවිද්‍යාලය
+              <p className="text-[16px] font-medium leading-6">
+                The Open University of Sri Lanka
               </p>
             </div>
           </div>
 
           {/* Main Heading */}
-          <div className="mt-12 max-w-[450px] lg:mt-14">
-            <h1 className="text-[44px] font-light leading-[1] tracking-tight sm:text-[48px] lg:text-[52px]">
+          <div className="mt-12 max-w-112.5 lg:mt-14">
+            <h1 className="text-[44px] font-light leading-none tracking-tight sm:text-[48px] lg:text-[52px]">
               Learning that
               <br />
               reaches
               <br />
-
               <span className="italic text-[#f6b81c]">
                 anyone,
                 <br />
@@ -65,7 +63,7 @@ export default function Page() {
               any time.
             </h1>
 
-            <p className="mt-4 max-w-[390px] text-[15px] leading-[1.25] text-slate-300">
+            <p className="mt-4 max-w-97.5 text-[15px] leading-tight text-slate-300">
               One account for your courses, results, library
               <br />
               and campus services.
@@ -73,7 +71,7 @@ export default function Page() {
           </div>
 
           {/* Decorative Network */}
-          <div className="pointer-events-none absolute bottom-[165px] left-[55%] hidden -translate-x-1/2 md:block">
+          <div className="pointer-events-none absolute bottom-41.25 left-[55%] hidden -translate-x-1/2 md:block">
             <svg
               width="120"
               height="175"
@@ -101,9 +99,7 @@ export default function Page() {
           <div className="mt-auto border-t border-[#29415f] pt-5">
             <div className="flex items-end gap-10 sm:gap-14">
               <div>
-                <p className="text-[24px] font-bold leading-none">
-                  40,000+
-                </p>
+                <p className="text-[24px] font-bold leading-none">40,000+</p>
 
                 <p className="mt-2 text-[7px] uppercase tracking-[0.16em] text-slate-400">
                   Learners
@@ -111,9 +107,7 @@ export default function Page() {
               </div>
 
               <div>
-                <p className="text-[17px] font-semibold leading-none">
-                  9
-                </p>
+                <p className="text-[17px] font-semibold leading-none">9</p>
 
                 <p className="mt-2 text-[6px] uppercase tracking-[0.14em] text-slate-400">
                   Regional Centres
@@ -121,9 +115,7 @@ export default function Page() {
               </div>
 
               <div>
-                <p className="text-[17px] font-semibold leading-none">
-                  6
-                </p>
+                <p className="text-[17px] font-semibold leading-none">6</p>
 
                 <p className="mt-2 text-[6px] uppercase tracking-[0.14em] text-slate-400">
                   Faculties
@@ -206,27 +198,16 @@ export default function Page() {
 
             {/* Helpdesk */}
             <div className="mt-12 text-[14px] leading-6 text-neutral-600">
-              <p>
-                Trouble signing in? Contact the IT Helpdesk.
-              </p>
+              <p>Trouble signing in? Contact the IT Helpdesk.</p>
 
               <p>
-                <a
-                  href="tel:0112881378"
-                  className="text-[#20395f] underline"
-                >
+                <a href="tel:0112881378" className="text-[#20395f] underline">
                   0112 881 378
-                </a>
-
-                {" "}or{" "}
-
-                <a
-                  href="tel:0112881055"
-                  className="text-[#20395f] underline"
-                >
+                </a>{" "}
+                or{" "}
+                <a href="tel:0112881055" className="text-[#20395f] underline">
                   0112 881 055
                 </a>
-
                 , ext. 1175 / 1176
               </p>
 
