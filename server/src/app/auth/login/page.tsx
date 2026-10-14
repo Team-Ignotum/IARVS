@@ -1,7 +1,6 @@
 
 "use client";
 
-import type { FormEvent } from "react";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -23,7 +22,7 @@ export default function Page() {
     <main className="min-h-screen w-full">
       <div className="grid min-h-screen w-full lg:grid-cols-2">
         {/* LEFT PANEL — UNIVERSITY BRANDING */}
-        <section className="relative flex min-h-[520px] flex-col overflow-hidden bg-[#00152f] px-6 py-8 text-white sm:px-12 lg:min-h-screen lg:px-14 lg:py-10">
+        <section className="relative flex min-h-130 flex-col overflow-hidden bg-[#00152f] px-6 py-8 text-white sm:px-12 lg:min-h-screen lg:px-14 lg:py-10">
           {/* University Identity */}
           <div className="flex items-start gap-4 sm:gap-7">
             <Image
