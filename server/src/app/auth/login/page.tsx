@@ -1,6 +1,9 @@
+
 "use client";
 
+import type { FormEvent } from "react";
 import Image from "next/image";
+import Link from "next/link";
 
 import crest from "../favicon.ico.png";
 
@@ -8,53 +11,52 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-export default function Page() {
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+export default function LoginPage() {
+  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    // Front-end only for now
+    // Frontend only — authentication API integration pending.
     console.log("Sign in clicked");
   };
 
   return (
     <main className="min-h-screen w-full">
       <div className="grid min-h-screen w-full lg:grid-cols-2">
-        {/* ================= LEFT PANEL ================= */}
-        <section className="relative flex min-h-screen flex-col overflow-hidden bg-[#00152f] px-8 py-8 text-white sm:px-12 lg:px-14 lg:py-10">
-          {/* University Branding */}
-          <div className="flex items-start gap-5 sm:gap-7">
+        {/* LEFT PANEL — UNIVERSITY BRANDING */}
+        <section className="relative flex min-h-[520px] flex-col overflow-hidden bg-[#00152f] px-6 py-8 text-white sm:px-12 lg:min-h-screen lg:px-14 lg:py-10">
+          {/* University Identity */}
+          <div className="flex items-start gap-4 sm:gap-7">
             <Image
               src={crest}
-              alt="The Open University of Sri Lanka"
-              width={120}
-              height={120}
+              alt="The Open University of Sri Lanka crest"
+              width={125}
+              height={125}
               priority
-              className="h-[115px] w-[115px] shrink-0 object-contain sm:h-[125px] sm:w-[125px]"
+              className="h-[90px] w-[90px] shrink-0 object-contain sm:h-[125px] sm:w-[125px]"
             />
 
-            <div className="pt-3 sm:pt-5">
-              <p className="text-[16px] font-medium leading-6">
+            <div className="min-w-0 pt-2 sm:pt-5">
+              <p className="text-[13px] font-medium leading-5 sm:text-[16px] sm:leading-6">
                 The Open University of Sri Lanka
               </p>
 
-              <p className="mt-1 text-[17px] leading-6">
+              <p className="mt-1 text-[13px] leading-5 sm:text-[17px] sm:leading-6">
                 இலங்கை திறந்த பல்கலைக்கழகம்
               </p>
 
-              <p className="mt-1 text-[17px] leading-6">
+              <p className="mt-1 text-[13px] leading-5 sm:text-[17px] sm:leading-6">
                 ශ්‍රී ලංකා විවෘත විශ්වවිද්‍යාලය
               </p>
             </div>
           </div>
 
           {/* Main Heading */}
-          <div className="mt-12 max-w-[450px] lg:mt-14">
-            <h1 className="text-[44px] font-light leading-[1] tracking-tight sm:text-[48px] lg:text-[52px]">
+          <div className="relative z-10 mt-12 max-w-[450px] sm:mt-14 lg:mt-14">
+            <h1 className="text-[39px] font-light leading-[1.06] tracking-tight sm:text-[48px] lg:text-[52px]">
               Learning that
               <br />
               reaches
               <br />
-
               <span className="italic text-[#f6b81c]">
                 anyone,
                 <br />
@@ -65,15 +67,18 @@ export default function Page() {
               any time.
             </h1>
 
-            <p className="mt-4 max-w-[390px] text-[15px] leading-[1.25] text-slate-300">
+            <p className="mt-5 max-w-[390px] text-[14px] leading-relaxed text-slate-300 sm:text-[15px]">
               One account for your courses, results, library
-              <br />
-              and campus services.
+              <br className="hidden sm:block" />
+              {" "}and campus services.
             </p>
           </div>
 
           {/* Decorative Network */}
-          <div className="pointer-events-none absolute bottom-[165px] left-[55%] hidden -translate-x-1/2 md:block">
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute bottom-[145px] left-[55%] hidden -translate-x-1/2 lg:block"
+          >
             <svg
               width="120"
               height="175"
@@ -87,7 +92,6 @@ export default function Page() {
                 strokeWidth="1"
                 opacity="0.6"
               />
-
               <circle cx="55" cy="8" r="2.5" fill="#F6B81C" />
               <circle cx="44" cy="75" r="3" fill="#F6B81C" />
               <circle cx="81" cy="148" r="2.5" fill="#60728B" />
@@ -97,44 +101,43 @@ export default function Page() {
             </svg>
           </div>
 
-          {/* Bottom Statistics */}
-          <div className="mt-auto border-t border-[#29415f] pt-5">
-            <div className="flex items-end gap-10 sm:gap-14">
-              <div>
-                <p className="text-[24px] font-bold leading-none">
-                  40,000+
-                </p>
+          {/* University Statistics */}
+          <div className="relative z-10 mt-auto pt-12">
+            <div className="border-t border-[#29415f] pt-5">
+              <div className="flex flex-wrap items-end gap-8 sm:gap-14">
+                <div>
+                  <p className="text-[24px] font-bold leading-none">
+                    40,000+
+                  </p>
+                  <p className="mt-2 text-[9px] uppercase tracking-[0.14em] text-slate-400">
+                    Learners
+                  </p>
+                </div>
 
-                <p className="mt-2 text-[7px] uppercase tracking-[0.16em] text-slate-400">
-                  Learners
-                </p>
-              </div>
+                <div>
+                  <p className="text-[20px] font-semibold leading-none">
+                    9
+                  </p>
+                  <p className="mt-2 text-[9px] uppercase tracking-[0.14em] text-slate-400">
+                    Regional Centres
+                  </p>
+                </div>
 
-              <div>
-                <p className="text-[17px] font-semibold leading-none">
-                  9
-                </p>
-
-                <p className="mt-2 text-[6px] uppercase tracking-[0.14em] text-slate-400">
-                  Regional Centres
-                </p>
-              </div>
-
-              <div>
-                <p className="text-[17px] font-semibold leading-none">
-                  6
-                </p>
-
-                <p className="mt-2 text-[6px] uppercase tracking-[0.14em] text-slate-400">
-                  Faculties
-                </p>
+                <div>
+                  <p className="text-[20px] font-semibold leading-none">
+                    6
+                  </p>
+                  <p className="mt-2 text-[9px] uppercase tracking-[0.14em] text-slate-400">
+                    Faculties
+                  </p>
+                </div>
               </div>
             </div>
           </div>
         </section>
 
-        {/* ================= RIGHT PANEL ================= */}
-        <section className="flex min-h-screen items-start justify-center bg-white px-8 pt-24 sm:px-12 lg:px-16 lg:pt-[155px]">
+        {/* RIGHT PANEL — LOGIN FORM */}
+        <section className="flex min-h-[600px] items-start justify-center bg-white px-6 py-14 sm:px-12 lg:min-h-screen lg:px-16 lg:pt-[155px]">
           <div className="w-full max-w-[490px]">
             {/* Heading */}
             <h2 className="text-[34px] font-semibold tracking-tight text-[#071936]">
@@ -162,6 +165,7 @@ export default function Page() {
                   type="text"
                   placeholder="e.g. s20007000 or jperera"
                   autoComplete="username"
+                  required
                   className="h-[52px] rounded-lg border-[#d9dee6] bg-[#fafafa] px-5 text-[15px] shadow-sm focus-visible:border-[#21385f] focus-visible:ring-2 focus-visible:ring-[#21385f]/20"
                 />
               </div>
@@ -179,32 +183,33 @@ export default function Page() {
                   id="password"
                   name="password"
                   type="password"
+                  placeholder="Enter your password"
                   autoComplete="current-password"
+                  required
                   className="h-[52px] rounded-lg border-[#d9dee6] bg-[#fafafa] px-5 text-[15px] shadow-sm focus-visible:border-[#21385f] focus-visible:ring-2 focus-visible:ring-[#21385f]/20"
                 />
 
-                {/* Forgot Password */}
-                <div className="flex justify-end pt-1">
-                  <Button
-                    type="button"
-                    variant="link"
-                    className="h-auto p-0 text-[15px] font-normal text-[#20395f]"
+                {/* Forgot Password Navigation */}
+                <div className="flex justify-end pt-2">
+                  <Link
+                    href="/auth/forgot-password"
+                    className="rounded-sm text-[15px] font-medium text-[#20395f] transition-colors hover:text-[#10284d] hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#20395f]"
                   >
                     Forgot Password?
-                  </Button>
+                  </Link>
                 </div>
               </div>
 
-              {/* Sign In */}
+              {/* Sign In Button */}
               <Button
                 type="submit"
-                className="mt-9 h-[48px] w-full rounded-lg bg-[#1d3a66] text-[15px] font-medium text-white hover:bg-[#152e53]"
+                className="mt-9 h-[48px] w-full rounded-lg bg-[#1d3a66] text-[15px] font-medium text-white transition-colors hover:bg-[#152e53]"
               >
                 Sign in
               </Button>
             </form>
 
-            {/* Helpdesk */}
+            {/* IT Helpdesk */}
             <div className="mt-12 text-[14px] leading-6 text-neutral-600">
               <p>
                 Trouble signing in? Contact the IT Helpdesk.
@@ -213,26 +218,23 @@ export default function Page() {
               <p>
                 <a
                   href="tel:0112881378"
-                  className="text-[#20395f] underline"
+                  className="text-[#20395f] underline underline-offset-2 hover:text-[#10284d]"
                 >
                   0112 881 378
                 </a>
-
-                {" "}or{" "}
-
+                {" or "}
                 <a
                   href="tel:0112881055"
-                  className="text-[#20395f] underline"
+                  className="text-[#20395f] underline underline-offset-2 hover:text-[#10284d]"
                 >
                   0112 881 055
                 </a>
-
                 , ext. 1175 / 1176
               </p>
 
               <a
                 href="mailto:ithelpdesk@ou.ac.lk"
-                className="text-[#20395f] underline"
+                className="text-[#20395f] underline underline-offset-2 hover:text-[#10284d]"
               >
                 ithelpdesk@ou.ac.lk
               </a>
