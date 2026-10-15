@@ -4,17 +4,18 @@ type RepositoryDelegate<T> = {
   findUnique(args: any): Promise<T | null>;
   create(args: any): Promise<T>;
   delete(args: any): Promise<T>;
-  count(args?: any): Promise<number>;
   update(args: any): Promise<T>;
 };
 
 export default abstract class BaseRepository<
   T,
-  TCreate,
+  TCreate = any,
+  TUpdate = any,
   TId extends string | number = number
 > {
   constructor(
-    protected readonly modelClient: RepositoryDelegate<T>
+    protected readonly modelClient: RepositoryDelegate<T>,
+    private readonly idField: string = "id"
   ) {}
 
   getAll(options: any = {}): Promise<T[]> {
@@ -23,7 +24,7 @@ export default abstract class BaseRepository<
 
   getById(id: TId): Promise<T | null> {
     return this.modelClient.findUnique({
-      where: { id },
+      where: { [this.idField]: id },
     });
   }
 
@@ -33,9 +34,16 @@ export default abstract class BaseRepository<
     });
   }
 
+  update(id: TId, data: TUpdate): Promise<T> {
+    return this.modelClient.update({
+      where: { [this.idField]: id },
+      data,
+    });
+  }
+
   delete(id: TId): Promise<T> {
     return this.modelClient.delete({
-      where: { id },
+      where: { [this.idField]: id },
     });
   }
 }
