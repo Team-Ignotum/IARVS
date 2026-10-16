@@ -8,7 +8,7 @@ import crest from "../favicon.ico.png";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import React, { useState } from "react";
+import React, { useState ,useEffect} from "react";
 
 
 import { useLogin } from "@/_hooks/login/useLogin";
@@ -31,6 +31,15 @@ const LoginPage = () => {
     variant: "default" as ToastVariant,
   });
 
+  useEffect(() => {
+    if (!toastData.open) return;
+
+    const timer = setTimeout(() => {
+      setToastData((prev) => ({ ...prev, open: false }));
+    }, 3000);
+
+    return () => clearTimeout(timer);
+  }, [toastData.open, toastData.title, toastData.description]);
   
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -72,6 +81,32 @@ const LoginPage = () => {
 
   return (
     <main className="min-h-screen w-full">
+      {toastData.open && (
+        <div
+          role="alert"
+          className={`fixed right-5 top-5 z-50 w-full max-w-sm rounded-lg border p-4 shadow-lg ${
+            toastData.variant === "destructive"
+              ? "border-red-200 bg-red-50 text-red-800"
+              : "border-green-200 bg-green-50 text-green-800"
+          }`}
+        >
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <p className="font-semibold">{toastData.title}</p>
+              <p className="mt-1 text-sm">{toastData.description}</p>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setToastData((prev) => ({ ...prev, open: false }))}
+              aria-label="Close notification"
+              className="text-lg leading-none"
+            >
+              ×
+            </button>
+          </div>
+        </div>
+      )}
       <div className="grid min-h-screen w-full lg:grid-cols-2">
         {/* LEFT PANEL — UNIVERSITY BRANDING */}
         <section className="relative flex min-h-130 flex-col overflow-hidden bg-[#00152f] px-6 py-8 text-white sm:px-12 lg:min-h-screen lg:px-14 lg:py-10">
