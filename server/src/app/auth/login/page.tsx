@@ -1,4 +1,3 @@
-
 "use client";
 
 import Image from "next/image";
@@ -9,14 +8,67 @@ import crest from "../favicon.ico.png";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import React, { useState } from "react";
 
-export default function Page() {
-  const handleSubmit = (e: React.SubmitEvent<HTMLFormElement>) => {
+
+import { useLogin } from "@/_hooks/login/useLogin";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
+import { useRouter } from "next/navigation";
+
+type ToastVariant = "default" | "destructive";
+
+const LoginPage = () => {
+
+  const loginMutation = useLogin();
+  const router = useRouter();
+  const [showPassword, setShowPassword] = useState(false);
+  const loading = loginMutation.isPending;
+
+  const [toastData, setToastData] = useState({
+    open: false,
+    title: "",
+    description: "",
+    variant: "default" as ToastVariant,
+  });
+
+  
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    // Frontend only — authentication API integration pending.
-    console.log("Sign in clicked");
+    const formData = new FormData(e.currentTarget);
+
+    try {
+      const data = await loginMutation.mutateAsync({
+        email: formData.get("email") as string,
+        password: formData.get("password") as string,
+      });
+
+      // Your existing success toast
+      setToastData({
+        open: true,
+        title: "Access Granted",
+        description: "Welcome back. Initializing your workspace...",
+        variant: "default",
+      });
+
+      if (data.redirectUrl) {
+        setTimeout(() => router.push(data.redirectUrl), 800);
+      }
+    } catch (error) {
+      // Your existing error toast
+      setToastData({
+        open: true,
+        title: "Authentication Failed",
+        description:
+          error instanceof Error
+            ? error.message
+            : "Please verify your credentials and try again.",
+        variant: "destructive",
+      });
+    }
   };
+
 
   return (
     <main className="min-h-screen w-full">
@@ -67,8 +119,7 @@ export default function Page() {
 
             <p className="mt-4 max-w-97.5 text-[15px] leading-tight text-slate-300">
               One account for your courses, results, library
-              <br className="hidden sm:block" />
-              {" "}and campus services.
+              <br className="hidden sm:block" /> and campus services.
             </p>
           </div>
 
@@ -119,9 +170,7 @@ export default function Page() {
                 <p className="text-[17px] font-semibold leading-none">6</p>
 
                 <div>
-                  <p className="text-[20px] font-semibold leading-none">
-                    6
-                  </p>
+                  <p className="text-[20px] font-semibold leading-none">6</p>
                   <p className="mt-2 text-[9px] uppercase tracking-[0.14em] text-slate-400">
                     Faculties
                   </p>
@@ -156,9 +205,9 @@ export default function Page() {
 
                 <Input
                   id="account"
-                  name="account"
+                  name="email"
                   type="text"
-                  placeholder="e.g. s20007000 or jperera"
+                  placeholder="e.g. s20007000@ousl.lk "
                   autoComplete="username"
                   required
                   className="h-13 rounded-lg border-[#d9dee6] bg-[#fafafa] px-5 text-[15px] shadow-sm focus-visible:border-[#21385f] focus-visible:ring-2 focus-visible:ring-[#21385f]/20"
@@ -173,16 +222,36 @@ export default function Page() {
                 >
                   Password
                 </Label>
+                <div className="relative">
+                  <Input
+                    id="password"
+                    name="password"
+                    type={showPassword ? "text" : "password"}
+                    placeholder="Enter your password"
+                    autoComplete="current-password"
+                    required
+                    className="h-13 rounded-lg border-[#d9dee6] bg-[#fafafa] px-5 text-[15px] shadow-sm focus-visible:border-[#21385f] focus-visible:ring-2 focus-visible:ring-[#21385f]/20"
+                  />
 
-                <Input
-                  id="password"
-                  name="password"
-                  type="password"
-                  placeholder="Enter your password"
-                  autoComplete="current-password"
-                  required
-                  className="h-13 rounded-lg border-[#d9dee6] bg-[#fafafa] px-5 text-[15px] shadow-sm focus-visible:border-[#21385f] focus-visible:ring-2 focus-visible:ring-[#21385f]/20"
-                />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    aria-label={
+                      showPassword ? "Hide password" : "Show password"
+                    }
+                    aria-pressed={showPassword}
+                    disabled={loading}
+                    onClick={() => setShowPassword((prev) => !prev)}
+                    className="absolute right-1 top-1/2 h-10 w-10 -translate-y-1/2 text-neutral-500 hover:bg-transparent"
+                  >
+                    {showPassword ? (
+                      <EyeOff className="h-5 w-5" />
+                    ) : (
+                      <Eye className="h-5 w-5" />
+                    )}
+                  </Button>
+                </div>
 
                 {/* Forgot Password Navigation */}
                 <div className="flex justify-end pt-2">
@@ -198,9 +267,17 @@ export default function Page() {
               {/* Sign In Button */}
               <Button
                 type="submit"
+                disabled={loading}
                 className="mt-9 h-12 w-full rounded-lg bg-[#1d3a66] text-[15px] font-medium text-white transition-colors hover:bg-[#152e53]"
               >
-                Sign in
+                {loading ? (
+                  <span className="flex items-center gap-2">
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Signing in...
+                  </span>
+                ) : (
+                  "Sign in"
+                )}
               </Button>
             </form>
 
@@ -231,4 +308,6 @@ export default function Page() {
       </div>
     </main>
   );
-}
+};
+
+export default LoginPage;
