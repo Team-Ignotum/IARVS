@@ -42,7 +42,7 @@ const mainLinks = [
     icon: GraduationCap,
   },
   {
-    label: "Schedule",
+    label: "Schedule Management",
     href: "/admin/schedule",
     icon: CalendarDays,
   },
