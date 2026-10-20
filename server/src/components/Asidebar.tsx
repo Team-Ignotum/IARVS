@@ -6,11 +6,13 @@ import { usePathname, useRouter } from "next/navigation";
 import crest from "../../src/app/favicon.ico";
 
 import {
-  BookOpen,
   BriefcaseBusiness,
-  ClipboardCheck,
+  CalendarDays,
+  CircleHelp,
   GraduationCap,
   LayoutDashboard,
+  Settings,
+  UserPlus,
 } from "lucide-react";
 
 import {
@@ -43,14 +45,28 @@ const mainLinks = [
     icon: GraduationCap,
   },
   {
-    label: "Override Requests",
-    href: "/admin/overrides",
-    icon: ClipboardCheck,
+    label: "Schedule Management",
+    href: "/admin/schedule",
+    icon: CalendarDays,
+  },
+    {
+    label: "User Registration",
+    href: "/admin/user-registration",
+    icon: UserPlus,
+  },
+
+];
+
+const bottomLinks = [
+  {
+    label: "Support",
+    href: "/admin/support",
+    icon: CircleHelp,
   },
   {
-    label: "Curriculum Management",
-    href: "/admin/curriculum",
-    icon: BookOpen,
+    label: "Settings",
+    href: "/admin/settings",
+    icon: Settings,
   },
 ];
 
