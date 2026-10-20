@@ -4,10 +4,9 @@ import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import crest from "../../src/app/favicon.ico";
 import {
-  BookOpen,
   BriefcaseBusiness,
+  CalendarDays,
   CircleHelp,
-  ClipboardCheck,
   GraduationCap,
   LayoutDashboard,
   Settings,
@@ -42,16 +41,11 @@ const mainLinks = [
     icon: GraduationCap,
   },
   {
-    label: "Override Requests",
-    href: "/admin/overrides",
-    icon: ClipboardCheck,
+    label: "Schedule",
+    href: "/admin/schedule",
+    icon: CalendarDays,
   },
 
-  {
-    label: "Curriculum Management",
-    href: "/admin/curriculum",
-    icon:  BookOpen,
-  },
 ];
 
 const bottomLinks = [
