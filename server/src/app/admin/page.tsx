@@ -2,7 +2,10 @@
 "use client";
 
 import { AdminSidebar } from "@/components/Asidebar";
-import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
+import {
+  SidebarInset,
+  SidebarProvider,
+} from "@/components/ui/sidebar";
 
 import {
   Briefcase,
@@ -17,7 +20,10 @@ import {
 import { useAdminDashboard } from "@/_hooks/admin/useAdminDashboard";
 import { AdminBreadcrumb } from "@/components/admin/AdministrativeBreadcrumb";
 import { AdminProfileDropdown } from "./AdminProfileDropdown";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import {
+  Avatar,
+  AvatarFallback,
+} from "@/components/ui/avatar";
 
 export default function AdminPage() {
   const { stats } = useAdminDashboard();
@@ -28,37 +34,93 @@ export default function AdminPage() {
       label: "Total users",
       value: stats.totalUsers,
       icon: Users,
-      iconClass: "bg-[#eef2ff] text-[#4f46e5]",
+      iconClass:
+        "bg-[#eef2ff] text-[#4f46e5] dark:bg-indigo-950 dark:text-indigo-300",
     },
     {
       label: "Total Students",
       value: stats.totalStudents,
       icon: GraduationCap,
-      iconClass: "bg-[#fef3c7] text-[#f59e0b]",
+      iconClass:
+        "bg-[#fef3c7] text-[#f59e0b] dark:bg-amber-950 dark:text-amber-300",
     },
     {
       label: "Total Staff",
       value: stats.totalStaff,
       icon: Briefcase,
-      iconClass: "bg-[#fff7ed] text-[#f59e0b]",
+      iconClass:
+        "bg-[#fff7ed] text-[#f59e0b] dark:bg-orange-950 dark:text-orange-300",
     },
     {
       label: "Total Centers",
       value: stats.centers,
       icon: Building,
-      iconClass: "bg-[#ecfeff] text-[#0891b2]",
+      iconClass:
+        "bg-[#ecfeff] text-[#0891b2] dark:bg-cyan-950 dark:text-cyan-300",
     },
   ];
+
+  // Recent inquiries
+  const recentInquiries = [
+    {
+      history: "Application batch verified",
+      initials: "DA",
+      initiator: "Dr. Admin Silva",
+      email: "admin@university.edu",
+      status: "VERIFIED",
+      time: "10:24 AM",
+    },
+    {
+      history: "Transcript request",
+      initials: "SP",
+      initiator: "Student Portal System",
+      email: "system@university.edu",
+      status: "PENDING",
+      time: "08:15 AM",
+    },
+    {
+      history: "New staff profile created",
+      initials: "SA",
+      initiator: "System Admin",
+      email: "admin@university.edu",
+      status: "VERIFIED",
+      time: "08:41 AM",
+    },
+    {
+      history: "System update failed",
+      initials: "AT",
+      initiator: "Automation Task",
+      email: "automation@university.edu",
+      status: "FAILED",
+      time: "03:23 AM",
+    },
+  ];
+
+  const getStatusClass = (status: string) => {
+    switch (status) {
+      case "VERIFIED":
+        return "bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300";
+
+      case "PENDING":
+        return "bg-yellow-50 text-yellow-700 dark:bg-yellow-950 dark:text-yellow-300";
+
+      case "FAILED":
+        return "bg-red-50 text-red-700 dark:bg-red-950 dark:text-red-300";
+
+      default:
+        return "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300";
+    }
+  };
 
   return (
     <SidebarProvider>
       <AdminSidebar />
 
-      <SidebarInset>
+      <SidebarInset className="bg-[#f4f5f7] dark:bg-slate-950">
         {/* ADMIN DASHBOARD HEADER */}
-        <header className="sticky top-0 z-20 border-b border-slate-200 bg-white/95 backdrop-blur">
+        <header className="sticky top-0 z-20 border-b border-slate-200 bg-white/95 backdrop-blur transition-colors dark:border-slate-700 dark:bg-slate-900/95">
           <div className="flex items-center justify-between px-6 py-4">
-            <h2 className="text-lg font-semibold text-slate-900">
+            <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
               Administration Dashboard
             </h2>
 
@@ -67,9 +129,9 @@ export default function AdminPage() {
               <button
                 type="button"
                 aria-label="Notifications"
-                className="rounded-lg p-2 transition-colors hover:bg-slate-100"
+                className="rounded-lg p-2 transition-colors hover:bg-slate-100 dark:hover:bg-slate-800"
               >
-                <Bell className="h-5 w-5 text-slate-600" />
+                <Bell className="h-5 w-5 text-slate-600 dark:text-slate-300" />
               </button>
 
               {/* Admin Profile Dropdown */}
@@ -79,18 +141,18 @@ export default function AdminPage() {
         </header>
 
         {/* DASHBOARD CONTENT */}
-        <div className="flex flex-1 flex-col bg-[#f4f5f7] p-4 sm:p-6 lg:p-8">
+        <div className="flex flex-1 flex-col bg-[#f4f5f7] p-4 transition-colors sm:p-6 lg:p-8 dark:bg-slate-950">
           {/* Breadcrumbs */}
           <div className="mb-4">
             <AdminBreadcrumb />
           </div>
 
           {/* DASHBOARD SUMMARY SECTION */}
-          <div className="w-full rounded-t-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
-            <div className="flex flex-col gap-5 border-b border-slate-300 pb-6 sm:flex-row sm:items-end sm:justify-between">
+          <div className="w-full rounded-t-2xl border border-slate-200 bg-white p-5 shadow-sm transition-colors sm:p-7 dark:border-slate-700 dark:bg-slate-900">
+            <div className="flex flex-col gap-5 border-b border-slate-300 pb-6 sm:flex-row sm:items-end sm:justify-between dark:border-slate-700">
               {/* Dashboard Title */}
               <div>
-                <h1 className="text-3xl font-semibold tracking-[-0.02em] text-slate-950 sm:text-4xl">
+                <h1 className="text-3xl font-semibold tracking-[-0.02em] text-slate-950 sm:text-4xl dark:text-slate-100">
                   Administrative Dashboard
                 </h1>
               </div>
@@ -99,7 +161,7 @@ export default function AdminPage() {
               <div className="flex flex-wrap items-center gap-2 sm:ml-auto sm:justify-end">
                 <button
                   type="button"
-                  className="inline-flex h-10 items-center justify-center gap-2 rounded-md border border-slate-300 bg-white px-3.5 text-sm font-medium text-slate-700 transition-colors hover:border-slate-400 hover:bg-slate-50"
+                  className="inline-flex h-10 items-center justify-center gap-2 rounded-md border border-slate-300 bg-white px-3.5 text-sm font-medium text-slate-700 transition-colors hover:border-slate-400 hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:border-slate-500 dark:hover:bg-slate-700"
                 >
                   <Download className="h-4 w-4" />
                   Schedule
@@ -107,7 +169,7 @@ export default function AdminPage() {
 
                 <button
                   type="button"
-                  className="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-[#183b68] px-3.5 text-sm font-medium text-white transition-colors hover:bg-[#102d52]"
+                  className="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-[#183b68] px-3.5 text-sm font-medium text-white transition-colors hover:bg-[#102d52] dark:bg-blue-700 dark:hover:bg-blue-600"
                 >
                   <Plus className="h-4 w-4" />
                   Export Report
@@ -121,7 +183,7 @@ export default function AdminPage() {
                 ({ label, value, icon: Icon, iconClass }) => (
                   <div
                     key={label}
-                    className="rounded-xl border border-slate-200 bg-white p-4 shadow-[0_1px_2px_rgba(15,23,42,0.04)]"
+                    className="rounded-xl border border-slate-200 bg-white p-4 shadow-[0_1px_2px_rgba(15,23,42,0.04)] transition-colors dark:border-slate-700 dark:bg-slate-800 dark:shadow-none"
                   >
                     <div className="flex items-center justify-between gap-3">
                       <div className="flex items-center gap-3">
@@ -131,13 +193,13 @@ export default function AdminPage() {
                           <Icon className="h-5 w-5" />
                         </div>
 
-                        <span className="text-[11px] font-medium uppercase tracking-[0.12em] text-slate-500">
+                        <span className="text-[11px] font-medium uppercase tracking-[0.12em] text-slate-500 dark:text-slate-400">
                           {label}
                         </span>
                       </div>
                     </div>
 
-                    <div className="mt-4 text-3xl font-semibold tracking-tight text-slate-950 sm:text-4xl">
+                    <div className="mt-4 text-3xl font-semibold tracking-tight text-slate-950 sm:text-4xl dark:text-white">
                       {value.toLocaleString()}
                     </div>
                   </div>
@@ -147,9 +209,9 @@ export default function AdminPage() {
           </div>
 
           {/* RECENT INQUIRIES SECTION */}
-          <div className="w-full overflow-hidden rounded-b-2xl border-x border-b border-slate-200 bg-white">
-            <div className="border-b border-slate-200 p-5 sm:p-7">
-              <h2 className="text-xl font-semibold text-slate-950">
+          <div className="w-full overflow-hidden rounded-b-2xl border-x border-b border-slate-200 bg-white transition-colors dark:border-slate-700 dark:bg-slate-900">
+            <div className="border-b border-slate-200 p-5 sm:p-7 dark:border-slate-700">
+              <h2 className="text-xl font-semibold text-slate-950 dark:text-slate-100">
                 Recent Inquiries
               </h2>
             </div>
@@ -157,173 +219,78 @@ export default function AdminPage() {
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
-                  <tr className="border-b border-slate-200 bg-[#f8fafc]">
-                    <th className="px-4 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-slate-500">
+                  <tr className="border-b border-slate-200 bg-[#f8fafc] dark:border-slate-700 dark:bg-slate-800">
+                    <th className="px-4 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                       History
                     </th>
 
-                    <th className="px-4 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-slate-500">
+                    <th className="px-4 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                       Initiator
                     </th>
 
-                    <th className="px-4 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-slate-500">
+                    <th className="px-4 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                       Status
                     </th>
 
-                    <th className="px-4 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-slate-500">
+                    <th className="px-4 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                       Email
                     </th>
                   </tr>
                 </thead>
 
                 <tbody>
-                  {/* INQUIRY 1 */}
-                  <tr className="border-b border-slate-200 bg-white hover:bg-[#fbfcff]">
-                    <td className="px-4 py-4 text-sm text-slate-900">
-                      Application batch verified
-                    </td>
+                  {recentInquiries.map((inquiry, index) => (
+                    <tr
+                      key={`${inquiry.history}-${index}`}
+                      className={`bg-white transition-colors hover:bg-[#fbfcff] dark:bg-slate-900 dark:hover:bg-slate-800 ${
+                        index !== recentInquiries.length - 1
+                          ? "border-b border-slate-200 dark:border-slate-700"
+                          : ""
+                      }`}
+                    >
+                      {/* History */}
+                      <td className="px-4 py-4 text-sm text-slate-900 dark:text-slate-200">
+                        {inquiry.history}
+                      </td>
 
-                    <td className="px-4 py-4">
-                      <div className="flex items-center gap-3">
-                        <Avatar className="h-9 w-9 border border-slate-200">
-                          <AvatarFallback className="bg-[#000053] text-xs font-semibold text-white">
-                            DA
-                          </AvatarFallback>
-                        </Avatar>
+                      {/* Initiator */}
+                      <td className="px-4 py-4">
+                        <div className="flex items-center gap-3">
+                          <Avatar className="h-9 w-9 border border-slate-200 dark:border-slate-600">
+                            <AvatarFallback className="bg-[#000053] text-xs font-semibold text-white dark:bg-indigo-900 dark:text-indigo-100">
+                              {inquiry.initials}
+                            </AvatarFallback>
+                          </Avatar>
 
-                        <div>
-                          <p className="text-sm font-semibold text-slate-900">
-                            Dr. Admin Silva
-                          </p>
+                          <div>
+                            <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+                              {inquiry.initiator}
+                            </p>
 
-                          <p className="text-xs text-slate-500">
-                            admin@university.edu
-                          </p>
+                            <p className="text-xs text-slate-500 dark:text-slate-400">
+                              {inquiry.email}
+                            </p>
+                          </div>
                         </div>
-                      </div>
-                    </td>
+                      </td>
 
-                    <td className="px-4 py-4">
-                      <span className="inline-flex items-center rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">
-                        VERIFIED
-                      </span>
-                    </td>
+                      {/* Status */}
+                      <td className="px-4 py-4">
+                        <span
+                          className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ${getStatusClass(
+                            inquiry.status
+                          )}`}
+                        >
+                          {inquiry.status}
+                        </span>
+                      </td>
 
-                    <td className="px-4 py-4 text-sm text-slate-500">
-                      10:24 AM
-                    </td>
-                  </tr>
-
-                  {/* INQUIRY 2 */}
-                  <tr className="border-b border-slate-200 bg-white hover:bg-[#fbfcff]">
-                    <td className="px-4 py-4 text-sm text-slate-900">
-                      Transcript request
-                    </td>
-
-                    <td className="px-4 py-4">
-                      <div className="flex items-center gap-3">
-                        <Avatar className="h-9 w-9 border border-slate-200">
-                          <AvatarFallback className="bg-[#000053] text-xs font-semibold text-white">
-                            SP
-                          </AvatarFallback>
-                        </Avatar>
-
-                        <div>
-                          <p className="text-sm font-semibold text-slate-900">
-                            Student Portal System
-                          </p>
-
-                          <p className="text-xs text-slate-500">
-                            system@university.edu
-                          </p>
-                        </div>
-                      </div>
-                    </td>
-
-                    <td className="px-4 py-4">
-                      <span className="inline-flex items-center rounded-full bg-yellow-50 px-3 py-1 text-xs font-semibold text-yellow-700">
-                        PENDING
-                      </span>
-                    </td>
-
-                    <td className="px-4 py-4 text-sm text-slate-500">
-                      08:15 AM
-                    </td>
-                  </tr>
-
-                  {/* INQUIRY 3 */}
-                  <tr className="border-b border-slate-200 bg-white hover:bg-[#fbfcff]">
-                    <td className="px-4 py-4 text-sm text-slate-900">
-                      New staff profile created
-                    </td>
-
-                    <td className="px-4 py-4">
-                      <div className="flex items-center gap-3">
-                        <Avatar className="h-9 w-9 border border-slate-200">
-                          <AvatarFallback className="bg-[#000053] text-xs font-semibold text-white">
-                            SA
-                          </AvatarFallback>
-                        </Avatar>
-
-                        <div>
-                          <p className="text-sm font-semibold text-slate-900">
-                            System Admin
-                          </p>
-
-                          <p className="text-xs text-slate-500">
-                            admin@university.edu
-                          </p>
-                        </div>
-                      </div>
-                    </td>
-
-                    <td className="px-4 py-4">
-                      <span className="inline-flex items-center rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">
-                        VERIFIED
-                      </span>
-                    </td>
-
-                    <td className="px-4 py-4 text-sm text-slate-500">
-                      08:41 AM
-                    </td>
-                  </tr>
-
-                  {/* INQUIRY 4 */}
-                  <tr className="bg-white hover:bg-[#fbfcff]">
-                    <td className="px-4 py-4 text-sm text-slate-900">
-                      System update failed
-                    </td>
-
-                    <td className="px-4 py-4">
-                      <div className="flex items-center gap-3">
-                        <Avatar className="h-9 w-9 border border-slate-200">
-                          <AvatarFallback className="bg-[#000053] text-xs font-semibold text-white">
-                            AT
-                          </AvatarFallback>
-                        </Avatar>
-
-                        <div>
-                          <p className="text-sm font-semibold text-slate-900">
-                            Automation Task
-                          </p>
-
-                          <p className="text-xs text-slate-500">
-                            automation@university.edu
-                          </p>
-                        </div>
-                      </div>
-                    </td>
-
-                    <td className="px-4 py-4">
-                      <span className="inline-flex items-center rounded-full bg-red-50 px-3 py-1 text-xs font-semibold text-red-700">
-                        FAILED
-                      </span>
-                    </td>
-
-                    <td className="px-4 py-4 text-sm text-slate-500">
-                      03:23 AM
-                    </td>
-                  </tr>
+                      {/* Time */}
+                      <td className="px-4 py-4 text-sm text-slate-500 dark:text-slate-400">
+                        {inquiry.time}
+                      </td>
+                    </tr>
+                  ))}
                 </tbody>
               </table>
             </div>
