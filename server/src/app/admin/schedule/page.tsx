@@ -246,7 +246,7 @@ export default function RegistrationWindowMock() {
           <button
             type="button"
             onClick={openGenericModal}
-            className="inline-flex items-center gap-2 rounded-lg bg-slate-900 px-4 py-2.5 text-sm font-medium text-white hover:bg-slate-800 active:bg-slate-950 transition-colors shrink-0"
+            className="inline-flex items-center gap-2 rounded-lg bg-[#183b68] px-4 py-2.5 text-sm font-medium text-white hover:bg-slate-800 active:bg-slate-950 transition-colors shrink-0"
           >
             <Calendar size={16} strokeWidth={2} />
             Manage Registration Window
@@ -458,7 +458,7 @@ export default function RegistrationWindowMock() {
                   type="button"
                   onClick={handleSave}
                   disabled={saving}
-                  className="px-4 py-2 text-sm font-medium text-white bg-slate-900 rounded-lg hover:bg-slate-800 active:bg-slate-950 disabled:opacity-50 transition-colors"
+                  className="px-4 py-2 text-sm font-medium text-white bg-[#183b68] rounded-lg hover:bg-[#183b68]/80 active:bg-[#183b68]/95 disabled:opacity-50 transition-colors"
                 >
                   {saving ? "Saving\u2026" : "Save & Schedule"}
                 </button>

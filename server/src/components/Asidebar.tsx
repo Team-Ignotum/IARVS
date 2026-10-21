@@ -1,15 +1,20 @@
+
 "use client";
 
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import crest from "../../src/app/favicon.ico";
+
 import {
   BriefcaseBusiness,
+  CalendarDays,
   CircleHelp,
   GraduationCap,
   LayoutDashboard,
   Settings,
+  UserPlus,
 } from "lucide-react";
+
 import {
   Sidebar,
   SidebarContent,
@@ -39,6 +44,17 @@ const mainLinks = [
     href: "/admin/students",
     icon: GraduationCap,
   },
+  {
+    label: "Schedule Management",
+    href: "/admin/schedule",
+    icon: CalendarDays,
+  },
+    {
+    label: "User Registration",
+    href: "/admin/user-registration",
+    icon: UserPlus,
+  },
+
 ];
 
 const bottomLinks = [
@@ -56,15 +72,20 @@ const bottomLinks = [
 
 const COLLAPSED_BASE =
   "group-data-[collapsible=icon]:!size-8 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:gap-0 group-data-[collapsible=icon]:mx-auto";
+
 const ACTIVE_CLASS =
   "bg-[#021127] text-white hover:bg-[#021127] hover:text-white data-[active=true]:bg-[#021127] data-[active=true]:text-white data-[active=true]:hover:bg-[#021127]";
-const INACTIVE_CLASS = "text-[#737373] hover:bg-gray-100 hover:text-[#0A0A0A]";
+
+const INACTIVE_CLASS =
+  "text-[#737373] hover:bg-gray-100 hover:text-[#0A0A0A]";
 
 const menuBtnClass = (active: boolean) =>
   `${COLLAPSED_BASE} ${active ? ACTIVE_CLASS : INACTIVE_CLASS}`;
 
 const isActivePath = (pathname: string, href: string) =>
-  href === "/admin" ? pathname === "/admin" : pathname.startsWith(href);
+  href === "/admin"
+    ? pathname === "/admin"
+    : pathname.startsWith(href);
 
 function LogoHeader({ collapsed }: { collapsed: boolean }) {
   return (
@@ -83,17 +104,22 @@ function LogoHeader({ collapsed }: { collapsed: boolean }) {
             className="shrink-0 rounded-md"
             style={{ display: "block" }}
           />
+
           {!collapsed && (
             <span className="truncate text-sm font-semibold tracking-wide">
               IARVS PORTAL
             </span>
           )}
         </div>
+
         {!collapsed && (
           <SidebarTrigger className="mr-3 h-9 w-9 shrink-0 [&_svg]:size-5" />
         )}
       </div>
-      {collapsed && <SidebarTrigger className="mt-1 h-8 w-8 [&_svg]:size-4" />}
+
+      {collapsed && (
+        <SidebarTrigger className="mt-1 h-8 w-8 [&_svg]:size-4" />
+      )}
     </SidebarHeader>
   );
 }
@@ -116,6 +142,7 @@ function NavMenu({
       <SidebarGroupLabel className="text-[11px] font-bold tracking-[0.1em] text-[#737373] uppercase">
         {label}
       </SidebarGroupLabel>
+
       <SidebarMenu className="gap-3">
         {links.map((item) => {
           const Icon = item.icon;
@@ -133,6 +160,7 @@ function NavMenu({
                 className={menuBtnClass(active)}
               >
                 <Icon strokeWidth={1.8} />
+
                 <span className="group-data-[collapsible=icon]:hidden">
                   {item.label}
                 </span>
@@ -148,6 +176,7 @@ function NavMenu({
 export function AdminSidebar() {
   const pathname = usePathname();
   const router = useRouter();
+
   const { setOpenMobile, state } = useSidebar();
   const collapsed = state === "collapsed";
 
@@ -159,6 +188,7 @@ export function AdminSidebar() {
   return (
     <Sidebar collapsible="icon">
       <LogoHeader collapsed={collapsed} />
+
       <SidebarContent className="flex-1 overflow-auto">
         <NavMenu
           pathname={pathname}
@@ -166,13 +196,6 @@ export function AdminSidebar() {
           collapsed={collapsed}
           label="Main Menu"
           links={mainLinks}
-        />
-        <NavMenu
-          pathname={pathname}
-          onNavigate={navigate}
-          collapsed={collapsed}
-          label="Settings"
-          links={bottomLinks}
         />
       </SidebarContent>
     </Sidebar>

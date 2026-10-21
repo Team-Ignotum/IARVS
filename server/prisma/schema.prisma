@@ -1,10 +1,6 @@
-
 generator client {
   provider = "prisma-client"
-}
-
-generator client_js {
-  provider = "prisma-client-js"
+  output   = "../src/generated"
 }
 
 datasource db {
@@ -15,7 +11,7 @@ enum UserRole {
   STUDENT
   ADMIN
   STAFF
-  SUPER_ADMIN
+  SUPER_STAFF
 }
 
 enum UserStatus {
@@ -35,35 +31,69 @@ enum PassStatus {
 }
 
 model User {
-  id        Int      @id @default(autoincrement())
-  email     String   @unique
-  password  String
-  firstName String
-  lastName  String
-  role      UserRole
-  isActive  Boolean  @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id           Int        @id @default(autoincrement())
+  userId       String     @unique
+  email        String     @unique
+  passwordHash String
+  regNumber    String?    @unique
+  stNumber     String?    @unique
+  intake       String?
+  status       UserStatus @default(ACTIVE)
+  firstName    String
+  lastName     String
+  role         UserRole
+  center       String
+  isActive     Boolean    @default(true)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
 
-  student Student?
-}
-
-model Student {
-  userId             Int           @id
-  registrationNumber String        @unique
-  intake             String?
-  status             UserStatus    @default(ACTIVE)
-  createdAt          DateTime      @default(now())
-  updatedAt          DateTime      @updatedAt
-
-  user            User                @relation(fields: [userId], references: [id], onDelete: Cascade)
   enrollments     StudentEnrollment[]
   academicRecords AcademicRecord[]
+
+  @@map("users")
+}
+
+model Programme {
+  id          Int      @id @default(autoincrement())
+  code        String   @unique
+  name        String
+  description String?
+  duration    Int // Programme duration in years
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  curriculumVersions CurriculumVersion[]
+  enrollments        StudentEnrollment[]
+
+  @@map("programmes")
+}
+
+model CurriculumVersion {
+  id            Int       @id @default(autoincrement())
+  programmeId   Int
+  versionCode   String
+  name          String
+  intake        String?
+  effectiveFrom DateTime
+  effectiveTo   DateTime?
+  isActive      Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  programme       Programme           @relation(fields: [programmeId], references: [id])
+  enrollments     StudentEnrollment[]
+  modules         CurriculumModule[]
+  academicRecords AcademicRecord[]
+
+  @@unique([programmeId, versionCode])
+  @@index([programmeId])
+  @@map("curriculum_versions")
 }
 
 model StudentEnrollment {
   id                  Int       @id @default(autoincrement())
-  studentId           Int
+  studentId           String
   programmeId         Int
   curriculumVersionId Int
   startDate           DateTime
@@ -72,27 +102,70 @@ model StudentEnrollment {
   createdAt           DateTime  @default(now())
   updatedAt           DateTime  @updatedAt
 
-  student Student @relation(fields: [studentId], references: [userId])
+  student           User              @relation(fields: [studentId], references: [stNumber])
+  programme         Programme         @relation(fields: [programmeId], references: [id])
+  curriculumVersion CurriculumVersion @relation(fields: [curriculumVersionId], references: [id])
 
   @@index([studentId])
   @@index([programmeId])
   @@index([curriculumVersionId])
+  @@map("student_enrollments")
+}
+
+model Module {
+  id        Int      @id @default(autoincrement())
+  code      String   @unique
+  name      String
+  level     Int
+  credits   Int
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  academicRecords    AcademicRecord[]
+  curriculumMappings CurriculumModule[]
+
+  @@map("modules")
+}
+
+model CurriculumModule {
+  id                  Int      @id @default(autoincrement())
+  curriculumVersionId Int
+  moduleId            Int
+  isCompulsory        Boolean  @default(true)
+  level               Int
+  createdAt           DateTime @default(now())
+
+  curriculumVersion CurriculumVersion @relation(fields: [curriculumVersionId], references: [id], onDelete: Restrict)
+
+  module Module @relation(fields: [moduleId], references: [id], onDelete: Restrict)
+
+  @@unique([curriculumVersionId, moduleId])
+  @@index([moduleId])
+  @@map("curriculum_modules")
 }
 
 model AcademicRecord {
-  id            Int        @id @default(autoincrement())
-  studentId     Int
-  moduleId      Int
-  attemptNumber Int
-  grade         String?
-  caStatus      CAStatus
-  passStatus    PassStatus 
-  createdAt     DateTime   @default(now())
-  updatedAt     DateTime   @updatedAt
+  id                  Int        @id @default(autoincrement())
+  studentId           String
+  moduleId            Int
+  curriculumVersionId Int
+  attemptNumber       Int
+  grade               String?
+  caStatus            CAStatus
+  passStatus          PassStatus
+  createdAt           DateTime   @default(now())
+  updatedAt           DateTime   @updatedAt
 
-  student Student @relation(fields: [studentId], references: [userId])
+  student User @relation(fields: [studentId], references: [stNumber])
+
+  module Module @relation(fields: [moduleId], references: [id])
+
+  curriculumVersion CurriculumVersion @relation(fields: [curriculumVersionId], references: [id])
 
   @@unique([studentId, moduleId, attemptNumber])
   @@index([studentId])
   @@index([moduleId])
+  @@index([curriculumVersionId])
+  @@map("academic_records")
 }
