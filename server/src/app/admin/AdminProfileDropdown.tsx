@@ -3,6 +3,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import {
   ChevronDown,
   LogOut,
@@ -14,6 +15,10 @@ import {
 export function AdminProfileDropdown() {
   const [open, setOpen] = useState(false);
   const [theme, setTheme] = useState<"Light" | "Dark">("Light");
+
+  const pathname = usePathname();
+  const isProfilePage = pathname === "/admin/profile";
+
   const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -47,9 +52,9 @@ export function AdminProfileDropdown() {
         type="button"
         onClick={() => setOpen((previous) => !previous)}
         aria-expanded={open}
-        aria-haspopup="true"
+        aria-haspopup="menu"
         aria-label="Admin profile menu"
-        className="flex items-center gap-3 rounded-lg px-3 py-2 hover:bg-slate-100"
+        className="flex items-center gap-3 rounded-lg px-3 py-2 transition-colors hover:bg-slate-100"
       >
         <div className="hidden text-right sm:block">
           <p className="text-sm font-semibold text-slate-800">
@@ -88,7 +93,12 @@ export function AdminProfileDropdown() {
           <Link
             href="/admin/profile"
             onClick={() => setOpen(false)}
-            className="mt-2 flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-slate-700 hover:bg-slate-100"
+            aria-current={isProfilePage ? "page" : undefined}
+            className={`mt-2 flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors ${
+              isProfilePage
+                ? "bg-blue-50 font-semibold text-blue-700"
+                : "text-slate-700 hover:bg-slate-100"
+            }`}
           >
             <UserRound size={17} />
             My Profile
@@ -107,10 +117,10 @@ export function AdminProfileDropdown() {
                   type="button"
                   aria-pressed={theme === value}
                   onClick={() => setTheme(value)}
-                  className={`flex items-center justify-center gap-2 rounded-lg border px-3 py-2 text-xs ${
+                  className={`flex items-center justify-center gap-2 rounded-lg border px-3 py-2 text-xs transition-colors ${
                     theme === value
                       ? "border-blue-500 bg-blue-50 text-blue-700"
-                      : "border-slate-200 text-slate-600"
+                      : "border-slate-200 text-slate-600 hover:bg-slate-50"
                   }`}
                 >
                   {value === "Light" ? (
@@ -129,7 +139,7 @@ export function AdminProfileDropdown() {
             <button
               type="button"
               onClick={() => setOpen(false)}
-              className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-red-600 hover:bg-red-50"
+              className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-red-600 transition-colors hover:bg-red-50"
             >
               <LogOut size={17} />
               Logout
