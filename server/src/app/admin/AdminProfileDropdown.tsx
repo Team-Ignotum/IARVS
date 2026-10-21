@@ -1,59 +1,72 @@
+
 "use client";
+
 import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import {
   ChevronDown,
   LogOut,
   Moon,
+  Sun,
   UserRound,
 } from "lucide-react";
 
 export function AdminProfileDropdown() {
   const [open, setOpen] = useState(false);
-  const containerRef = useRef<HTMLDivElement>(null);
+  const [theme, setTheme] = useState<"Light" | "Dark">("Light");
+  const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const closeOnOutsideClick = (event: MouseEvent) => {
+    const handleOutsideClick = (event: MouseEvent) => {
       if (
-        containerRef.current &&
-        !containerRef.current.contains(event.target as Node)
+        menuRef.current &&
+        !menuRef.current.contains(event.target as Node)
       ) {
         setOpen(false);
       }
     };
 
-    const closeOnEscape = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setOpen(false);
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setOpen(false);
+      }
     };
 
-    document.addEventListener("mousedown", closeOnOutsideClick);
-    document.addEventListener("keydown", closeOnEscape);
+    document.addEventListener("mousedown", handleOutsideClick);
+    document.addEventListener("keydown", handleEscape);
 
     return () => {
-      document.removeEventListener("mousedown", closeOnOutsideClick);
-      document.removeEventListener("keydown", closeOnEscape);
+      document.removeEventListener("mousedown", handleOutsideClick);
+      document.removeEventListener("keydown", handleEscape);
     };
   }, []);
 
   return (
-    <div ref={containerRef} className="relative">
+    <div ref={menuRef} className="relative">
       <button
         type="button"
-        onClick={() => setOpen((value) => !value)}
+        onClick={() => setOpen((previous) => !previous)}
         aria-expanded={open}
         aria-haspopup="true"
         aria-label="Admin profile menu"
-        className="flex items-center gap-2 rounded-lg px-3 py-2 hover:bg-slate-100"
+        className="flex items-center gap-3 rounded-lg px-3 py-2 hover:bg-slate-100"
       >
-        <span className="text-sm font-medium text-slate-700">
-          Admin Registry
-        </span>
+        <div className="hidden text-right sm:block">
+          <p className="text-sm font-semibold text-slate-800">
+            Admin Registry
+          </p>
 
-        <span className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-300 text-sm font-semibold text-slate-700">
-          A
-        </span>
+          <p className="text-xs text-slate-500">
+            Administrator
+          </p>
+        </div>
+
+        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-blue-100 text-blue-700">
+          <UserRound size={19} />
+        </div>
 
         <ChevronDown
-          size={15}
+          size={16}
           className={`text-slate-500 transition-transform ${
             open ? "rotate-180" : ""
           }`}
@@ -62,48 +75,66 @@ export function AdminProfileDropdown() {
 
       {open && (
         <div className="absolute right-0 top-full z-50 mt-2 w-64 rounded-xl border border-slate-200 bg-white p-2 shadow-xl">
-          <div className="flex items-center gap-3 px-3 py-3">
-            <span className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-200 font-semibold text-slate-700">
-              A
-            </span>
+          <div className="border-b border-slate-100 px-3 py-3">
+            <p className="text-sm font-semibold text-slate-900">
+              Admin Registry
+            </p>
 
-            <div>
-              <p className="text-sm font-semibold text-slate-900">
-                Admin Registry
-              </p>
-              <p className="text-xs text-slate-500">
-                Administrator
-              </p>
-            </div>
+            <p className="text-xs text-slate-500">
+              Administrator Account
+            </p>
           </div>
 
-          <div className="my-2 border-t border-slate-100" />
-
-          <button
-            type="button"
-            className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-slate-700 hover:bg-slate-100"
+          <Link
+            href="/admin/profile"
+            onClick={() => setOpen(false)}
+            className="mt-2 flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-slate-700 hover:bg-slate-100"
           >
             <UserRound size={17} />
             My Profile
-          </button>
+          </Link>
 
-          <button
-            type="button"
-            className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-slate-700 hover:bg-slate-100"
-          >
-            <Moon size={17} />
-            Theme
-          </button>
+          <div className="px-3 py-3">
+            <p className="mb-3 flex items-center gap-2 text-sm text-slate-700">
+              <Moon size={17} />
+              Theme
+            </p>
 
-          <div className="my-2 border-t border-slate-100" />
+            <div className="grid grid-cols-2 gap-2">
+              {(["Light", "Dark"] as const).map((value) => (
+                <button
+                  key={value}
+                  type="button"
+                  aria-pressed={theme === value}
+                  onClick={() => setTheme(value)}
+                  className={`flex items-center justify-center gap-2 rounded-lg border px-3 py-2 text-xs ${
+                    theme === value
+                      ? "border-blue-500 bg-blue-50 text-blue-700"
+                      : "border-slate-200 text-slate-600"
+                  }`}
+                >
+                  {value === "Light" ? (
+                    <Sun size={14} />
+                  ) : (
+                    <Moon size={14} />
+                  )}
 
-          <button
-            type="button"
-            className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-red-600 hover:bg-red-50"
-          >
-            <LogOut size={17} />
-            Logout
-          </button>
+                  {value}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="border-t border-slate-100 pt-2">
+            <button
+              type="button"
+              onClick={() => setOpen(false)}
+              className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-red-600 hover:bg-red-50"
+            >
+              <LogOut size={17} />
+              Logout
+            </button>
+          </div>
         </div>
       )}
     </div>
