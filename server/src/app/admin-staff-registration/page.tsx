@@ -1,4 +1,5 @@
 import getSession from "@/server_actions/getSession";
+import StaffRegistrationForm from "./StaffRegistrationForm";
 
 export default async function AdminStaffRegistrationPage() {
   const session = await getSession();
@@ -11,5 +12,5 @@ export default async function AdminStaffRegistrationPage() {
     return <p>You do not have access to staff registration.</p>;
   }
 
-  return;
+  return <StaffRegistrationForm />;
 }
