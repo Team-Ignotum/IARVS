@@ -9,6 +9,7 @@ import {
   Download,
   GraduationCap,
   Plus,
+  UserPlusIcon,
   Users,
   Bell,
 } from "lucide-react";
@@ -82,15 +83,15 @@ export default function AdminPage() {
               {/* Buttons*/}
               <div className="flex flex-wrap items-center gap-2 sm:ml-auto sm:justify-end">
                 <Link
-                  href="/admin/schedule"
+                  href="/admin-staff-registration"
                   className="inline-flex h-10 items-center justify-center gap-2 rounded-md border border-slate-300 bg-white px-3.5 text-sm font-medium text-slate-700 transition-colors hover:border-slate-400 hover:bg-slate-50"
                 >
-                  <Download className="h-4 w-4" />
-                  Schedule
+                  <UserPlusIcon className="h-4 w-4" />
+                  Register
                 </Link>
 
                 <button className="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-[#183b68] px-3.5 text-sm font-medium text-white transition-colors hover:bg-[#102d52]">
-                  <Plus className="h-4 w-4" />
+                  <Download className="h-4 w-4" />
                   Export Report
                 </button>
               </div>

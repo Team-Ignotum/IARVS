@@ -1,15 +1,7 @@
 /**
- * Admin - Staff Registration ( React + TypeScript)
- *
  * Exports
  *   default StaffRegistration  Admin form: name, email, role -> POST /api/admin/staff
  *   AcceptInvite               Page opened from the emailed link: staff set their own password
- *
- * Works with the API in staff-registration.ts (same endpoints). Proxy /api to the server in dev.
- * The role check below only hides the UI; the server enforces the real permission.
- *
- * Suggested commit message:
- *   feat(admin): add staff registration form and accept-invite page
  */
 import { useState, type ChangeEvent, type FormEvent } from 'react';
 
