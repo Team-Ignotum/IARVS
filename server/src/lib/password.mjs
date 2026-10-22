@@ -1,11 +1,11 @@
-import bcrypt from "bcrypt-ts";
+import { hash, compare } from "bcrypt-ts";
 
-const SALT_ROUNDS =12;
+const SALT_ROUNDS = 12;
 
 export async function hashPassword(password) {
-    return bcrypt.hash(password,SALT_ROUNDS)
+  return hash(password, SALT_ROUNDS);
 }
 
-export async function verifyPassword(password,storedHash){
-    return bcrypt.compare(password,storedHash)
+export async function verifyPassword(password, storedHash) {
+  return compare(password, storedHash);
 }

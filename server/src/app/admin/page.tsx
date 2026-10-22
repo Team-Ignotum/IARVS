@@ -1,6 +1,7 @@
 
 "use client";
 
+import Link from "next/link";
 import { AdminSidebar } from "@/components/Asidebar";
 import {
   SidebarInset,
@@ -165,7 +166,7 @@ export default function AdminPage() {
                 >
                   <Download className="h-4 w-4" />
                   Schedule
-                </button>
+                </Link>
 
                 <button
                   type="button"
