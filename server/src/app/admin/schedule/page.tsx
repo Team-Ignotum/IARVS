@@ -8,7 +8,6 @@ import { useState, useRef, useEffect } from "react";
 import { Calendar, Clock, X, ChevronDown, Check, AlertCircle, Power, CheckCircle2 } from "lucide-react";
 import { AdminSidebar } from "@/components/Asidebar";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
-
 type RegistrationType = "NEW_REGISTRATION" | "RE_REGISTRATION" | "ADD_DROP";
 type WindowStatus = "OPEN" | "SCHEDULED" | "CLOSED";
 
