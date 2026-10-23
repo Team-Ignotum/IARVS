@@ -1,7 +1,6 @@
 
 "use client";
 
-import Link from "next/link";
 import { AdminSidebar } from "@/components/Asidebar";
 import {
   SidebarInset,
@@ -21,6 +20,7 @@ import {
 import { useAdminDashboard } from "@/_hooks/admin/useAdminDashboard";
 import { AdminBreadcrumb } from "@/components/admin/AdministrativeBreadcrumb";
 import { AdminProfileDropdown } from "./AdminProfileDropdown";
+
 import {
   Avatar,
   AvatarFallback,
@@ -29,7 +29,8 @@ import {
 export default function AdminPage() {
   const { stats } = useAdminDashboard();
 
-  // Dashboard summary cards
+  // ================= DASHBOARD SUMMARY CARDS =================
+
   const summaryCards = [
     {
       label: "Total users",
@@ -61,7 +62,8 @@ export default function AdminPage() {
     },
   ];
 
-  // Recent inquiries
+  // ================= RECENT INQUIRIES =================
+
   const recentInquiries = [
     {
       history: "Application batch verified",
@@ -97,6 +99,8 @@ export default function AdminPage() {
     },
   ];
 
+  // ================= STATUS STYLES =================
+
   const getStatusClass = (status: string) => {
     switch (status) {
       case "VERIFIED":
@@ -113,6 +117,8 @@ export default function AdminPage() {
     }
   };
 
+  // ================= DASHBOARD PAGE =================
+
   return (
     <SidebarProvider>
       <AdminSidebar />
@@ -120,7 +126,7 @@ export default function AdminPage() {
       <SidebarInset className="bg-[#f4f5f7] dark:bg-slate-950">
         {/* ADMIN DASHBOARD HEADER */}
         <header className="sticky top-0 z-20 border-b border-slate-200 bg-white/95 backdrop-blur transition-colors dark:border-slate-700 dark:bg-slate-900/95">
-          <div className="flex items-center justify-between px-6 py-4">
+          <div className="flex items-center justify-between gap-4 px-4 py-4 sm:px-6">
             <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
               Administration Dashboard
             </h2>
@@ -130,7 +136,7 @@ export default function AdminPage() {
               <button
                 type="button"
                 aria-label="Notifications"
-                className="rounded-lg p-2 transition-colors hover:bg-slate-100 dark:hover:bg-slate-800"
+                className="rounded-lg p-2 transition-colors hover:bg-slate-100 focus-visible:outline-2 focus-visible:outline-blue-600 dark:hover:bg-slate-800"
               >
                 <Bell className="h-5 w-5 text-slate-600 dark:text-slate-300" />
               </button>
@@ -160,17 +166,18 @@ export default function AdminPage() {
 
               {/* Dashboard Buttons */}
               <div className="flex flex-wrap items-center gap-2 sm:ml-auto sm:justify-end">
+                {/* FIXED: Correct closing button tag */}
                 <button
                   type="button"
-                  className="inline-flex h-10 items-center justify-center gap-2 rounded-md border border-slate-300 bg-white px-3.5 text-sm font-medium text-slate-700 transition-colors hover:border-slate-400 hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:border-slate-500 dark:hover:bg-slate-700"
+                  className="inline-flex h-10 items-center justify-center gap-2 rounded-md border border-slate-300 bg-white px-3.5 text-sm font-medium text-slate-700 transition-colors hover:border-slate-400 hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-blue-600 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:border-slate-500 dark:hover:bg-slate-700"
                 >
                   <Download className="h-4 w-4" />
                   Schedule
-                </Link>
+                </button>
 
                 <button
                   type="button"
-                  className="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-[#183b68] px-3.5 text-sm font-medium text-white transition-colors hover:bg-[#102d52] dark:bg-blue-700 dark:hover:bg-blue-600"
+                  className="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-[#183b68] px-3.5 text-sm font-medium text-white transition-colors hover:bg-[#102d52] focus-visible:outline-2 focus-visible:outline-blue-600 dark:bg-blue-700 dark:hover:bg-blue-600"
                 >
                   <Plus className="h-4 w-4" />
                   Export Report
@@ -201,7 +208,7 @@ export default function AdminPage() {
                     </div>
 
                     <div className="mt-4 text-3xl font-semibold tracking-tight text-slate-950 sm:text-4xl dark:text-white">
-                      {value.toLocaleString()}
+                      {Number(value ?? 0).toLocaleString()}
                     </div>
                   </div>
                 )
@@ -218,7 +225,7 @@ export default function AdminPage() {
             </div>
 
             <div className="overflow-x-auto">
-              <table className="w-full">
+              <table className="w-full min-w-[680px]">
                 <thead>
                   <tr className="border-b border-slate-200 bg-[#f8fafc] dark:border-slate-700 dark:bg-slate-800">
                     <th className="px-4 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
@@ -234,7 +241,7 @@ export default function AdminPage() {
                     </th>
 
                     <th className="px-4 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                      Email
+                      Time
                     </th>
                   </tr>
                 </thead>
