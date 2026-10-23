@@ -6,6 +6,8 @@
 
 import { useState, useRef, useEffect } from "react";
 import { Calendar, Clock, X, ChevronDown, Check, AlertCircle, Power, CheckCircle2 } from "lucide-react";
+import { AdminSidebar } from "@/components/Asidebar";
+import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 
 type RegistrationType = "NEW_REGISTRATION" | "RE_REGISTRATION" | "ADD_DROP";
 type WindowStatus = "OPEN" | "SCHEDULED" | "CLOSED";
@@ -234,7 +236,17 @@ export default function RegistrationWindowMock() {
   const typeLabel = TYPES.find((t) => t.value === form.registrationType)?.label;
 
   return (
-    <div className="min-h-screen bg-slate-50 p-6 sm:p-10 font-sans">
+    <SidebarProvider>
+      <AdminSidebar />
+      <SidebarInset className="min-h-screen bg-slate-50 font-sans">
+        <header className="sticky top-0 z-20 border-b border-slate-200 bg-white/95 backdrop-blur">
+          <div className="px-6 py-4">
+            <h2 className="text-lg font-semibold text-slate-900">
+              Administration Dashboard
+            </h2>
+          </div>
+        </header>
+        <main className="p-6 sm:p-10">
       <div className="max-w-3xl mx-auto">
         <div className="flex items-center justify-between mb-1 gap-4">
           <div>
@@ -474,6 +486,8 @@ export default function RegistrationWindowMock() {
           {toast}
         </div>
       )}
-    </div>
+        </main>
+      </SidebarInset>
+    </SidebarProvider>
   );
 }
