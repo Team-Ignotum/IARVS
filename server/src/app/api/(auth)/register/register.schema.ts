@@ -1,6 +1,7 @@
 import {z} from "zod";
 
 export const registrationSchema = z.object({
+  userId: z.string().trim().min(1, "User ID is required"),
   email: z.string().email(),
   password: z.string().min(8),
   firstName: z.string().min(1).trim(),
@@ -14,7 +15,7 @@ export const registrationSchema = z.object({
     .regex(/^\d{8}$/, "Registration number must be exactly 9 digits"),
 
   stNumber: z.string().min(9).trim(),
-  
+
   intake: z
     .string()
     .regex(
