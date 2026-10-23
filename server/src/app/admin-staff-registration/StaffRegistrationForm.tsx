@@ -59,18 +59,26 @@ export default function StaffRegistrationForm() {
 
   if (sentTo) {
     return (
-      <div className="flex min-w-0 w-full max-w-xl flex-col gap-5 rounded-xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
-        <p role="status" className="break-words text-base text-emerald-800">
-          Invite sent to {sentTo}. It expires in {INVITE_HOURS} hours.
-        </p>
+      <>
+        <div className="flex min-w-0 w-full max-w-xl flex-col gap-5 rounded-xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
+          <p role="status" className="break-words text-base text-emerald-800">
+            Invite sent to {sentTo}. It expires in {INVITE_HOURS} hours.
+          </p>
+          <button
+            type="button"
+            onClick={() => setSentTo(null)}
+            className="h-11 self-start rounded-md border border-slate-400 bg-white px-6 text-base text-slate-900 hover:bg-slate-50"
+          >
+            Add another staff member
+          </button>
+        </div>
         <button
           type="button"
-          onClick={() => setSentTo(null)}
-          className="h-11 self-start rounded-md border border-slate-400 bg-white px-6 text-base text-slate-900 hover:bg-slate-50"
+          className="mt-4 h-11 self-start rounded-md bg-[#183b68] px-6 text-base font-semibold text-white hover:bg-[#102d52]"
         >
-          Add another staff member
+          Set password
         </button>
-      </div>
+      </>
     );
   }
 
