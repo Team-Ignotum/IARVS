@@ -5,14 +5,12 @@ import { usePathname, useRouter } from "next/navigation";
 import crest from "../../src/app/favicon.ico";
 import {
   BriefcaseBusiness,
-  CalendarDays,
   CircleHelp,
   GraduationCap,
   BookOpen, 
   ClipboardCheck,
   LayoutDashboard,
   Settings,
-  UserPlus,
 } from "lucide-react";
 import {
   Sidebar,
