@@ -16,10 +16,7 @@ import {
   Sun,
   UserRound,
 } from "lucide-react";
-
 import { useAdminTheme } from "./AdminThemeProvider";
-
-// ================= TYPES =================
 
 type Profile = {
   fullName: string;
@@ -30,6 +27,10 @@ type Profile = {
   email: string;
 };
 
+type ProfileErrors = Partial<
+  Record<"fullName" | "phone" | "email", string>
+>;
+
 type ToggleKey =
   | "email"
   | "system"
@@ -39,8 +40,6 @@ type ToggleKey =
   | "communication"
   | "statistics"
   | "analytics";
-
-// ================= SAMPLE DATA =================
 
 const initialProfile: Profile = {
   fullName: "Admin Registry",
@@ -99,13 +98,48 @@ const privacyItems: {
   },
 ];
 
-// ================= MAIN COMPONENT =================
+// Validate profile information before saving.
+function validateProfile(values: Profile): ProfileErrors {
+  const errors: ProfileErrors = {};
+
+  const name = values.fullName.trim();
+  const email = values.email.trim();
+  const phone = values.phone.replace(/[\s-]/g, "");
+
+  if (!name) {
+    errors.fullName = "Full name is required.";
+  } else if (name.length < 3) {
+    errors.fullName =
+      "Full name must contain at least 3 characters.";
+  } else if (name.length > 100) {
+    errors.fullName =
+      "Full name cannot exceed 100 characters.";
+  }
+
+  if (!email) {
+    errors.email = "Email address is required.";
+  } else if (
+    !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
+  ) {
+    errors.email = "Enter a valid email address.";
+  }
+
+  if (!phone) {
+    errors.phone = "Phone number is required.";
+  } else if (
+    !/^(?:0[1-9]\d{8}|\+94[1-9]\d{8})$/.test(phone)
+  ) {
+    errors.phone =
+      "Enter a valid Sri Lankan phone number.";
+  }
+
+  return errors;
+}
 
 export function AdminProfileSettings() {
-  // Shared theme from AdminThemeProvider
   const { theme, setTheme } = useAdminTheme();
 
-  // Profile
+  // Profile state
   const [profile, setProfile] =
     useState<Profile>(initialProfile);
 
@@ -113,25 +147,26 @@ export function AdminProfileSettings() {
     useState<Profile>(initialProfile);
 
   const [isEditing, setIsEditing] = useState(false);
-  const [profileError, setProfileError] = useState("");
 
-  // Photo
+  const [profileErrors, setProfileErrors] =
+    useState<ProfileErrors>({});
+
+  const [photoError, setPhotoError] = useState("");
+
   const [profilePhoto, setProfilePhoto] =
     useState<string | null>(null);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Preferences
+  // Other settings
   const [toggles, setToggles] = useState(initialToggles);
   const [language, setLanguage] = useState("English");
   const [fontSize, setFontSize] = useState("Medium");
   const [saved, setSaved] = useState(false);
 
-  // ================= PROFILE ACTIONS =================
-
   const handleEditProfile = () => {
     setEditedProfile({ ...profile });
-    setProfileError("");
+    setProfileErrors({});
     setIsEditing(true);
   };
 
@@ -143,39 +178,40 @@ export function AdminProfileSettings() {
       ...previous,
       [key]: value,
     }));
+
+    if (key === "fullName" || key === "phone" || key === "email") {
+      setProfileErrors((previous) => ({
+        ...previous,
+        [key]: undefined,
+      }));
+    }
   };
 
   const handleSaveProfile = () => {
-    const fullName = editedProfile.fullName.trim();
-    const email = editedProfile.email.trim();
+    const errors = validateProfile(editedProfile);
 
-    if (!fullName) {
-      setProfileError("Full name is required.");
-      return;
-    }
+    setProfileErrors(errors);
 
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      setProfileError("Enter a valid email address.");
+    if (Object.keys(errors).length > 0) {
       return;
     }
 
     setProfile({
       ...editedProfile,
-      fullName,
-      email,
+      fullName: editedProfile.fullName.trim(),
+      email: editedProfile.email.trim(),
+      phone: editedProfile.phone.trim(),
     });
 
+    setProfileErrors({});
     setIsEditing(false);
-    setProfileError("");
   };
 
   const handleCancelEdit = () => {
     setEditedProfile({ ...profile });
-    setProfileError("");
+    setProfileErrors({});
     setIsEditing(false);
   };
-
-  // ================= PHOTO PREVIEW =================
 
   const handlePhotoChange = (
     event: ChangeEvent<HTMLInputElement>
@@ -191,13 +227,13 @@ export function AdminProfileSettings() {
     ];
 
     if (!allowedTypes.includes(file.type)) {
-      setProfileError("Choose a JPG, PNG or WebP image.");
+      setPhotoError("Choose a JPG, PNG or WebP image.");
       event.target.value = "";
       return;
     }
 
     if (file.size > 2 * 1024 * 1024) {
-      setProfileError("Image must be smaller than 2 MB.");
+      setPhotoError("Image must be smaller than 2 MB.");
       event.target.value = "";
       return;
     }
@@ -207,26 +243,25 @@ export function AdminProfileSettings() {
     reader.onload = () => {
       if (typeof reader.result === "string") {
         setProfilePhoto(reader.result);
-        setProfileError("");
+        setPhotoError("");
       }
+    };
+
+    reader.onerror = () => {
+      setPhotoError("Unable to read the selected image.");
     };
 
     reader.readAsDataURL(file);
     event.target.value = "";
   };
 
-  // ================= PREFERENCES =================
-
   const handleToggle = (key: ToggleKey) => {
     setToggles((previous) => ({
       ...previous,
       [key]: !previous[key],
     }));
-
     setSaved(false);
   };
-
-  // ================= STYLES =================
 
   const cardClass =
     "rounded-2xl border border-slate-200 bg-white p-6 shadow-sm " +
@@ -247,18 +282,15 @@ export function AdminProfileSettings() {
     "dark:border-slate-700 dark:text-slate-300 " +
     "dark:hover:bg-slate-800";
 
-  // ================= PAGE =================
-
   return (
     <main className="min-h-screen bg-[#f5f7fb] px-4 py-6 text-[#14213d] transition-colors sm:px-7 lg:px-9 dark:bg-slate-950 dark:text-slate-100">
       <div className="mx-auto max-w-6xl space-y-5">
 
-        {/* ================= PAGE HEADER ================= */}
-
+        {/* PAGE HEADER */}
         <header className="mb-7">
           <Link
             href="/admin"
-            className="mb-4 inline-flex items-center gap-2 text-sm text-slate-500 transition-colors hover:text-blue-600 dark:text-slate-400 dark:hover:text-blue-400"
+            className="mb-4 inline-flex items-center gap-2 text-sm text-slate-500 hover:text-blue-600 dark:text-slate-400 dark:hover:text-blue-400"
           >
             <ArrowLeft size={16} />
             Back to Dashboard
@@ -269,13 +301,12 @@ export function AdminProfileSettings() {
           </h1>
 
           <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-            Manage your administrator account, preferences and
-            security settings.
+            Manage your administrator account, preferences
+            and security settings.
           </p>
         </header>
 
-        {/* ================= PROFILE INFORMATION ================= */}
-
+        {/* PROFILE INFORMATION */}
         <section className={cardClass}>
           <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
             <SectionHeading
@@ -296,9 +327,7 @@ export function AdminProfileSettings() {
           </div>
 
           <div className="flex flex-col gap-6 sm:flex-row">
-
-            {/* Profile Photo */}
-
+            {/* PHOTO */}
             <div className="flex flex-col items-center gap-3">
               <div className="flex h-24 w-24 items-center justify-center overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
                 {profilePhoto ? (
@@ -333,10 +362,24 @@ export function AdminProfileSettings() {
                 <Camera size={13} />
                 Change Photo
               </button>
+
+              <p className="text-center text-[11px] text-slate-500 dark:text-slate-400">
+                JPG, PNG or WebP
+                <br />
+                Maximum 2 MB
+              </p>
+
+              {photoError && (
+                <p
+                  role="alert"
+                  className="max-w-40 text-center text-xs text-red-600 dark:text-red-400"
+                >
+                  {photoError}
+                </p>
+              )}
             </div>
 
-            {/* Profile Details */}
-
+            {/* PROFILE FIELDS */}
             <div className="min-w-0 flex-1">
               {isEditing ? (
                 <div className="grid gap-4 sm:grid-cols-2">
@@ -346,6 +389,7 @@ export function AdminProfileSettings() {
                     onChange={(value) =>
                       updateProfile("fullName", value)
                     }
+                    error={profileErrors.fullName}
                   />
 
                   <ProfileField
@@ -370,6 +414,7 @@ export function AdminProfileSettings() {
                     onChange={(value) =>
                       updateProfile("phone", value)
                     }
+                    error={profileErrors.phone}
                   />
 
                   <EditableField
@@ -379,16 +424,8 @@ export function AdminProfileSettings() {
                     onChange={(value) =>
                       updateProfile("email", value)
                     }
+                    error={profileErrors.email}
                   />
-
-                  {profileError && (
-                    <p
-                      role="alert"
-                      className="text-sm text-red-600 sm:col-span-2 dark:text-red-400"
-                    >
-                      {profileError}
-                    </p>
-                  )}
 
                   <div className="flex flex-wrap gap-3 sm:col-span-2">
                     <button
@@ -414,27 +451,22 @@ export function AdminProfileSettings() {
                     label="Full Name"
                     value={profile.fullName}
                   />
-
                   <ProfileField
                     label="Role"
                     value={profile.role}
                   />
-
                   <ProfileField
                     label="Department"
                     value={profile.department}
                   />
-
                   <ProfileField
                     label="Study Centre"
                     value={profile.studyCentre}
                   />
-
                   <ProfileField
                     label="Phone"
                     value={profile.phone}
                   />
-
                   <ProfileField
                     label="Email"
                     value={profile.email}
@@ -443,23 +475,12 @@ export function AdminProfileSettings() {
               )}
             </div>
           </div>
-
-          {!isEditing && profileError && (
-            <p
-              role="alert"
-              className="mt-4 text-sm text-red-600 dark:text-red-400"
-            >
-              {profileError}
-            </p>
-          )}
         </section>
 
-        {/* ================= SETTINGS GRID ================= */}
-
+        {/* SETTINGS GRID */}
         <div className="grid gap-5 xl:grid-cols-2">
 
-          {/* ACCOUNT & SECURITY */}
-
+          {/* ACCOUNT AND SECURITY */}
           <section className={cardClass}>
             <SectionHeading
               icon={<LockKeyhole size={17} />}
@@ -469,12 +490,10 @@ export function AdminProfileSettings() {
             <div className="mt-7 space-y-5">
               <div>
                 <FieldLabel>Email Address</FieldLabel>
-
                 <div className="flex items-center justify-between gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-3 text-sm dark:border-slate-700 dark:bg-slate-800">
                   <span className="truncate text-slate-600 dark:text-slate-200">
                     {profile.email}
                   </span>
-
                   <span className="text-xs font-medium text-slate-500 dark:text-slate-400">
                     Demo
                   </span>
@@ -483,12 +502,10 @@ export function AdminProfileSettings() {
 
               <div>
                 <FieldLabel>Password</FieldLabel>
-
                 <div className="flex gap-2">
                   <div className="min-w-0 flex-1 rounded-lg border border-slate-200 bg-slate-50 px-3 py-3 text-sm dark:border-slate-700 dark:bg-slate-800">
                     ••••••••••
                   </div>
-
                   <span className="flex items-center rounded-lg border border-slate-200 px-3 text-xs font-medium text-slate-400 dark:border-slate-700 dark:text-slate-500">
                     Not connected
                   </span>
@@ -500,12 +517,10 @@ export function AdminProfileSettings() {
                   <FieldLabel>
                     Two-Factor Authentication
                   </FieldLabel>
-
                   <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
                     Add an extra layer of security to your account
                   </p>
                 </div>
-
                 <span className="text-xs text-slate-400 dark:text-slate-500">
                   Not configured
                 </span>
@@ -515,7 +530,6 @@ export function AdminProfileSettings() {
                 <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">
                   Last Login
                 </p>
-
                 <p className="mt-1 text-xs text-slate-600 dark:text-slate-300">
                   Session information will appear here.
                 </p>
@@ -524,7 +538,6 @@ export function AdminProfileSettings() {
           </section>
 
           {/* NOTIFICATION PREFERENCES */}
-
           <section className={cardClass}>
             <SectionHeading
               icon={<Bell size={17} />}
@@ -540,7 +553,6 @@ export function AdminProfileSettings() {
                   <span className="text-sm text-slate-600 dark:text-slate-300">
                     {item.label}
                   </span>
-
                   <Toggle
                     checked={toggles[item.key]}
                     onChange={() => handleToggle(item.key)}
@@ -551,8 +563,7 @@ export function AdminProfileSettings() {
             </div>
           </section>
 
-          {/* ================= APPEARANCE ================= */}
-
+          {/* APPEARANCE */}
           <section className={cardClass}>
             <SectionHeading
               icon={<Sun size={17} />}
@@ -560,38 +571,35 @@ export function AdminProfileSettings() {
             />
 
             <div className="mt-7 space-y-6">
-
-              {/* Shared Light/Dark Theme */}
-
               <div>
                 <FieldLabel>Theme</FieldLabel>
-
                 <p className="mb-3 text-xs text-slate-500 dark:text-slate-400">
                   Choose your preferred dashboard appearance.
                 </p>
 
                 <div className="mt-2 flex flex-wrap gap-2">
-                  {(["light", "dark"] as const).map((value) => (
-                    <button
-                      key={value}
-                      type="button"
-                      onClick={() => setTheme(value)}
-                      aria-pressed={theme === value}
-                      className={`flex items-center gap-2 rounded-lg border px-4 py-2 text-xs font-medium transition-colors ${
-                        theme === value
-                          ? selectedOptionClass
-                          : unselectedOptionClass
-                      }`}
-                    >
-                      {value === "light" ? (
-                        <Sun size={14} />
-                      ) : (
-                        <Moon size={14} />
-                      )}
-
-                      {value === "light" ? "Light" : "Dark"}
-                    </button>
-                  ))}
+                  {(["light", "dark"] as const).map(
+                    (value) => (
+                      <button
+                        key={value}
+                        type="button"
+                        onClick={() => setTheme(value)}
+                        aria-pressed={theme === value}
+                        className={`flex items-center gap-2 rounded-lg border px-4 py-2 text-xs font-medium transition-colors ${
+                          theme === value
+                            ? selectedOptionClass
+                            : unselectedOptionClass
+                        }`}
+                      >
+                        {value === "light" ? (
+                          <Sun size={14} />
+                        ) : (
+                          <Moon size={14} />
+                        )}
+                        {value === "light" ? "Light" : "Dark"}
+                      </button>
+                    )
+                  )}
                 </div>
 
                 <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">
@@ -600,11 +608,8 @@ export function AdminProfileSettings() {
                 </p>
               </div>
 
-              {/* Language */}
-
               <div>
                 <FieldLabel>Language</FieldLabel>
-
                 <select
                   aria-label="Language"
                   value={language}
@@ -620,37 +625,35 @@ export function AdminProfileSettings() {
                 </select>
               </div>
 
-              {/* Font Size */}
-
               <div>
                 <FieldLabel>Font Size</FieldLabel>
-
                 <div className="mt-2 flex flex-wrap gap-2">
-                  {["Small", "Medium", "Large"].map((value) => (
-                    <button
-                      key={value}
-                      type="button"
-                      onClick={() => {
-                        setFontSize(value);
-                        setSaved(false);
-                      }}
-                      aria-pressed={fontSize === value}
-                      className={`rounded-lg border px-4 py-2 text-xs font-medium transition-colors ${
-                        fontSize === value
-                          ? selectedOptionClass
-                          : unselectedOptionClass
-                      }`}
-                    >
-                      {value}
-                    </button>
-                  ))}
+                  {["Small", "Medium", "Large"].map(
+                    (value) => (
+                      <button
+                        key={value}
+                        type="button"
+                        onClick={() => {
+                          setFontSize(value);
+                          setSaved(false);
+                        }}
+                        aria-pressed={fontSize === value}
+                        className={`rounded-lg border px-4 py-2 text-xs font-medium transition-colors ${
+                          fontSize === value
+                            ? selectedOptionClass
+                            : unselectedOptionClass
+                        }`}
+                      >
+                        {value}
+                      </button>
+                    )
+                  )}
                 </div>
               </div>
             </div>
           </section>
 
           {/* PRIVACY SETTINGS */}
-
           <section className={cardClass}>
             <SectionHeading
               icon={<ShieldCheck size={17} />}
@@ -667,12 +670,10 @@ export function AdminProfileSettings() {
                     <p className="text-sm font-medium text-slate-800 dark:text-slate-100">
                       {item.label}
                     </p>
-
                     <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
                       {item.description}
                     </p>
                   </div>
-
                   <Toggle
                     checked={toggles[item.key]}
                     onChange={() => handleToggle(item.key)}
@@ -684,23 +685,20 @@ export function AdminProfileSettings() {
           </section>
         </div>
 
-        {/* ================= SAVE PREFERENCES ================= */}
-
+        {/* SAVE PREFERENCES */}
         <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-blue-100 bg-blue-50 p-5 dark:border-blue-900 dark:bg-blue-950/40">
           <div className="flex items-center gap-3">
             <ShieldCheck
               className="text-blue-600 dark:text-blue-400"
               size={20}
             />
-
             <div>
               <p className="text-sm font-semibold">
                 Your data is secure with us.
               </p>
-
               <p className="text-xs text-slate-500 dark:text-slate-400">
-                Preferences are currently stored in frontend state
-                only, except the browser-saved theme.
+                Preferences are currently stored in frontend
+                state only, except the browser-saved theme.
               </p>
             </div>
           </div>
@@ -708,7 +706,7 @@ export function AdminProfileSettings() {
           <button
             type="button"
             onClick={() => setSaved(true)}
-            className="flex items-center gap-2 rounded-lg bg-blue-600 px-5 py-3 text-sm font-medium text-white transition-colors hover:bg-blue-700"
+            className="flex items-center gap-2 rounded-lg bg-blue-600 px-5 py-3 text-sm font-medium text-white hover:bg-blue-700"
           >
             <Check size={16} />
             {saved ? "Selected" : "Save Changes"}
@@ -719,7 +717,7 @@ export function AdminProfileSettings() {
   );
 }
 
-// ================= REUSABLE UI =================
+// REUSABLE COMPONENTS
 
 function SectionHeading({
   icon,
@@ -733,7 +731,6 @@ function SectionHeading({
       <div className="rounded-lg bg-blue-50 p-2 text-blue-600 dark:bg-blue-950 dark:text-blue-300">
         {icon}
       </div>
-
       <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
         {title}
       </h2>
@@ -753,7 +750,6 @@ function ProfileField({
       <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">
         {label}
       </p>
-
       <p className="mt-1 break-words text-sm font-medium text-slate-800 dark:text-slate-100">
         {value}
       </p>
@@ -766,11 +762,13 @@ function EditableField({
   value,
   onChange,
   type = "text",
+  error,
 }: {
   label: string;
   value: string;
   onChange: (value: string) => void;
   type?: string;
+  error?: string;
 }) {
   const id = `admin-profile-${label
     .toLowerCase()
@@ -790,8 +788,26 @@ function EditableField({
         type={type}
         value={value}
         onChange={(event) => onChange(event.target.value)}
-        className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 dark:focus:border-blue-400"
+        aria-invalid={Boolean(error)}
+        aria-describedby={
+          error ? `${id}-error` : undefined
+        }
+        className={`w-full rounded-lg border bg-white px-3 py-2 text-sm text-slate-900 outline-none transition-colors focus:ring-2 focus:ring-blue-500/10 dark:bg-slate-800 dark:text-slate-100 ${
+          error
+            ? "border-red-500 focus:border-red-500 dark:border-red-400"
+            : "border-slate-300 focus:border-blue-500 dark:border-slate-600 dark:focus:border-blue-400"
+        }`}
       />
+
+      {error && (
+        <p
+          id={`${id}-error`}
+          role="alert"
+          className="mt-1 text-xs text-red-600 dark:text-red-400"
+        >
+          {error}
+        </p>
+      )}
     </div>
   );
 }
