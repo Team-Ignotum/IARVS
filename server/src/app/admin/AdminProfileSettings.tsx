@@ -1,8 +1,8 @@
 
 "use client";
 
-import { useRef, useState } from "react";
-import type { ChangeEvent, ReactNode } from "react";
+import { useEffect, useRef, useState } from "react";
+import type { ChangeEvent, ReactNode, CSSProperties } from "react";
 import Link from "next/link";
 import {
   ArrowLeft,
@@ -44,13 +44,16 @@ type ToggleKey =
   | "statistics"
   | "analytics";
 
+type Language = "English" | "Tamil" | "Sinhala";
+type FontSize = "Small" | "Medium" | "Large";
+
 type Preferences = {
   toggles: Record<ToggleKey, boolean>;
-  language: string;
-  fontSize: string;
+  language: Language;
+  fontSize: FontSize;
 };
 
-// ================= SAMPLE DATA =================
+// ================= INITIAL DATA =================
 
 const initialProfile: Profile = {
   fullName: "Admin Registry",
@@ -72,11 +75,13 @@ const initialToggles: Record<ToggleKey, boolean> = {
   analytics: false,
 };
 
-const initialPreferences: Preferences = {
+const defaultPreferences: Preferences = {
   toggles: { ...initialToggles },
   language: "English",
   fontSize: "Medium",
 };
+
+const STORAGE_KEY = "iarvs-admin-profile-preferences";
 
 const notificationItems: {
   key: ToggleKey;
@@ -136,9 +141,7 @@ function validateProfile(values: Profile): ProfileErrors {
 
   if (!email) {
     errors.email = "Email address is required.";
-  } else if (
-    !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
-  ) {
+  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     errors.email = "Enter a valid email address.";
   }
 
@@ -147,11 +150,50 @@ function validateProfile(values: Profile): ProfileErrors {
   } else if (
     !/^(?:0[1-9]\d{8}|\+94[1-9]\d{8})$/.test(phone)
   ) {
-    errors.phone =
-      "Enter a valid Sri Lankan phone number.";
+    errors.phone = "Enter a valid Sri Lankan phone number.";
   }
 
   return errors;
+}
+
+function loadPreferences(): Preferences {
+  const defaults: Preferences = {
+    toggles: { ...initialToggles },
+    language: "English",
+    fontSize: "Medium",
+  };
+
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY);
+
+    if (!stored) return defaults;
+
+    const parsed = JSON.parse(stored) as Partial<Preferences>;
+
+    const toggles = { ...initialToggles };
+
+    for (const key of Object.keys(initialToggles) as ToggleKey[]) {
+      if (typeof parsed.toggles?.[key] === "boolean") {
+        toggles[key] = parsed.toggles[key];
+      }
+    }
+
+    return {
+      toggles,
+      language:
+        parsed.language === "Tamil" ||
+        parsed.language === "Sinhala"
+          ? parsed.language
+          : "English",
+      fontSize:
+        parsed.fontSize === "Small" ||
+        parsed.fontSize === "Large"
+          ? parsed.fontSize
+          : "Medium",
+    };
+  } catch {
+    return defaults;
+  }
 }
 
 // ================= MAIN COMPONENT =================
@@ -172,31 +214,51 @@ export function AdminProfileSettings() {
     useState<ProfileErrors>({});
 
   // Photo state
-  const [photoError, setPhotoError] = useState("");
-
   const [profilePhoto, setProfilePhoto] =
     useState<string | null>(null);
+
+  const [photoError, setPhotoError] = useState("");
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Preferences state
-  const [toggles, setToggles] = useState<
-    Record<ToggleKey, boolean>
-  >({ ...initialToggles });
-
-  const [language, setLanguage] = useState("English");
-
-  const [fontSize, setFontSize] = useState("Medium");
+  const [preferences, setPreferences] =
+    useState<Preferences>(defaultPreferences);
 
   const [savedPreferences, setSavedPreferences] =
-    useState<Preferences>(initialPreferences);
+    useState<Preferences>(defaultPreferences);
+
+  const [preferencesLoaded, setPreferencesLoaded] =
+    useState(false);
+
+  // Restore saved preferences after hydration.
+  useEffect(() => {
+    const restored = loadPreferences();
+
+    setPreferences(restored);
+    setSavedPreferences({
+      ...restored,
+      toggles: { ...restored.toggles },
+    });
+    setPreferencesLoaded(true);
+  }, []);
 
   const hasUnsavedChanges =
-    JSON.stringify({
-      toggles,
-      language,
-      fontSize,
-    }) !== JSON.stringify(savedPreferences);
+    JSON.stringify(preferences) !==
+    JSON.stringify(savedPreferences);
+
+  // ================= WORKING FONT SIZE =================
+
+  const fontScale =
+    preferences.fontSize === "Small"
+      ? 0.9
+      : preferences.fontSize === "Large"
+        ? 1.2
+        : 1;
+
+  const pageStyle = {
+    "--profile-font-scale": fontScale,
+  } as CSSProperties;
 
   // ================= PROFILE ACTIONS =================
 
@@ -207,7 +269,7 @@ export function AdminProfileSettings() {
   };
 
   const updateProfile = (
-    key: keyof Profile,
+    key: "fullName" | "phone" | "email",
     value: string
   ) => {
     setEditedProfile((previous) => ({
@@ -215,16 +277,10 @@ export function AdminProfileSettings() {
       [key]: value,
     }));
 
-    if (
-      key === "fullName" ||
-      key === "phone" ||
-      key === "email"
-    ) {
-      setProfileErrors((previous) => ({
-        ...previous,
-        [key]: undefined,
-      }));
-    }
+    setProfileErrors((previous) => ({
+      ...previous,
+      [key]: undefined,
+    }));
   };
 
   const handleSaveProfile = () => {
@@ -297,40 +353,57 @@ export function AdminProfileSettings() {
     event.target.value = "";
   };
 
-  // ================= PREFERENCES ACTIONS =================
+  // ================= PREFERENCE ACTIONS =================
+
+  const updatePreferences = (
+    changes: Partial<Preferences>
+  ) => {
+    setPreferences((previous) => ({
+      ...previous,
+      ...changes,
+    }));
+  };
 
   const handleToggle = (key: ToggleKey) => {
-    setToggles((previous) => ({
+    setPreferences((previous) => ({
       ...previous,
-      [key]: !previous[key],
+      toggles: {
+        ...previous.toggles,
+        [key]: !previous.toggles[key],
+      },
     }));
   };
 
   const handleSavePreferences = () => {
-    setSavedPreferences({
-      toggles: { ...toggles },
-      language,
-      fontSize,
-    });
+    try {
+      localStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify(preferences)
+      );
+
+      setSavedPreferences({
+        ...preferences,
+        toggles: { ...preferences.toggles },
+      });
+    } catch {
+      window.alert(
+        "Unable to save preferences in this browser."
+      );
+    }
   };
 
   const handleDiscardPreferences = () => {
-    setToggles({ ...savedPreferences.toggles });
-    setLanguage(savedPreferences.language);
-    setFontSize(savedPreferences.fontSize);
+    setPreferences({
+      ...savedPreferences,
+      toggles: { ...savedPreferences.toggles },
+    });
   };
 
   // ================= STYLES =================
 
   const cardClass =
-    "rounded-2xl border border-slate-200 bg-white p-6 shadow-sm " +
-    "dark:border-slate-700 dark:bg-slate-900";
-
-  const secondaryButtonClass =
-    "rounded-lg border border-slate-200 px-4 py-2 text-xs " +
-    "font-medium transition-colors hover:bg-slate-50 " +
-    "dark:border-slate-700 dark:text-slate-200 " +
-    "dark:hover:bg-slate-800";
+    "rounded-2xl border border-slate-200 bg-white p-4 shadow-sm " +
+    "transition-colors sm:p-6 dark:border-slate-700 dark:bg-slate-900";
 
   const selectedOptionClass =
     "border-blue-500 bg-blue-50 text-blue-700 " +
@@ -341,17 +414,48 @@ export function AdminProfileSettings() {
     "dark:border-slate-700 dark:text-slate-300 " +
     "dark:hover:bg-slate-800";
 
+  const secondaryButtonClass =
+    "rounded-lg border border-slate-200 px-4 py-2 " +
+    "font-medium transition-colors hover:bg-slate-50 " +
+    "focus-visible:outline-2 focus-visible:outline-offset-2 " +
+    "focus-visible:outline-blue-600 " +
+    "dark:border-slate-700 dark:text-slate-200 " +
+    "dark:hover:bg-slate-800";
+
   // ================= PAGE =================
 
   return (
-    <main className="min-h-screen bg-[#f5f7fb] px-4 py-6 text-[#14213d] transition-colors sm:px-7 lg:px-9 dark:bg-slate-950 dark:text-slate-100">
+    <main
+      id="admin-profile-settings"
+      style={pageStyle}
+      className="min-h-screen bg-[#f5f7fb] px-4 py-6 text-[#14213d] transition-colors sm:px-7 lg:px-9 dark:bg-slate-950 dark:text-slate-100"
+    >
+      {/* Font scaling applies only inside this page. */}
+      <style>{`
+        #admin-profile-settings .text-xs {
+          font-size: calc(0.75rem * var(--profile-font-scale));
+        }
+
+        #admin-profile-settings .text-sm {
+          font-size: calc(0.875rem * var(--profile-font-scale));
+        }
+
+        #admin-profile-settings .text-2xl {
+          font-size: calc(1.5rem * var(--profile-font-scale));
+        }
+
+        #admin-profile-settings .text-\\[11px\\] {
+          font-size: calc(11px * var(--profile-font-scale));
+        }
+      `}</style>
+
       <div className="mx-auto max-w-6xl space-y-5">
 
         {/* PAGE HEADER */}
         <header className="mb-7">
           <Link
             href="/admin"
-            className="mb-4 inline-flex items-center gap-2 text-sm text-slate-500 hover:text-blue-600 dark:text-slate-400 dark:hover:text-blue-400"
+            className="mb-4 inline-flex items-center gap-2 rounded-md text-sm text-slate-500 transition-colors hover:text-blue-600 focus-visible:outline-2 focus-visible:outline-blue-600 dark:text-slate-400 dark:hover:text-blue-400"
           >
             <ArrowLeft size={16} />
             Back to Dashboard
@@ -379,7 +483,7 @@ export function AdminProfileSettings() {
               <button
                 type="button"
                 onClick={handleEditProfile}
-                className={`flex items-center gap-2 ${secondaryButtonClass}`}
+                className={`flex items-center gap-2 text-xs ${secondaryButtonClass}`}
               >
                 <Pencil size={13} />
                 Edit Profile
@@ -418,17 +522,17 @@ export function AdminProfileSettings() {
 
               <button
                 type="button"
-                onClick={() => fileInputRef.current?.click()}
-                className="flex items-center gap-1 text-xs font-medium text-blue-600 hover:underline dark:text-blue-400"
+                onClick={() =>
+                  fileInputRef.current?.click()
+                }
+                className="flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium text-blue-600 transition-colors hover:bg-blue-50 focus-visible:outline-2 focus-visible:outline-blue-600 dark:text-blue-400 dark:hover:bg-slate-800"
               >
                 <Camera size={13} />
                 Change Photo
               </button>
 
-              <p className="text-center text-[11px] text-slate-500 dark:text-slate-400">
-                JPG, PNG or WebP
-                <br />
-                Maximum 2 MB
+              <p className="max-w-40 text-center text-xs text-slate-500 dark:text-slate-400">
+                JPG, PNG or WebP — maximum 2 MB
               </p>
 
               {photoError && (
@@ -446,6 +550,7 @@ export function AdminProfileSettings() {
               {isEditing ? (
                 <div className="grid gap-4 sm:grid-cols-2">
                   <EditableField
+                    id="admin-full-name"
                     label="Full Name"
                     value={editedProfile.fullName}
                     onChange={(value) =>
@@ -470,6 +575,7 @@ export function AdminProfileSettings() {
                   />
 
                   <EditableField
+                    id="admin-phone"
                     label="Phone"
                     type="tel"
                     value={editedProfile.phone}
@@ -480,6 +586,7 @@ export function AdminProfileSettings() {
                   />
 
                   <EditableField
+                    id="admin-email"
                     label="Email"
                     type="email"
                     value={editedProfile.email}
@@ -493,7 +600,7 @@ export function AdminProfileSettings() {
                     <button
                       type="button"
                       onClick={handleSaveProfile}
-                      className="rounded-lg bg-blue-600 px-5 py-2 text-sm font-medium text-white hover:bg-blue-700"
+                      className="rounded-lg bg-blue-600 px-5 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
                     >
                       Save Profile
                     </button>
@@ -501,7 +608,7 @@ export function AdminProfileSettings() {
                     <button
                       type="button"
                       onClick={handleCancelEdit}
-                      className="rounded-lg border border-slate-300 px-5 py-2 text-sm hover:bg-slate-50 dark:border-slate-600 dark:hover:bg-slate-800"
+                      className={`text-sm ${secondaryButtonClass}`}
                     >
                       Cancel
                     </button>
@@ -513,22 +620,27 @@ export function AdminProfileSettings() {
                     label="Full Name"
                     value={profile.fullName}
                   />
+
                   <ProfileField
                     label="Role"
                     value={profile.role}
                   />
+
                   <ProfileField
                     label="Department"
                     value={profile.department}
                   />
+
                   <ProfileField
                     label="Study Centre"
                     value={profile.studyCentre}
                   />
+
                   <ProfileField
                     label="Phone"
                     value={profile.phone}
                   />
+
                   <ProfileField
                     label="Email"
                     value={profile.email}
@@ -542,7 +654,7 @@ export function AdminProfileSettings() {
         {/* SETTINGS GRID */}
         <div className="grid gap-5 xl:grid-cols-2">
 
-          {/* ACCOUNT AND SECURITY */}
+          {/* ACCOUNT & SECURITY */}
           <section className={cardClass}>
             <SectionHeading
               icon={<LockKeyhole size={17} />}
@@ -553,60 +665,50 @@ export function AdminProfileSettings() {
               <div>
                 <FieldLabel>Email Address</FieldLabel>
 
-                <div className="flex items-center justify-between gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-3 text-sm dark:border-slate-700 dark:bg-slate-800">
-                  <span className="truncate text-slate-600 dark:text-slate-200">
-                    {profile.email}
-                  </span>
-
-                  <span className="text-xs font-medium text-slate-500 dark:text-slate-400">
-                    Demo
-                  </span>
+                <div className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-3 text-sm dark:border-slate-700 dark:bg-slate-800">
+                  {profile.email}
                 </div>
               </div>
 
               <div>
                 <FieldLabel>Password</FieldLabel>
 
-                <div className="flex gap-2">
+                <div className="flex flex-wrap items-center gap-2">
                   <div className="min-w-0 flex-1 rounded-lg border border-slate-200 bg-slate-50 px-3 py-3 text-sm dark:border-slate-700 dark:bg-slate-800">
                     ••••••••••
                   </div>
 
-                  <span className="flex items-center rounded-lg border border-slate-200 px-3 text-xs font-medium text-slate-400 dark:border-slate-700 dark:text-slate-500">
+                  <span className="text-xs text-slate-500 dark:text-slate-400">
                     Not connected
                   </span>
                 </div>
               </div>
 
-              <div className="flex items-center justify-between gap-3">
-                <div>
-                  <FieldLabel>
-                    Two-Factor Authentication
-                  </FieldLabel>
+              <div>
+                <FieldLabel>
+                  Two-Factor Authentication
+                </FieldLabel>
 
-                  <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-                    Add an extra layer of security to your account
-                  </p>
-                </div>
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                  Add an extra layer of security to your account
+                </p>
 
-                <span className="text-xs text-slate-400 dark:text-slate-500">
+                <p className="mt-2 text-xs text-slate-400 dark:text-slate-500">
                   Not configured
-                </span>
+                </p>
               </div>
 
               <div className="border-t border-slate-100 pt-4 dark:border-slate-700">
-                <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">
-                  Last Login
-                </p>
+                <FieldLabel>Last Login</FieldLabel>
 
-                <p className="mt-1 text-xs text-slate-600 dark:text-slate-300">
+                <p className="text-xs text-slate-500 dark:text-slate-400">
                   Session information will appear here.
                 </p>
               </div>
             </div>
           </section>
 
-          {/* NOTIFICATION PREFERENCES */}
+          {/* NOTIFICATIONS */}
           <section className={cardClass}>
             <SectionHeading
               icon={<Bell size={17} />}
@@ -624,8 +726,10 @@ export function AdminProfileSettings() {
                   </span>
 
                   <Toggle
-                    checked={toggles[item.key]}
-                    onChange={() => handleToggle(item.key)}
+                    checked={preferences.toggles[item.key]}
+                    onChange={() =>
+                      handleToggle(item.key)
+                    }
                     label={item.label}
                   />
                 </div>
@@ -641,6 +745,7 @@ export function AdminProfileSettings() {
             />
 
             <div className="mt-7 space-y-6">
+              {/* THEME */}
               <div>
                 <FieldLabel>Theme</FieldLabel>
 
@@ -648,7 +753,7 @@ export function AdminProfileSettings() {
                   Choose your preferred dashboard appearance.
                 </p>
 
-                <div className="mt-2 flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-2">
                   {(["light", "dark"] as const).map(
                     (value) => (
                       <button
@@ -656,7 +761,7 @@ export function AdminProfileSettings() {
                         type="button"
                         onClick={() => setTheme(value)}
                         aria-pressed={theme === value}
-                        className={`flex items-center gap-2 rounded-lg border px-4 py-2 text-xs font-medium transition-colors ${
+                        className={`flex items-center gap-2 rounded-lg border px-4 py-2 text-xs font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 ${
                           theme === value
                             ? selectedOptionClass
                             : unselectedOptionClass
@@ -668,62 +773,95 @@ export function AdminProfileSettings() {
                           <Moon size={14} />
                         )}
 
-                        {value === "light" ? "Light" : "Dark"}
+                        {value === "light"
+                          ? "Light"
+                          : "Dark"}
                       </button>
                     )
                   )}
                 </div>
 
                 <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">
-                  Theme changes apply immediately and are saved
-                  in this browser.
+                  Theme changes apply immediately and are
+                  saved in this browser.
                 </p>
               </div>
 
+              {/* LANGUAGE — SELECTION ONLY */}
               <div>
-                <FieldLabel>Language</FieldLabel>
+                <label
+                  htmlFor="admin-language"
+                  className="mb-2 block text-xs font-semibold text-slate-700 dark:text-slate-200"
+                >
+                  Language
+                </label>
 
                 <select
-                  aria-label="Language"
-                  value={language}
+                  id="admin-language"
+                  value={preferences.language}
                   onChange={(event) =>
-                    setLanguage(event.target.value)
+                    updatePreferences({
+                      language:
+                        event.target.value as Language,
+                    })
                   }
-                  className="mt-2 w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-3 text-sm text-slate-900 outline-none focus:border-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+                  className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-3 text-sm text-slate-900 outline-none focus:border-blue-500 focus-visible:ring-2 focus-visible:ring-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
                 >
-                  <option value="English">English</option>
-                  <option value="Tamil">Tamil</option>
-                  <option value="Sinhala">Sinhala</option>
+                  <option value="English">
+                    English
+                  </option>
+                  <option value="Tamil">
+                    Tamil
+                  </option>
+                  <option value="Sinhala">
+                    Sinhala
+                  </option>
                 </select>
+
+                <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
+                  Language selection is saved as a preference.
+                  Interface translation is not enabled.
+                </p>
               </div>
 
+              {/* FONT SIZE — FUNCTIONAL */}
               <div>
                 <FieldLabel>Font Size</FieldLabel>
 
                 <div className="mt-2 flex flex-wrap gap-2">
-                  {["Small", "Medium", "Large"].map(
-                    (value) => (
-                      <button
-                        key={value}
-                        type="button"
-                        onClick={() => setFontSize(value)}
-                        aria-pressed={fontSize === value}
-                        className={`rounded-lg border px-4 py-2 text-xs font-medium transition-colors ${
-                          fontSize === value
-                            ? selectedOptionClass
-                            : unselectedOptionClass
-                        }`}
-                      >
-                        {value}
-                      </button>
-                    )
-                  )}
+                  {(
+                    ["Small", "Medium", "Large"] as FontSize[]
+                  ).map((value) => (
+                    <button
+                      key={value}
+                      type="button"
+                      onClick={() =>
+                        updatePreferences({
+                          fontSize: value,
+                        })
+                      }
+                      aria-pressed={
+                        preferences.fontSize === value
+                      }
+                      className={`rounded-lg border px-4 py-2 text-xs font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 ${
+                        preferences.fontSize === value
+                          ? selectedOptionClass
+                          : unselectedOptionClass
+                      }`}
+                    >
+                      {value}
+                    </button>
+                  ))}
                 </div>
+
+                <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">
+                  Text size changes immediately on this page.
+                </p>
               </div>
             </div>
           </section>
 
-          {/* PRIVACY SETTINGS */}
+          {/* PRIVACY */}
           <section className={cardClass}>
             <SectionHeading
               icon={<ShieldCheck size={17} />}
@@ -747,8 +885,10 @@ export function AdminProfileSettings() {
                   </div>
 
                   <Toggle
-                    checked={toggles[item.key]}
-                    onChange={() => handleToggle(item.key)}
+                    checked={preferences.toggles[item.key]}
+                    onChange={() =>
+                      handleToggle(item.key)
+                    }
                     label={item.label}
                   />
                 </div>
@@ -761,15 +901,15 @@ export function AdminProfileSettings() {
         <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-blue-100 bg-blue-50 p-5 dark:border-blue-900 dark:bg-blue-950/40">
           <div className="flex items-center gap-3">
             <ShieldCheck
-              className="text-blue-600 dark:text-blue-400"
               size={20}
+              className="shrink-0 text-blue-600 dark:text-blue-400"
             />
 
             <div>
               <p
-                className="text-sm font-semibold"
                 role="status"
                 aria-live="polite"
+                className="text-sm font-semibold"
               >
                 {hasUnsavedChanges
                   ? "You have unsaved changes"
@@ -777,9 +917,8 @@ export function AdminProfileSettings() {
               </p>
 
               <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-                Preferences are saved in this page's frontend
-                state only. Theme is stored separately in
-                your browser.
+                Preferences are saved in this browser.
+                Profile details remain frontend-only.
               </p>
             </div>
           </div>
@@ -788,8 +927,11 @@ export function AdminProfileSettings() {
             <button
               type="button"
               onClick={handleDiscardPreferences}
-              disabled={!hasUnsavedChanges}
-              className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-white disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600 dark:text-slate-200 dark:hover:bg-slate-800"
+              disabled={
+                !hasUnsavedChanges ||
+                !preferencesLoaded
+              }
+              className={`text-sm disabled:cursor-not-allowed disabled:opacity-50 ${secondaryButtonClass}`}
             >
               Discard Changes
             </button>
@@ -797,8 +939,11 @@ export function AdminProfileSettings() {
             <button
               type="button"
               onClick={handleSavePreferences}
-              disabled={!hasUnsavedChanges}
-              className="flex items-center gap-2 rounded-lg bg-blue-600 px-5 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+              disabled={
+                !hasUnsavedChanges ||
+                !preferencesLoaded
+              }
+              className="flex items-center gap-2 rounded-lg bg-blue-600 px-5 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 disabled:cursor-not-allowed disabled:opacity-50"
             >
               <Check size={16} />
               Save Changes
@@ -841,7 +986,7 @@ function ProfileField({
 }) {
   return (
     <div>
-      <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">
+      <p className="text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">
         {label}
       </p>
 
@@ -853,22 +998,20 @@ function ProfileField({
 }
 
 function EditableField({
+  id,
   label,
   value,
   onChange,
   type = "text",
   error,
 }: {
+  id: string;
   label: string;
   value: string;
   onChange: (value: string) => void;
   type?: string;
   error?: string;
 }) {
-  const id = `admin-profile-${label
-    .toLowerCase()
-    .replace(/\s+/g, "-")}`;
-
   return (
     <div>
       <label
@@ -882,15 +1025,17 @@ function EditableField({
         id={id}
         type={type}
         value={value}
-        onChange={(event) => onChange(event.target.value)}
+        onChange={(event) =>
+          onChange(event.target.value)
+        }
         aria-invalid={Boolean(error)}
         aria-describedby={
           error ? `${id}-error` : undefined
         }
-        className={`w-full rounded-lg border bg-white px-3 py-2 text-sm text-slate-900 outline-none transition-colors focus:ring-2 focus:ring-blue-500/10 dark:bg-slate-800 dark:text-slate-100 ${
+        className={`w-full rounded-lg border bg-white px-3 py-2 text-sm text-slate-900 outline-none transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 dark:bg-slate-800 dark:text-slate-100 ${
           error
-            ? "border-red-500 focus:border-red-500 dark:border-red-400"
-            : "border-slate-300 focus:border-blue-500 dark:border-slate-600 dark:focus:border-blue-400"
+            ? "border-red-500 dark:border-red-400"
+            : "border-slate-300 focus:border-blue-500 dark:border-slate-600"
         }`}
       />
 
