@@ -16,7 +16,10 @@ import {
   Sun,
   UserRound,
 } from "lucide-react";
+
 import { useAdminTheme } from "./AdminThemeProvider";
+
+// ================= TYPES =================
 
 type Profile = {
   fullName: string;
@@ -41,6 +44,14 @@ type ToggleKey =
   | "statistics"
   | "analytics";
 
+type Preferences = {
+  toggles: Record<ToggleKey, boolean>;
+  language: string;
+  fontSize: string;
+};
+
+// ================= SAMPLE DATA =================
+
 const initialProfile: Profile = {
   fullName: "Admin Registry",
   role: "Administrator",
@@ -59,6 +70,12 @@ const initialToggles: Record<ToggleKey, boolean> = {
   communication: true,
   statistics: false,
   analytics: false,
+};
+
+const initialPreferences: Preferences = {
+  toggles: { ...initialToggles },
+  language: "English",
+  fontSize: "Medium",
 };
 
 const notificationItems: {
@@ -98,7 +115,8 @@ const privacyItems: {
   },
 ];
 
-// Validate profile information before saving.
+// ================= VALIDATION =================
+
 function validateProfile(values: Profile): ProfileErrors {
   const errors: ProfileErrors = {};
 
@@ -136,6 +154,8 @@ function validateProfile(values: Profile): ProfileErrors {
   return errors;
 }
 
+// ================= MAIN COMPONENT =================
+
 export function AdminProfileSettings() {
   const { theme, setTheme } = useAdminTheme();
 
@@ -151,6 +171,7 @@ export function AdminProfileSettings() {
   const [profileErrors, setProfileErrors] =
     useState<ProfileErrors>({});
 
+  // Photo state
   const [photoError, setPhotoError] = useState("");
 
   const [profilePhoto, setProfilePhoto] =
@@ -158,11 +179,26 @@ export function AdminProfileSettings() {
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Other settings
-  const [toggles, setToggles] = useState(initialToggles);
+  // Preferences state
+  const [toggles, setToggles] = useState<
+    Record<ToggleKey, boolean>
+  >({ ...initialToggles });
+
   const [language, setLanguage] = useState("English");
+
   const [fontSize, setFontSize] = useState("Medium");
-  const [saved, setSaved] = useState(false);
+
+  const [savedPreferences, setSavedPreferences] =
+    useState<Preferences>(initialPreferences);
+
+  const hasUnsavedChanges =
+    JSON.stringify({
+      toggles,
+      language,
+      fontSize,
+    }) !== JSON.stringify(savedPreferences);
+
+  // ================= PROFILE ACTIONS =================
 
   const handleEditProfile = () => {
     setEditedProfile({ ...profile });
@@ -179,7 +215,11 @@ export function AdminProfileSettings() {
       [key]: value,
     }));
 
-    if (key === "fullName" || key === "phone" || key === "email") {
+    if (
+      key === "fullName" ||
+      key === "phone" ||
+      key === "email"
+    ) {
       setProfileErrors((previous) => ({
         ...previous,
         [key]: undefined,
@@ -212,6 +252,8 @@ export function AdminProfileSettings() {
     setProfileErrors({});
     setIsEditing(false);
   };
+
+  // ================= PHOTO ACTIONS =================
 
   const handlePhotoChange = (
     event: ChangeEvent<HTMLInputElement>
@@ -255,13 +297,30 @@ export function AdminProfileSettings() {
     event.target.value = "";
   };
 
+  // ================= PREFERENCES ACTIONS =================
+
   const handleToggle = (key: ToggleKey) => {
     setToggles((previous) => ({
       ...previous,
       [key]: !previous[key],
     }));
-    setSaved(false);
   };
+
+  const handleSavePreferences = () => {
+    setSavedPreferences({
+      toggles: { ...toggles },
+      language,
+      fontSize,
+    });
+  };
+
+  const handleDiscardPreferences = () => {
+    setToggles({ ...savedPreferences.toggles });
+    setLanguage(savedPreferences.language);
+    setFontSize(savedPreferences.fontSize);
+  };
+
+  // ================= STYLES =================
 
   const cardClass =
     "rounded-2xl border border-slate-200 bg-white p-6 shadow-sm " +
@@ -281,6 +340,8 @@ export function AdminProfileSettings() {
     "border-slate-200 text-slate-600 hover:bg-slate-50 " +
     "dark:border-slate-700 dark:text-slate-300 " +
     "dark:hover:bg-slate-800";
+
+  // ================= PAGE =================
 
   return (
     <main className="min-h-screen bg-[#f5f7fb] px-4 py-6 text-[#14213d] transition-colors sm:px-7 lg:px-9 dark:bg-slate-950 dark:text-slate-100">
@@ -327,7 +388,8 @@ export function AdminProfileSettings() {
           </div>
 
           <div className="flex flex-col gap-6 sm:flex-row">
-            {/* PHOTO */}
+
+            {/* PROFILE PHOTO */}
             <div className="flex flex-col items-center gap-3">
               <div className="flex h-24 w-24 items-center justify-center overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
                 {profilePhoto ? (
@@ -379,7 +441,7 @@ export function AdminProfileSettings() {
               )}
             </div>
 
-            {/* PROFILE FIELDS */}
+            {/* PROFILE DETAILS */}
             <div className="min-w-0 flex-1">
               {isEditing ? (
                 <div className="grid gap-4 sm:grid-cols-2">
@@ -490,10 +552,12 @@ export function AdminProfileSettings() {
             <div className="mt-7 space-y-5">
               <div>
                 <FieldLabel>Email Address</FieldLabel>
+
                 <div className="flex items-center justify-between gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-3 text-sm dark:border-slate-700 dark:bg-slate-800">
                   <span className="truncate text-slate-600 dark:text-slate-200">
                     {profile.email}
                   </span>
+
                   <span className="text-xs font-medium text-slate-500 dark:text-slate-400">
                     Demo
                   </span>
@@ -502,10 +566,12 @@ export function AdminProfileSettings() {
 
               <div>
                 <FieldLabel>Password</FieldLabel>
+
                 <div className="flex gap-2">
                   <div className="min-w-0 flex-1 rounded-lg border border-slate-200 bg-slate-50 px-3 py-3 text-sm dark:border-slate-700 dark:bg-slate-800">
                     ••••••••••
                   </div>
+
                   <span className="flex items-center rounded-lg border border-slate-200 px-3 text-xs font-medium text-slate-400 dark:border-slate-700 dark:text-slate-500">
                     Not connected
                   </span>
@@ -517,10 +583,12 @@ export function AdminProfileSettings() {
                   <FieldLabel>
                     Two-Factor Authentication
                   </FieldLabel>
+
                   <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
                     Add an extra layer of security to your account
                   </p>
                 </div>
+
                 <span className="text-xs text-slate-400 dark:text-slate-500">
                   Not configured
                 </span>
@@ -530,6 +598,7 @@ export function AdminProfileSettings() {
                 <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">
                   Last Login
                 </p>
+
                 <p className="mt-1 text-xs text-slate-600 dark:text-slate-300">
                   Session information will appear here.
                 </p>
@@ -553,6 +622,7 @@ export function AdminProfileSettings() {
                   <span className="text-sm text-slate-600 dark:text-slate-300">
                     {item.label}
                   </span>
+
                   <Toggle
                     checked={toggles[item.key]}
                     onChange={() => handleToggle(item.key)}
@@ -573,6 +643,7 @@ export function AdminProfileSettings() {
             <div className="mt-7 space-y-6">
               <div>
                 <FieldLabel>Theme</FieldLabel>
+
                 <p className="mb-3 text-xs text-slate-500 dark:text-slate-400">
                   Choose your preferred dashboard appearance.
                 </p>
@@ -596,6 +667,7 @@ export function AdminProfileSettings() {
                         ) : (
                           <Moon size={14} />
                         )}
+
                         {value === "light" ? "Light" : "Dark"}
                       </button>
                     )
@@ -610,13 +682,13 @@ export function AdminProfileSettings() {
 
               <div>
                 <FieldLabel>Language</FieldLabel>
+
                 <select
                   aria-label="Language"
                   value={language}
-                  onChange={(event) => {
-                    setLanguage(event.target.value);
-                    setSaved(false);
-                  }}
+                  onChange={(event) =>
+                    setLanguage(event.target.value)
+                  }
                   className="mt-2 w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-3 text-sm text-slate-900 outline-none focus:border-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
                 >
                   <option value="English">English</option>
@@ -627,16 +699,14 @@ export function AdminProfileSettings() {
 
               <div>
                 <FieldLabel>Font Size</FieldLabel>
+
                 <div className="mt-2 flex flex-wrap gap-2">
                   {["Small", "Medium", "Large"].map(
                     (value) => (
                       <button
                         key={value}
                         type="button"
-                        onClick={() => {
-                          setFontSize(value);
-                          setSaved(false);
-                        }}
+                        onClick={() => setFontSize(value)}
                         aria-pressed={fontSize === value}
                         className={`rounded-lg border px-4 py-2 text-xs font-medium transition-colors ${
                           fontSize === value
@@ -670,10 +740,12 @@ export function AdminProfileSettings() {
                     <p className="text-sm font-medium text-slate-800 dark:text-slate-100">
                       {item.label}
                     </p>
+
                     <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
                       {item.description}
                     </p>
                   </div>
+
                   <Toggle
                     checked={toggles[item.key]}
                     onChange={() => handleToggle(item.key)}
@@ -692,32 +764,53 @@ export function AdminProfileSettings() {
               className="text-blue-600 dark:text-blue-400"
               size={20}
             />
+
             <div>
-              <p className="text-sm font-semibold">
-                Your data is secure with us.
+              <p
+                className="text-sm font-semibold"
+                role="status"
+                aria-live="polite"
+              >
+                {hasUnsavedChanges
+                  ? "You have unsaved changes"
+                  : "Preferences are up to date"}
               </p>
-              <p className="text-xs text-slate-500 dark:text-slate-400">
-                Preferences are currently stored in frontend
-                state only, except the browser-saved theme.
+
+              <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                Preferences are saved in this page's frontend
+                state only. Theme is stored separately in
+                your browser.
               </p>
             </div>
           </div>
 
-          <button
-            type="button"
-            onClick={() => setSaved(true)}
-            className="flex items-center gap-2 rounded-lg bg-blue-600 px-5 py-3 text-sm font-medium text-white hover:bg-blue-700"
-          >
-            <Check size={16} />
-            {saved ? "Selected" : "Save Changes"}
-          </button>
+          <div className="flex flex-wrap gap-3">
+            <button
+              type="button"
+              onClick={handleDiscardPreferences}
+              disabled={!hasUnsavedChanges}
+              className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-white disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600 dark:text-slate-200 dark:hover:bg-slate-800"
+            >
+              Discard Changes
+            </button>
+
+            <button
+              type="button"
+              onClick={handleSavePreferences}
+              disabled={!hasUnsavedChanges}
+              className="flex items-center gap-2 rounded-lg bg-blue-600 px-5 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              <Check size={16} />
+              Save Changes
+            </button>
+          </div>
         </div>
       </div>
     </main>
   );
 }
 
-// REUSABLE COMPONENTS
+// ================= REUSABLE COMPONENTS =================
 
 function SectionHeading({
   icon,
@@ -731,6 +824,7 @@ function SectionHeading({
       <div className="rounded-lg bg-blue-50 p-2 text-blue-600 dark:bg-blue-950 dark:text-blue-300">
         {icon}
       </div>
+
       <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
         {title}
       </h2>
@@ -750,6 +844,7 @@ function ProfileField({
       <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">
         {label}
       </p>
+
       <p className="mt-1 break-words text-sm font-medium text-slate-800 dark:text-slate-100">
         {value}
       </p>
