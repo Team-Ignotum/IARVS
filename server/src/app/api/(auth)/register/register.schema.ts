@@ -4,13 +4,17 @@ export const registrationSchema = z.object({
   email: z.string().email(),
   password: z.string().min(8),
   firstName: z.string().min(1).trim(),
-  lastName: z.string().min(1).trim,
+  lastName: z.string().min(1).trim(),
+
   role: z.enum(["STUDENT", "ADMIN", "STAFF", "SUPER_STAFF"]),
+
   center: z.string(),
   regNumber: z
     .string()
     .regex(/^\d{8}$/, "Registration number must be exactly 9 digits"),
+
   stNumber: z.string().min(9).trim(),
+  
   intake: z
     .string()
     .regex(
