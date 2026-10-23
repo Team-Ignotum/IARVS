@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
-import Link from "next/link";
 import {
   Select,
   SelectContent,
@@ -9,6 +8,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import AcceptInviteForm from "./accept-invite/AcceptInviteForm";
 
 // Matches the mock preview: one form, inline field errors, then an "Invite sent" screen.
 
@@ -82,12 +89,22 @@ export default function StaffRegistrationForm() {
             Add another staff member
           </button>
         </div>
-        <Link
-          href="/admin-staff-registration/accept-invite"
-          className="mt-4 inline-flex h-10 items-center justify-center self-start rounded-md bg-[#183b68] px-3.5 font-sans text-sm font-medium text-white transition-colors hover:bg-[#102d52]"
-        >
-          Set password
-        </Link>
+        <Dialog>
+          <DialogTrigger asChild>
+            <button
+              type="button"
+              className="mt-4 inline-flex h-10 items-center justify-center self-start rounded-md bg-[#183b68] px-3.5 font-sans text-sm font-medium text-white transition-colors hover:bg-[#102d52]"
+            >
+              Set password
+            </button>
+          </DialogTrigger>
+          <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Set your password</DialogTitle>
+            </DialogHeader>
+            <AcceptInviteForm token="" />
+          </DialogContent>
+        </Dialog>
       </>
     );
   }

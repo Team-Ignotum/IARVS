@@ -1,8 +1,14 @@
 "use client";
 
-import Link from "next/link";
 import { AdminSidebar } from "@/components/Asidebar";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import {
   Briefcase,
   Building,
@@ -16,6 +22,7 @@ import {
 import { useAdminDashboard } from "@/_hooks/admin/useAdminDashboard";
 import { AdminBreadcrumb } from "@/components/admin/AdministrativeBreadcrumb";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import StaffRegistrationForm from "@/app/admin-staff-registration/StaffRegistrationForm";
 
 export default function AdminPage() {
   const { stats } = useAdminDashboard();
@@ -82,13 +89,20 @@ export default function AdminPage() {
               </div>
               {/* Buttons*/}
               <div className="flex flex-wrap items-center gap-2 sm:ml-auto sm:justify-end">
-                <Link
-                  href="/admin-staff-registration"
-                  className="inline-flex h-10 items-center justify-center gap-2 rounded-md border border-slate-300 bg-white px-3.5 text-sm font-medium text-slate-700 transition-colors hover:border-slate-400 hover:bg-slate-50"
-                >
-                  <UserPlusIcon className="h-4 w-4" />
-                  Register
-                </Link>
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <button className="inline-flex h-10 items-center justify-center gap-2 rounded-md border border-slate-300 bg-white px-3.5 text-sm font-medium text-slate-700 transition-colors hover:border-slate-400 hover:bg-slate-50">
+                      <UserPlusIcon className="h-4 w-4" />
+                      Register
+                    </button>
+                  </DialogTrigger>
+                  <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto">
+                    <DialogHeader>
+                      <DialogTitle>Register staff</DialogTitle>
+                    </DialogHeader>
+                    <StaffRegistrationForm />
+                  </DialogContent>
+                </Dialog>
 
                 <button className="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-[#183b68] px-3.5 text-sm font-medium text-white transition-colors hover:bg-[#102d52]">
                   <Download className="h-4 w-4" />
