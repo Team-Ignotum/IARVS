@@ -12,7 +12,6 @@ import {
   GraduationCap,
   LayoutDashboard,
   Settings,
-  UserPlus,
 } from "lucide-react";
 
 import {
@@ -48,11 +47,6 @@ const mainLinks = [
     label: "Schedule Management",
     href: "/admin/schedule",
     icon: CalendarDays,
-  },
-    {
-    label: "User Registration",
-    href: "/admin/user-registration",
-    icon: UserPlus,
   },
 
 ];
