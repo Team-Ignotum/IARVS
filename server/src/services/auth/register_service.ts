@@ -1,0 +1,46 @@
+import bcrypt from "bcrypt";
+import { Prisma } from "@/generated/client";
+import { UserRepository } from "@/repositories/user_repository_impl";
+import type { RegisterInput} from "@/app/api/(auth)/register/register.schema";
+import { randomUUID } from "crypto";
+
+export async function registerUser(input:RegisterInput){
+    const userRepository = new UserRepository();
+
+    const email = input.email.trim().toLocaleLowerCase();
+
+    //check whether user exists or not
+    const existingUser = await userRepository.getByEmail(email);
+
+    if (existingUser){
+        throw new Error("User Already Exists");
+    }
+    //hash the password
+    const passwordHash = await bcrypt.has(input.password, 12);
+
+    try {
+       //create the user
+       const user = await userRepository.create({
+           userId: randomUUID(),
+           email,
+           passwordHash,
+           firstName:input.firstName,
+           lastName: input.lastName,
+           role: input.role,
+           center: input.center,
+           regNumber:input.regNumber,
+           stNumber:input.stNumber,
+           intake:input.intake,
+       });
+       return user;
+    } catch (error){
+        //handle duplicate values and concurrent requests
+        if(
+            error instanceof Prisma.PrismaClientKnownRequestError &&
+            error.code === "P2002"
+        ) {
+            throw new Error("Duplicate User Data")
+        }
+        throw error;
+    }
+}
