@@ -1,14 +1,24 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
+import Link from "next/link";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 // Matches the mock preview: one form, inline field errors, then an "Invite sent" screen.
 
-type Role = "STAFF" | "SUPER_STAFF"; // roles from your Prisma schema
+type Role = "STUDENT" | "ADMIN" | "STAFF" | "SUPER_STAFF";
 type Values = { fullName: string; email: string; role: Role };
 type Errors = Partial<Record<keyof Values | "form", string>>;
 
 const ROLES: { value: Role; label: string }[] = [
+  { value: "STUDENT", label: "Student" },
+  { value: "ADMIN", label: "Admin" },
   { value: "STAFF", label: "Staff" },
   { value: "SUPER_STAFF", label: "Super staff" },
 ];
@@ -67,17 +77,17 @@ export default function StaffRegistrationForm() {
           <button
             type="button"
             onClick={() => setSentTo(null)}
-            className="h-11 self-start rounded-md border border-slate-400 bg-white px-6 text-base text-slate-900 hover:bg-slate-50"
+            className="inline-flex h-10 items-center justify-center rounded-md border border-slate-300 bg-white px-3.5 font-sans text-sm font-medium text-slate-700 transition-colors hover:border-slate-400 hover:bg-slate-50"
           >
             Add another staff member
           </button>
         </div>
-        <button
-          type="button"
-          className="mt-4 h-11 self-start rounded-md bg-[#183b68] px-6 text-base font-semibold text-white hover:bg-[#102d52]"
+        <Link
+          href="/admin-staff-registration/accept-invite"
+          className="mt-4 inline-flex h-10 items-center justify-center self-start rounded-md bg-[#183b68] px-3.5 font-sans text-sm font-medium text-white transition-colors hover:bg-[#102d52]"
         >
           Set password
-        </button>
+        </Link>
       </>
     );
   }
@@ -126,26 +136,40 @@ export default function StaffRegistrationForm() {
 
       <label className="text-[15px] font-medium text-slate-900">
         Role
-        <select
-          className={inputClass(false)}
+        <Select
           value={form.role}
-          onChange={(e) => {
-            const role = e.target.value;
+          onValueChange={(role) => {
             if (ROLES.some((option) => option.value === role)) {
               setForm({ ...form, role: role as Role });
             }
           }}
         >
-          {ROLES.map((r) => (
-            <option key={r.value} value={r.value}>{r.label}</option>
-          ))}
-        </select>
+          <SelectTrigger className="mt-1.5 h-11 w-full rounded-md border-slate-400 bg-white px-3 text-base text-slate-900 [&>svg]:transition-transform data-[state=open]:[&>svg]:rotate-180">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent
+            position="popper"
+            align="start"
+            sideOffset={4}
+            className="min-w-[var(--radix-select-trigger-width)] p-1 [&_[data-position=popper]]:h-auto"
+          >
+            {ROLES.map((r) => (
+              <SelectItem
+                key={r.value}
+                value={r.value}
+                className="px-2 py-2 text-base focus:bg-slate-100 focus:text-slate-900"
+              >
+                {r.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </label>
 
       <button
         type="submit"
         disabled={busy}
-        className="h-11 rounded-md bg-[#183b68] px-6 text-base font-semibold text-white hover:bg-[#102d52] disabled:opacity-60"
+        className="inline-flex h-10 items-center justify-center rounded-md bg-[#183b68] px-3.5 font-sans text-sm font-medium text-white transition-colors hover:bg-[#102d52] disabled:opacity-60"
       >
         {busy ? "Sending…" : "Send invite"}
       </button>
