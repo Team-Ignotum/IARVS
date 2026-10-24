@@ -67,7 +67,7 @@ export async function POST(request: Request) {
     // 6. Hash password
     const passwordHash = await hash(input.password, 12);
 
-    // 7. Create student account
+    // 7. Create user account
     const user = await userRepository.create({
       userId: input.userId,
       email,

@@ -12,9 +12,9 @@ export const registrationSchema = z.object({
   center: z.string(),
   regNumber: z
     .string()
-    .regex(/^\d{8}$/, "Registration number must be exactly 9 digits"),
+    .regex(/^\d{9}$/, "Registration number must be exactly 9 digits"),
 
-  stNumber: z.string().min(9).trim(),
+  stNumber: z.string().min(9).trim().toUpperCase(),
 
   intake: z
     .string()
