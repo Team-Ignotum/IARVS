@@ -23,7 +23,7 @@ import {
 import UsersFilters from "@/components/admin/users/UsersFilters";
 import { filterUsers } from "@/components/admin/users/filters";
 import { AdminBreadcrumb } from "@/components/admin/AdminBreadcrumb";
-import StaffRegistrationForm from "@/app/admin-staff-registration/StaffRegistrationForm";
+import StaffRegistrationForm from "@/app/admin/user-registration/StaffRegistrationForm";
 import {
   Dialog,
   DialogContent,

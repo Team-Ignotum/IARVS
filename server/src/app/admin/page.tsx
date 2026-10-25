@@ -22,7 +22,7 @@ import {
 import { useAdminDashboard } from "@/_hooks/admin/useAdminDashboard";
 import { AdminBreadcrumb } from "@/components/admin/AdministrativeBreadcrumb";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import StaffRegistrationForm from "@/app/admin-staff-registration/StaffRegistrationForm";
+import StaffRegistrationForm from "@/app/admin/user-registration/StaffRegistrationForm";
 
 export default function AdminPage() {
   const { stats } = useAdminDashboard();
