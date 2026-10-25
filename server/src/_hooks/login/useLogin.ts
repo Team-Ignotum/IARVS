@@ -15,6 +15,7 @@ interface LoginResponse {
 export function useLogin() {
   return useMutation<LoginResponse, Error, LoginInput>({
     mutationFn: async ({ email, password }) => {
+      // The login endpoint reads submitted credentials as multipart form data.
       const formData = new FormData();
 
       formData.append("email", email);
@@ -28,6 +29,7 @@ export function useLogin() {
       const data = await response.json();
 
       if (!response.ok) {
+        // Convert API failures into a mutation error so the form can display them.
         throw new Error(data.error || "Login failed");
       }
 
