@@ -1,17 +1,27 @@
 import { createClient } from "redis";
 
-const redisClient = createClient({
-  url: process.env.REDIS_URL,
+const globalForRedis = globalThis as unknown as {
+  redisClient?: ReturnType<typeof createClient>;
+};
+
+const redis =
+  globalForRedis.redisClient ??
+  createClient({
+    url: process.env.REDIS_URL,
+  });
+
+redis.on("error", (error) => {
+  console.error("Redis error:", error);
 });
 
-redisClient.on("error", (error) => {
-  console.error("Redis Error:", error);
-});
+if (process.env.NODE_ENV !== "production") {
+  globalForRedis.redisClient = redis;
+}
 
-export async function getRedisClient() {
-  if (!redisClient.isOpen) {
-    await redisClient.connect();
+export async function getRedis() {
+  if (!redis.isOpen) {
+    await redis.connect();
   }
 
-  return redisClient;
+  return redis;
 }
