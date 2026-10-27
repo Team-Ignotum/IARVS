@@ -32,7 +32,7 @@ export const userColumns: ColumnConfig[] = [
 
   {
     key: "id",
-    label: "Staff ID",
+    label: "User ID",
     render: (user) => (
       <span className="text-sm font-medium text-slate-700">{user.id}</span>
     ),

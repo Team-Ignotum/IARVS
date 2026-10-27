@@ -1,4 +1,3 @@
-
 "use client";
 
 import { AdminSidebar } from "@/components/Asidebar";
@@ -12,17 +11,13 @@ import {
   Plus,
   UserPlusIcon,
   Users,
-  Bell,
 } from "lucide-react";
 
 import { useAdminDashboard } from "@/_hooks/admin/useAdminDashboard";
 import { AdminBreadcrumb } from "@/components/admin/AdministrativeBreadcrumb";
-import { AdminProfileDropdown } from "./AdminProfileDropdown";
+import { AdminHeader } from "@/components/admin/AdminHeader";
 
-import {
-  Avatar,
-  AvatarFallback,
-} from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 export default function AdminPage() {
   const { stats } = useAdminDashboard();
@@ -122,28 +117,7 @@ export default function AdminPage() {
       <AdminSidebar />
 
       <SidebarInset className="bg-[#f4f5f7] dark:bg-slate-950">
-        {/* ADMIN DASHBOARD HEADER */}
-        <header className="sticky top-0 z-20 border-b border-slate-200 bg-white/95 backdrop-blur transition-colors dark:border-slate-700 dark:bg-slate-900/95">
-          <div className="flex items-center justify-between gap-4 px-4 py-4 sm:px-6">
-            <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
-              Administration Dashboard
-            </h2>
-
-            <div className="flex items-center gap-4">
-              {/* Notification Icon */}
-              <button
-                type="button"
-                aria-label="Notifications"
-                className="rounded-lg p-2 transition-colors hover:bg-slate-100 focus-visible:outline-2 focus-visible:outline-blue-600 dark:hover:bg-slate-800"
-              >
-                <Bell className="h-5 w-5 text-slate-600 dark:text-slate-300" />
-              </button>
-
-              {/* Admin Profile Dropdown */}
-              <AdminProfileDropdown />
-            </div>
-          </div>
-        </header>
+        <AdminHeader />
 
         {/* DASHBOARD CONTENT */}
         <div className="flex flex-1 flex-col bg-[#f4f5f7] p-4 transition-colors sm:p-6 lg:p-8 dark:bg-slate-950">
@@ -185,32 +159,30 @@ export default function AdminPage() {
 
             {/* STATISTICS CARDS */}
             <div className="mt-6 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-              {summaryCards.map(
-                ({ label, value, icon: Icon, iconClass }) => (
-                  <div
-                    key={label}
-                    className="rounded-xl border border-slate-200 bg-white p-4 shadow-[0_1px_2px_rgba(15,23,42,0.04)] transition-colors dark:border-slate-700 dark:bg-slate-800 dark:shadow-none"
-                  >
-                    <div className="flex items-center justify-between gap-3">
-                      <div className="flex items-center gap-3">
-                        <div
-                          className={`flex h-9 w-9 items-center justify-center rounded-lg ${iconClass}`}
-                        >
-                          <Icon className="h-5 w-5" />
-                        </div>
-
-                        <span className="text-[11px] font-medium uppercase tracking-[0.12em] text-slate-500 dark:text-slate-400">
-                          {label}
-                        </span>
+              {summaryCards.map(({ label, value, icon: Icon, iconClass }) => (
+                <div
+                  key={label}
+                  className="rounded-xl border border-slate-200 bg-white p-4 shadow-[0_1px_2px_rgba(15,23,42,0.04)] transition-colors dark:border-slate-700 dark:bg-slate-800 dark:shadow-none"
+                >
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-3">
+                      <div
+                        className={`flex h-9 w-9 items-center justify-center rounded-lg ${iconClass}`}
+                      >
+                        <Icon className="h-5 w-5" />
                       </div>
-                    </div>
 
-                    <div className="mt-4 text-3xl font-semibold tracking-tight text-slate-950 sm:text-4xl dark:text-white">
-                      {Number(value ?? 0).toLocaleString()}
+                      <span className="text-[11px] font-medium uppercase tracking-[0.12em] text-slate-500 dark:text-slate-400">
+                        {label}
+                      </span>
                     </div>
                   </div>
-                )
-              )}
+
+                  <div className="mt-4 text-3xl font-semibold tracking-tight text-slate-950 sm:text-4xl dark:text-white">
+                    {Number(value ?? 0).toLocaleString()}
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
 
@@ -284,7 +256,7 @@ export default function AdminPage() {
                       <td className="px-4 py-4">
                         <span
                           className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ${getStatusClass(
-                            inquiry.status
+                            inquiry.status,
                           )}`}
                         >
                           {inquiry.status}

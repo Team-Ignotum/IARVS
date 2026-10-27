@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { AdminSidebar } from "@/components/Asidebar";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
-import { PageHeader } from "@/components/admin/pageHeader";
+import { AdminHeader } from "@/components/admin/AdminHeader";
 import {
   Activity,
   Briefcase,
@@ -104,11 +104,7 @@ export default function StaffPage() {
     <SidebarProvider>
       <AdminSidebar />
       <SidebarInset>
-        <header className="sticky top-0 z-20 border-b border-slate-200 bg-white/95 backdrop-blur">
-          <div className="px-6 py-4">
-            <PageHeader title="Administration Dashboard" />
-          </div>
-        </header>
+        <AdminHeader />
 
         <div className="flex flex-1 flex-col gap-6 bg-[#f4f5f7] p-4 sm:p-6 lg:p-8">
           {/* Breadcrumbs */}
@@ -131,7 +127,10 @@ export default function StaffPage() {
                   Export CSV
                 </button>
 
-                <Dialog open={registrationOpen} onOpenChange={setRegistrationOpen}>
+                <Dialog
+                  open={registrationOpen}
+                  onOpenChange={setRegistrationOpen}
+                >
                   <DialogTrigger asChild>
                     <button className="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-[#183b68] px-3.5 text-sm font-medium text-white transition-colors hover:bg-[#102d52]">
                       <Plus className="h-4 w-4" />

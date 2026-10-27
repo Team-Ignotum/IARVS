@@ -2,22 +2,13 @@
 
 import { useEffect, useState } from "react";
 import { AdminSidebar } from "@/components/Asidebar";
-import {
-  SidebarInset,
-  SidebarProvider,
-} from "@/components/ui/sidebar";
-import { PageHeader } from "@/components/admin/pageHeader";
+import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
+import { AdminHeader } from "@/components/admin/AdminHeader";
 import AdminPagination from "@/components/admin/AdminPagination";
 import StatsGrid from "@/components/admin-dashboard/StatsGrid";
 import { Button } from "@/components/ui/button";
 
-import {
-  BadgeCheck,
-  Download,
-  Hourglass,
-  Plus,
-  Users,
-} from "lucide-react";
+import { BadgeCheck, Download, Hourglass, Plus, Users } from "lucide-react";
 
 import TableActionMenu from "@/components/admin/TableActionMenu";
 import {
@@ -31,10 +22,7 @@ import {
 
 import { useStudentDashboard } from "@/_hooks/admin/useAdminDashboard";
 
-import {
-  StudentRecord,
-  StudentStatus,
-} from "@/components/admin/users/types";
+import { StudentRecord, StudentStatus } from "@/components/admin/users/types";
 
 import StudentFilters from "@/components/admin/students/StudentFilters";
 
@@ -90,11 +78,11 @@ export default function StudentPage() {
 
   // FILTER STATES
 
-  const [statusFilter, setStatusFilter] =
-    useState<"all" | StudentStatus>("all");
+  const [statusFilter, setStatusFilter] = useState<"all" | StudentStatus>(
+    "all",
+  );
 
-  const [batchFilter, setBatchFilter] =
-    useState<"all" | string>("all");
+  const [batchFilter, setBatchFilter] = useState<"all" | string>("all");
 
   const [search, setSearch] = useState("");
 
@@ -114,8 +102,7 @@ export default function StudentPage() {
       student.registeredCenter.toLowerCase().includes(searchValue);
 
     const matchesStatus =
-      statusFilter === "all" ||
-      student.status === statusFilter;
+      statusFilter === "all" || student.status === statusFilter;
 
     return matchesSearch && matchesStatus;
   });
@@ -126,9 +113,7 @@ export default function StudentPage() {
 
   const studentsPerPage = 5;
 
-  const totalPages = Math.ceil(
-    filteredStudents.length / studentsPerPage
-  );
+  const totalPages = Math.ceil(filteredStudents.length / studentsPerPage);
 
   useEffect(() => {
     if (filteredStudents.length === 0) {
@@ -141,16 +126,11 @@ export default function StudentPage() {
     }
   }, [currentPage, filteredStudents.length, totalPages]);
 
-  const startIndex =
-    (currentPage - 1) * studentsPerPage;
+  const startIndex = (currentPage - 1) * studentsPerPage;
 
-  const endIndex =
-    startIndex + studentsPerPage;
+  const endIndex = startIndex + studentsPerPage;
 
-  const currentStudents = filteredStudents.slice(
-    startIndex,
-    endIndex
-  );
+  const currentStudents = filteredStudents.slice(startIndex, endIndex);
 
   // SUMMARY CARDS
 
@@ -181,27 +161,20 @@ export default function StudentPage() {
 
       <SidebarInset>
         {
-        // PAGE HEADER
+          // PAGE HEADER
         }
 
-        <header className="sticky top-0 z-20 border-b border-slate-200 bg-white/95 backdrop-blur">
-          <div className="px-6 py-4">
-            <PageHeader title="Administration Dashboard" />
-          </div>
-        </header>
+        <AdminHeader />
 
         {/* PAGE CONTENT */}
 
         <div className="flex flex-1 flex-col gap-4 bg-gray-100 p-6">
-
           {/* BREADCRUMB */}
 
           <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-
             {/* TITLE + BUTTONS */}
 
             <div className="flex items-start justify-between gap-4 border-b border-slate-200 pb-4">
-
               <div>
                 <h1 className="text-3xl font-bold text-slate-900">
                   Student Management
@@ -213,7 +186,6 @@ export default function StudentPage() {
               </div>
 
               <div className="ml-auto flex items-center gap-3">
-
                 {/* Export CSV */}
 
                 <Button
@@ -233,7 +205,6 @@ export default function StudentPage() {
                   <Plus className="h-4 w-4" />
                   Add Student
                 </Button>
-
               </div>
             </div>
 
@@ -241,18 +212,25 @@ export default function StudentPage() {
 
             <div className="mt-5">
               <StatsGrid
-                stats={summaryCards.map(({ label, value, icon: Icon, iconClass }) => ({
-                  label,
-                  value,
-                  icon: <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${iconClass}`}><Icon className="h-5 w-5" /></div>,
-                }))}
+                stats={summaryCards.map(
+                  ({ label, value, icon: Icon, iconClass }) => ({
+                    label,
+                    value,
+                    icon: (
+                      <div
+                        className={`flex h-10 w-10 items-center justify-center rounded-xl ${iconClass}`}
+                      >
+                        <Icon className="h-5 w-5" />
+                      </div>
+                    ),
+                  }),
+                )}
               />
             </div>
 
             {/* FILTER COMPONENT */}
 
             <div className="mt-6">
-
               <StudentFilters
                 statusFilter={statusFilter}
                 batchFilter={batchFilter}
@@ -359,8 +337,8 @@ export default function StudentPage() {
                                 student.status === "Approved"
                                   ? "border-emerald-200 bg-emerald-50 text-emerald-600"
                                   : student.status === "Pending"
-                                  ? "border-amber-200 bg-amber-50 text-amber-500"
-                                  : "border-red-200 bg-red-50 text-red-600"
+                                    ? "border-amber-200 bg-amber-50 text-amber-500"
+                                    : "border-red-200 bg-red-50 text-red-600"
                               }`}
                             >
                               {student.status}
@@ -377,13 +355,15 @@ export default function StudentPage() {
                                 },
                                 {
                                   label: "Change Status",
-                                  onSelect: () => console.log("change", student),
+                                  onSelect: () =>
+                                    console.log("change", student),
                                 },
                                 {
                                   label: "Delete User",
                                   variant: "danger",
                                   separator: true,
-                                  onSelect: () => console.log("delete", student.id),
+                                  onSelect: () =>
+                                    console.log("delete", student.id),
                                 },
                               ]}
                             />

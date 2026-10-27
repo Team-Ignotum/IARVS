@@ -162,12 +162,52 @@
   }
 }
 
-.filters{
-  border-top: 1px solid var(--line);      /* divider above the filter row */
-  border-bottom: 1px solid var(--line);   /* divider below the filter row */
+.filters {
+  border-top: 1px solid var(--line); /* divider above the filter row */
+  border-bottom: 1px solid var(--line); /* divider below the filter row */
 }
 
-.section-divider{
+.section-divider {
   border-bottom: 1px solid var(--line);
   padding-bottom: 20px; /* space between title and the line */
+}
+
+/* Keep every admin tab consistent when the shared admin theme is dark. */
+.dark .admin-theme {
+  background-color: #020617;
+  color: #f8fafc;
+}
+
+.dark .admin-theme .bg-white {
+  background-color: #0f172a;
+}
+
+.dark .admin-theme .bg-\[\#f4f5f7\],
+.dark .admin-theme .bg-gray-100,
+.dark .admin-theme .bg-slate-50 {
+  background-color: #020617;
+}
+
+.dark .admin-theme .bg-\[\#f8fafc\],
+.dark .admin-theme .bg-slate-100 {
+  background-color: #1e293b;
+}
+
+.dark .admin-theme .text-slate-950,
+.dark .admin-theme .text-slate-900,
+.dark .admin-theme .text-slate-800,
+.dark .admin-theme .text-slate-700 {
+  color: #f8fafc;
+}
+
+.dark .admin-theme .text-slate-600,
+.dark .admin-theme .text-slate-500,
+.dark .admin-theme .text-slate-400 {
+  color: #94a3b8;
+}
+
+.dark .admin-theme .border-slate-200,
+.dark .admin-theme .border-slate-300,
+.dark .admin-theme .border-\[\#e4e7ed\] {
+  border-color: #334155;
 }
