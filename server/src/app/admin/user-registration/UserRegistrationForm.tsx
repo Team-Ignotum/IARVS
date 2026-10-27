@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import {
   Select,
   SelectContent,
@@ -11,7 +11,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { REGIONAL_CENTRES, STUDY_CENTRES } from "@/lib/centres";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, X } from "lucide-react";
 
 type Role = "STUDENT" | "ADMIN" | "STAFF" | "SUPER_STAFF";
 type Values = {
@@ -92,6 +92,21 @@ export default function UserRegistrationForm() {
   const [errors, setErrors] = useState<Errors>({});
   const [submittedEmail, setSubmittedEmail] = useState<string | null>(null);
   const [centreMenuOpen, setCentreMenuOpen] = useState(false);
+  const centrePickerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function closeCentreMenu(event: PointerEvent) {
+      if (
+        centrePickerRef.current &&
+        !centrePickerRef.current.contains(event.target as Node)
+      ) {
+        setCentreMenuOpen(false);
+      }
+    }
+
+    document.addEventListener("pointerdown", closeCentreMenu);
+    return () => document.removeEventListener("pointerdown", closeCentreMenu);
+  }, []);
 
   function updateField<K extends keyof Values>(field: K, value: Values[K]) {
     setForm((current) => ({ ...current, [field]: value }));
@@ -265,134 +280,147 @@ export default function UserRegistrationForm() {
       <div className="grid gap-3 sm:grid-cols-2">
         <label className="text-sm font-semibold text-slate-700">
           Role
-        <Select
-          value={form.role}
-          onValueChange={(role) => {
-            if (ROLES.some((option) => option.value === role)) {
-              updateField("role", role as Role);
-            }
-          }}
-        >
-          <SelectTrigger
-            className={`${selectTriggerClass(false)} [&>svg]:h-6 [&>svg]:w-6 [&>svg]:rounded [&>svg]:p-1 [&>svg]:text-slate-500 [&>svg]:transition-transform hover:[&>svg]:bg-slate-100 data-[state=open]:[&>svg]:rotate-180`}
+          <Select
+            value={form.role}
+            onValueChange={(role) => {
+              if (ROLES.some((option) => option.value === role)) {
+                updateField("role", role as Role);
+              }
+            }}
           >
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent
-            position="popper"
-            align="start"
-            sideOffset={4}
-            className="min-w-[var(--radix-select-trigger-width)] p-1 [&_[data-position=popper]]:h-auto"
-          >
-            <SelectGroup>
-              <SelectLabel className="px-2 py-1.5 text-xs font-semibold uppercase tracking-wide text-slate-500">
-                User roles
-              </SelectLabel>
-              {ROLES.map((role) => (
-                <SelectItem
-                  key={role.value}
-                  value={role.value}
-                  className="px-2 py-2 text-base focus:bg-slate-100 focus:text-slate-900"
-                >
-                  {role.label}
-                </SelectItem>
-              ))}
-            </SelectGroup>
-          </SelectContent>
-        </Select>
+            <SelectTrigger
+              className={`${selectTriggerClass(false)} [&>svg]:h-6 [&>svg]:w-6 [&>svg]:rounded [&>svg]:p-1 [&>svg]:text-slate-500 [&>svg]:transition-transform hover:[&>svg]:bg-slate-100 data-[state=open]:[&>svg]:rotate-180`}
+            >
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent
+              position="popper"
+              align="start"
+              sideOffset={4}
+              className="min-w-[var(--radix-select-trigger-width)] p-1 [&_[data-position=popper]]:h-auto"
+            >
+              <SelectGroup>
+                <SelectLabel className="px-2 py-1.5 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                  User roles
+                </SelectLabel>
+                {ROLES.map((role) => (
+                  <SelectItem
+                    key={role.value}
+                    value={role.value}
+                    className="px-2 py-2 text-base focus:bg-slate-100 focus:text-slate-900"
+                  >
+                    {role.label}
+                  </SelectItem>
+                ))}
+              </SelectGroup>
+            </SelectContent>
+          </Select>
         </label>
 
         <label className="text-sm font-semibold text-slate-700">
           Center
-          <div className="relative">
-          <input
-            className={`${inputClass(!!errors.center)} pr-10`}
-            placeholder="Type or select a centre"
-            value={form.center}
-            onFocus={() => setCentreMenuOpen(true)}
-            onChange={(event) => {
-              updateField("center", event.target.value);
-              setCentreMenuOpen(true);
-            }}
-            onKeyDown={(event) => {
-              if (event.key === "Escape") setCentreMenuOpen(false);
-            }}
-            aria-invalid={!!errors.center}
-            role="combobox"
-            aria-autocomplete="list"
-            aria-expanded={centreMenuOpen}
-            aria-controls="centre-options"
-          />
-          <button
-            type="button"
-            aria-label="Show centre options"
-            onClick={() => setCentreMenuOpen((open) => !open)}
-            className="absolute right-2 top-1/2 -translate-y-1/2 rounded p-1 text-slate-500 hover:bg-slate-100"
-          >
-            <ChevronDown
-              className={`h-4 w-4 transition-transform ${
-                centreMenuOpen ? "rotate-180" : ""
-              }`}
+          <div ref={centrePickerRef} className="relative">
+            <input
+              className={`${inputClass(!!errors.center)} pr-16`}
+              placeholder="Type or select a centre"
+              value={form.center}
+              onFocus={() => setCentreMenuOpen(true)}
+              onChange={(event) => {
+                updateField("center", event.target.value);
+                setCentreMenuOpen(true);
+              }}
+              onKeyDown={(event) => {
+                if (event.key === "Escape") setCentreMenuOpen(false);
+              }}
+              aria-invalid={!!errors.center}
+              role="combobox"
+              aria-autocomplete="list"
+              aria-expanded={centreMenuOpen}
+              aria-controls="centre-options"
             />
-          </button>
-          {centreMenuOpen && (
-            <div
-              id="centre-options"
-              role="listbox"
-              className="absolute z-20 mt-1 max-h-64 w-full overflow-y-auto rounded-md border border-slate-300 bg-white p-1 shadow-lg"
+            {form.center && (
+              <button
+                type="button"
+                aria-label="Clear center"
+                onClick={() => {
+                  updateField("center", "");
+                  setCentreMenuOpen(true);
+                }}
+                className="absolute right-8 top-1/2 -translate-y-1/2 rounded p-1 text-slate-400 transition-colors hover:bg-slate-200 hover:text-slate-700"
+              >
+                <X className="h-3.5 w-3.5" />
+              </button>
+            )}
+            <button
+              type="button"
+              aria-label="Show centre options"
+              onClick={() => setCentreMenuOpen((open) => !open)}
+              className="absolute right-1 top-1/2 -translate-y-1/2 rounded p-1 text-slate-500 hover:bg-slate-100"
             >
-              {filteredRegionalCentres.length > 0 && (
-                <div>
-                  <p className="px-2 py-1.5 text-xs font-semibold uppercase tracking-wide text-slate-500">
-                    Regional Centres
-                  </p>
-                  {filteredRegionalCentres.map((centre) => (
-                    <button
-                      key={centre}
-                      type="button"
-                      role="option"
-                      aria-selected={form.center === centre}
-                      onClick={() => {
-                        updateField("center", centre);
-                        setCentreMenuOpen(false);
-                      }}
-                      className="block w-full rounded px-2 py-2 text-left text-base text-slate-900 hover:bg-slate-100"
-                    >
-                      {centre}
-                    </button>
-                  ))}
-                </div>
-              )}
-              {filteredStudyCentres.length > 0 && (
-                <div>
-                  <p className="px-2 py-1.5 text-xs font-semibold uppercase tracking-wide text-slate-500">
-                    Study Centres
-                  </p>
-                  {filteredStudyCentres.map((centre) => (
-                    <button
-                      key={centre}
-                      type="button"
-                      role="option"
-                      aria-selected={form.center === centre}
-                      onClick={() => {
-                        updateField("center", centre);
-                        setCentreMenuOpen(false);
-                      }}
-                      className="block w-full rounded px-2 py-2 text-left text-base text-slate-900 hover:bg-slate-100"
-                    >
-                      {centre}
-                    </button>
-                  ))}
-                </div>
-              )}
-              {filteredRegionalCentres.length === 0 &&
-                filteredStudyCentres.length === 0 && (
-                  <p className="px-2 py-2 text-sm text-slate-500">
-                    No matching centres
-                  </p>
+              <ChevronDown
+                className={`h-4 w-4 transition-transform ${
+                  centreMenuOpen ? "rotate-180" : ""
+                }`}
+              />
+            </button>
+            {centreMenuOpen && (
+              <div
+                id="centre-options"
+                role="listbox"
+                className="absolute z-20 mt-1 max-h-64 w-full overflow-y-auto rounded-md border border-slate-300 bg-white p-1 shadow-lg"
+              >
+                {filteredRegionalCentres.length > 0 && (
+                  <div>
+                    <p className="px-2 py-1.5 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                      Regional Centres
+                    </p>
+                    {filteredRegionalCentres.map((centre) => (
+                      <button
+                        key={centre}
+                        type="button"
+                        role="option"
+                        aria-selected={form.center === centre}
+                        onClick={() => {
+                          updateField("center", centre);
+                          setCentreMenuOpen(false);
+                        }}
+                        className="block w-full rounded px-2 py-2 text-left text-base text-slate-900 hover:bg-slate-100"
+                      >
+                        {centre}
+                      </button>
+                    ))}
+                  </div>
                 )}
-            </div>
-          )}
+                {filteredStudyCentres.length > 0 && (
+                  <div>
+                    <p className="px-2 py-1.5 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                      Study Centres
+                    </p>
+                    {filteredStudyCentres.map((centre) => (
+                      <button
+                        key={centre}
+                        type="button"
+                        role="option"
+                        aria-selected={form.center === centre}
+                        onClick={() => {
+                          updateField("center", centre);
+                          setCentreMenuOpen(false);
+                        }}
+                        className="block w-full rounded px-2 py-2 text-left text-base text-slate-900 hover:bg-slate-100"
+                      >
+                        {centre}
+                      </button>
+                    ))}
+                  </div>
+                )}
+                {filteredRegionalCentres.length === 0 &&
+                  filteredStudyCentres.length === 0 && (
+                    <p className="px-2 py-2 text-sm text-slate-500">
+                      No matching centres
+                    </p>
+                  )}
+              </div>
+            )}
           </div>
           {errors.center && (
             <span className="mt-1.5 block text-sm font-normal text-red-700">
