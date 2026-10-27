@@ -23,6 +23,14 @@ import {
 import UsersFilters from "@/components/admin/users/UsersFilters";
 import { filterUsers } from "@/components/admin/users/filters";
 import { AdminBreadcrumb } from "@/components/admin/AdminBreadcrumb";
+import UserRegistrationForm from "@/app/admin/user-registration/UserRegistrationForm";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 // sample user records
 const sampleUsers: UserRecord[] = [
@@ -50,6 +58,7 @@ const sampleUsers: UserRecord[] = [
 
 export default function StaffPage() {
   const { stats } = useAdminDashboard();
+  const [registrationOpen, setRegistrationOpen] = useState(false);
   const [roleFilter, setRoleFilter] = useState<"all" | UserRole>("all");
   const [statusFilter, setStatusFilter] = useState<"all" | UserStatus>("all");
   const [centerFilter, setCenterFilter] = useState<UserCenterFilter>("all");
@@ -122,10 +131,20 @@ export default function StaffPage() {
                   Export CSV
                 </button>
 
-                <button className="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-[#183b68] px-3.5 text-sm font-medium text-white transition-colors hover:bg-[#102d52]">
-                  <Plus className="h-4 w-4" />
-                  Add Staff
-                </button>
+                <Dialog open={registrationOpen} onOpenChange={setRegistrationOpen}>
+                  <DialogTrigger asChild>
+                    <button className="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-[#183b68] px-3.5 text-sm font-medium text-white transition-colors hover:bg-[#102d52]">
+                      <Plus className="h-4 w-4" />
+                      Add Staff
+                    </button>
+                  </DialogTrigger>
+                  <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto">
+                    <DialogHeader>
+                      <DialogTitle>Register staff</DialogTitle>
+                    </DialogHeader>
+                    <UserRegistrationForm />
+                  </DialogContent>
+                </Dialog>
               </div>
             </div>
             {/* Stat card representation*/}

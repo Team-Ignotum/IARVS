@@ -9,19 +9,21 @@ export const registrationSchema = z.object({
 
   role: z.enum(["STUDENT", "ADMIN", "STAFF", "SUPER_STAFF"]),
 
-  center: z.string(),
+  center: z.string().trim().min(1, "Center is required"),
   regNumber: z
     .string()
-    .regex(/^\d{9}$/, "Registration number must be exactly 9 digits"),
+    .regex(/^\d{9}$/, "Registration number must be exactly 9 digits")
+    .optional(),
 
-  stNumber: z.string().min(9).trim().toUpperCase(),
+  stNumber: z.string().trim().min(9).toUpperCase().optional(),
 
   intake: z
     .string()
     .regex(
       /^(?:\d{2}[/-]\d{2}|\d{4}-\d{4})$/,
       "Intake must be in the format 21/22, 21-22, or 2021-2022",
-    ),
+    )
+    .optional(),
 });
 
 export type RegisterInput = z.infer<typeof registrationSchema>;
