@@ -3,7 +3,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 
 import {
   ChevronDown,
@@ -18,16 +18,38 @@ import { useAdminTheme } from "./AdminThemeProvider";
 export function AdminProfileDropdown() {
   // Dropdown state
   const [open, setOpen] = useState(false);
+  const [loggingOut, setLoggingOut] = useState(false);
 
   // Shared theme state
   const { theme, setTheme } = useAdminTheme();
 
   // Current route
   const pathname = usePathname();
+  const router = useRouter();
   const isProfilePage = pathname === "/admin/profile";
 
   // Dropdown reference
   const menuRef = useRef<HTMLDivElement>(null);
+
+  async function handleLogout() {
+    if (loggingOut) return;
+
+    setLoggingOut(true);
+
+    try {
+      const response = await fetch("/api/logout", { method: "POST" });
+
+      if (!response.ok) {
+        throw new Error("Logout failed");
+      }
+
+      setOpen(false);
+      router.replace("/auth/login");
+      router.refresh();
+    } catch {
+      setLoggingOut(false);
+    }
+  }
 
   // Close dropdown when clicking outside or pressing Escape
   useEffect(() => {
@@ -172,11 +194,13 @@ export function AdminProfileDropdown() {
           <div className="border-t border-slate-100 pt-2 dark:border-slate-700">
             <button
               type="button"
-              onClick={() => setOpen(false)}
-              className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-red-600 transition-colors hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950"
+              onClick={handleLogout}
+              disabled={loggingOut}
+              aria-busy={loggingOut}
+              className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-red-600 transition-colors hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60 dark:text-red-400 dark:hover:bg-red-950"
             >
               <LogOut size={17} />
-              Logout
+              {loggingOut ? "Logging out..." : "Logout"}
             </button>
           </div>
         </div>
