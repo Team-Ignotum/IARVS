@@ -2,7 +2,7 @@ import getSession from "@/server_actions/getSession";
 import { AdminSidebar } from "@/components/Asidebar";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { AdminBreadcrumb } from "@/components/admin/AdministrativeBreadcrumb";
-import { PageHeader } from "@/components/admin/pageHeader";
+import { AdminHeader } from "@/components/admin/AdminHeader";
 import UserRegistrationDashboard from "./UserRegistrationDashboard";
 
 export default async function AdminStaffRegistrationPage() {
@@ -29,14 +29,7 @@ export default async function AdminStaffRegistrationPage() {
     <SidebarProvider>
       <AdminSidebar />
       <SidebarInset>
-        <header className="sticky top-0 z-20 border-b border-slate-200 bg-white/95 backdrop-blur">
-          <div className="px-6 py-4">
-            <PageHeader
-              title="Administration Dashboard"
-              subtitle="User Registration"
-            />
-          </div>
-        </header>
+        <AdminHeader />
 
         <div className="flex flex-1 flex-col gap-6 bg-[#f4f5f7] p-4 sm:p-6 lg:p-8">
           <AdminBreadcrumb />
