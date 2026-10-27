@@ -6,6 +6,7 @@ import {
   GraduationCap,
   Plus,
   ShieldCheck,
+  UserPlus,
   X,
   Users,
 } from "lucide-react";
@@ -14,6 +15,7 @@ import {
   Dialog,
   DialogClose,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -160,9 +162,20 @@ export default function UserRegistrationDashboard() {
                 Create a user
               </button>
             </DialogTrigger>
-            <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto">
+            <DialogContent className="max-h-[88vh] max-w-xl gap-3 overflow-y-auto p-5 sm:p-6">
               <DialogHeader className="relative pr-10">
-                <DialogTitle>Create a user</DialogTitle>
+                <div className="flex items-start gap-3">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#0f172a] text-white">
+                    <UserPlus className="h-4 w-4" />
+                  </div>
+                  <div>
+                    <DialogTitle>Create a user</DialogTitle>
+                    <DialogDescription className="mt-1 text-xs leading-5 text-slate-500">
+                      Send an invitation to onboard a new member of your
+                      organization.
+                    </DialogDescription>
+                  </div>
+                </div>
                 <DialogClose asChild>
                   <button
                     type="button"

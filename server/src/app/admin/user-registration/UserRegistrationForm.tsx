@@ -50,12 +50,12 @@ const EMPTY: Values = {
 
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const inputClass = (invalid: boolean) =>
-  `mt-1.5 block h-11 w-full rounded-md bg-white px-3 text-base text-slate-900 ${
-    invalid ? "border-2 border-red-700" : "border border-slate-400"
+  `mt-1.5 block h-10 w-full rounded-lg bg-slate-50/70 px-3 text-sm text-slate-900 outline-none transition-colors placeholder:text-slate-400 focus:border-[#183b68] focus:bg-white focus:ring-2 focus:ring-[#183b68]/10 ${
+    invalid ? "border-2 border-red-700" : "border border-slate-200"
   }`;
 const selectTriggerClass = (invalid: boolean) =>
-  `mt-1.5 h-11 !w-full rounded-md bg-white px-3 text-base text-slate-900 ${
-    invalid ? "border-2 border-red-700" : "border border-slate-400"
+  `mt-1.5 h-10 !w-full rounded-lg bg-slate-50/70 px-3 text-sm text-slate-900 outline-none transition-colors focus:border-[#183b68] focus:bg-white focus:ring-2 focus:ring-[#183b68]/10 ${
+    invalid ? "border-2 border-red-700" : "border border-slate-200"
   }`;
 
 function validate(values: Values): Errors {
@@ -95,7 +95,11 @@ export default function UserRegistrationForm() {
 
   function updateField<K extends keyof Values>(field: K, value: Values[K]) {
     setForm((current) => ({ ...current, [field]: value }));
-    setErrors((current) => ({ ...current, [field]: undefined, form: undefined }));
+    setErrors((current) => ({
+      ...current,
+      [field]: undefined,
+      form: undefined,
+    }));
   }
 
   const centreSearch = form.center.trim().toLowerCase();
@@ -130,8 +134,11 @@ export default function UserRegistrationForm() {
 
   if (submittedEmail) {
     return (
-      <div className="w-full max-w-2xl rounded-xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
-        <p role="status" className="text-base leading-6 text-cyan-800">
+      <div className="w-full rounded-xl border border-emerald-200 bg-emerald-50/70 p-5">
+        <p
+          role="status"
+          className="text-sm font-medium leading-6 text-emerald-800"
+        >
           Invite sent to {submittedEmail}. It expires in 48 hours.
         </p>
         <button
@@ -140,7 +147,7 @@ export default function UserRegistrationForm() {
             setSubmittedEmail(null);
             setErrors({});
           }}
-          className="mt-5 inline-flex h-11 items-center justify-center rounded-md border border-slate-400 bg-white px-5 text-base font-medium text-slate-900 transition-colors hover:bg-slate-50"
+          className="mt-4 inline-flex h-10 items-center justify-center rounded-lg border border-emerald-300 bg-white px-4 text-sm font-medium text-emerald-900 transition-colors hover:bg-emerald-100"
         >
           Add another staff member
         </button>
@@ -152,16 +159,28 @@ export default function UserRegistrationForm() {
     <form
       onSubmit={handleSubmit}
       noValidate
-      className="flex min-w-0 w-full flex-col gap-5"
+      className="flex min-w-0 w-full flex-col gap-4"
     >
+      <p className="-mt-1 text-xs leading-5 text-slate-500">
+        Add the account details below. The user will receive an invitation to
+        complete their access setup.
+      </p>
+
       {errors.form && (
-        <p role="alert" className="text-sm text-red-700">
+        <p
+          role="alert"
+          className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700"
+        >
           {errors.form}
         </p>
       )}
 
-      <div className="grid gap-5 sm:grid-cols-2">
-        <label className="text-[15px] font-medium text-slate-900">
+      <div className="border-b border-slate-100 pb-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-400">
+        Account details
+      </div>
+
+      <div className="grid gap-3 sm:grid-cols-2">
+        <label className="text-sm font-semibold text-slate-700">
           First name
           <input
             className={inputClass(!!errors.firstName)}
@@ -176,7 +195,7 @@ export default function UserRegistrationForm() {
           )}
         </label>
 
-        <label className="text-[15px] font-medium text-slate-900">
+        <label className="text-sm font-semibold text-slate-700">
           Last name
           <input
             className={inputClass(!!errors.lastName)}
@@ -192,7 +211,7 @@ export default function UserRegistrationForm() {
         </label>
       </div>
 
-      <label className="text-[15px] font-medium text-slate-900">
+      <label className="text-sm font-semibold text-slate-700">
         User ID
         <input
           className={inputClass(!!errors.userId)}
@@ -207,7 +226,7 @@ export default function UserRegistrationForm() {
         )}
       </label>
 
-      <label className="text-[15px] font-medium text-slate-900">
+      <label className="text-sm font-semibold text-slate-700">
         Work email
         <input
           type="email"
@@ -223,7 +242,7 @@ export default function UserRegistrationForm() {
         )}
       </label>
 
-      <label className="text-[15px] font-medium text-slate-900">
+      <label className="text-sm font-semibold text-slate-700">
         Temporary password
         <input
           type="password"
@@ -239,8 +258,13 @@ export default function UserRegistrationForm() {
         )}
       </label>
 
-      <label className="text-[15px] font-medium text-slate-900">
-        Role
+      <div className="border-b border-slate-100 pb-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-400">
+        Access details
+      </div>
+
+      <div className="grid gap-3 sm:grid-cols-2">
+        <label className="text-sm font-semibold text-slate-700">
+          Role
         <Select
           value={form.role}
           onValueChange={(role) => {
@@ -276,11 +300,11 @@ export default function UserRegistrationForm() {
             </SelectGroup>
           </SelectContent>
         </Select>
-      </label>
+        </label>
 
-      <label className="text-[15px] font-medium text-slate-900">
-        Center
-        <div className="relative">
+        <label className="text-sm font-semibold text-slate-700">
+          Center
+          <div className="relative">
           <input
             className={`${inputClass(!!errors.center)} pr-10`}
             placeholder="Type or select a centre"
@@ -369,16 +393,21 @@ export default function UserRegistrationForm() {
                 )}
             </div>
           )}
-        </div>
-        {errors.center && (
-          <span className="mt-1.5 block text-sm font-normal text-red-700">
-            {errors.center}
-          </span>
-        )}
-      </label>
+          </div>
+          {errors.center && (
+            <span className="mt-1.5 block text-sm font-normal text-red-700">
+              {errors.center}
+            </span>
+          )}
+        </label>
+      </div>
 
-      <div className="grid gap-5 sm:grid-cols-2">
-        <label className="text-[15px] font-medium text-slate-900">
+      <div className="border-b border-slate-100 pb-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-400">
+        Student details
+      </div>
+
+      <div className="grid gap-3 sm:grid-cols-2">
+        <label className="text-sm font-semibold text-slate-700">
           Registration number (optional)
           <input
             className={inputClass(!!errors.regNumber)}
@@ -393,7 +422,7 @@ export default function UserRegistrationForm() {
           )}
         </label>
 
-        <label className="text-[15px] font-medium text-slate-900">
+        <label className="text-sm font-semibold text-slate-700">
           Student number (optional)
           <input
             className={inputClass(!!errors.stNumber)}
@@ -409,7 +438,7 @@ export default function UserRegistrationForm() {
         </label>
       </div>
 
-      <label className="text-[15px] font-medium text-slate-900">
+      <label className="text-sm font-semibold text-slate-700">
         Intake (optional)
         <input
           className={inputClass(!!errors.intake)}
@@ -427,9 +456,9 @@ export default function UserRegistrationForm() {
 
       <button
         type="submit"
-        className="inline-flex h-10 items-center justify-center rounded-md bg-[#183b68] px-3.5 font-sans text-sm font-medium text-white transition-colors hover:bg-[#102d52] disabled:opacity-60"
+        className="mt-0.5 inline-flex h-10 items-center justify-center rounded-lg bg-[#183b68] px-5 font-sans text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[#102d52] focus:outline-none focus:ring-2 focus:ring-[#183b68]/30 disabled:opacity-60"
       >
-        Submit form
+        Create user
       </button>
     </form>
   );
