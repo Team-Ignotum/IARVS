@@ -3,7 +3,7 @@ import { AdminSidebar } from "@/components/Asidebar";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { AdminBreadcrumb } from "@/components/admin/AdministrativeBreadcrumb";
 import { PageHeader } from "@/components/admin/pageHeader";
-import UserRegistrationForm from "./UserRegistrationForm";
+import UserRegistrationDashboard from "./UserRegistrationDashboard";
 
 export default async function AdminStaffRegistrationPage() {
   const session = await getSession();
@@ -22,21 +22,7 @@ export default async function AdminStaffRegistrationPage() {
       </div>
     );
   } else {
-    content = (
-      <div className="w-full rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
-        <div className="border-b border-slate-300 pb-6">
-          <h1 className="text-3xl font-semibold tracking-[-0.02em] text-slate-950 sm:text-4xl">
-            User Registration
-          </h1>
-          <p className="mt-2 max-w-xl text-sm text-slate-500">
-            Create accounts for students, staff, and administrators.
-          </p>
-        </div>
-        <div className="mt-6">
-          <UserRegistrationForm />
-        </div>
-      </div>
-    );
+    content = <UserRegistrationDashboard />;
   }
 
   return (

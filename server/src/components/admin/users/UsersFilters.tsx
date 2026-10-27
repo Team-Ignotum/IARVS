@@ -46,8 +46,10 @@ export default function UsersFilters({
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Roles</SelectItem>
+            <SelectItem value="Student">Student</SelectItem>
             <SelectItem value="Staff">Staff</SelectItem>
             <SelectItem value="SuperStaff">SuperStaff</SelectItem>
+            <SelectItem value="SuperAdmin">SuperAdmin</SelectItem>
           </SelectContent>
         </Select>
       </FilterBar.Field>
