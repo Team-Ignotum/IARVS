@@ -5,9 +5,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import FilterBar  from "@/components/admin/FilterBar";
+import FilterBar from "@/components/admin/FilterBar";
 
-import { UserRole, UserStatus ,OUSL_CENTERS, UserCenterFilter } from "./types";
+import { UserRole, UserStatus, OUSL_CENTERS, UserCenterFilter } from "./types";
 
 interface UsersFiltersProps {
   roleFilter: "all" | UserRole;
@@ -30,7 +30,6 @@ export default function UsersFilters({
   onCenterChange,
   onSearchChange,
 }: UsersFiltersProps) {
-
   return (
     <FilterBar>
       {/* Filter based on Role */}

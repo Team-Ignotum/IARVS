@@ -6,11 +6,13 @@ import {
   GraduationCap,
   Plus,
   ShieldCheck,
+  X,
   Users,
 } from "lucide-react";
 import { useAdminDashboard } from "@/_hooks/admin/useAdminDashboard";
 import {
   Dialog,
+  DialogClose,
   DialogContent,
   DialogHeader,
   DialogTitle,
@@ -159,8 +161,17 @@ export default function UserRegistrationDashboard() {
               </button>
             </DialogTrigger>
             <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto">
-              <DialogHeader>
+              <DialogHeader className="relative pr-10">
                 <DialogTitle>Create a user</DialogTitle>
+                <DialogClose asChild>
+                  <button
+                    type="button"
+                    aria-label="Close create user dialog"
+                    className="absolute right-0 top-0 rounded-md p-1.5 text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-900"
+                  >
+                    <X className="h-5 w-5" />
+                  </button>
+                </DialogClose>
               </DialogHeader>
               <UserRegistrationForm />
             </DialogContent>
