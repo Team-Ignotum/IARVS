@@ -70,21 +70,55 @@ const sampleUsers: UserRecord[] = [
   },
 ];
 
+type UserActionKind = "view" | "status" | "delete";
+type UserAction = { kind: UserActionKind; user: UserRecord } | null;
+
 export default function UserRegistrationDashboard() {
   const { stats } = useAdminDashboard();
+  const [users, setUsers] = useState<UserRecord[]>(sampleUsers);
   const [registrationOpen, setRegistrationOpen] = useState(false);
+  const [userAction, setUserAction] = useState<UserAction>(null);
   const [roleFilter, setRoleFilter] = useState<"all" | UserRole>("all");
   const [statusFilter, setStatusFilter] = useState<"all" | UserStatus>("all");
   const [centerFilter, setCenterFilter] = useState<UserCenterFilter>("all");
   const [search, setSearch] = useState("");
 
   const filteredUsers = filterUsers({
-    users: sampleUsers,
+    users,
     roleFilter,
     statusFilter,
     centerFilter,
     search,
   });
+
+  function openUserAction(kind: UserActionKind, user: UserRecord) {
+    setUserAction({ kind, user });
+  }
+
+  function confirmStatusChange() {
+    if (!userAction || userAction.kind !== "status") return;
+
+    setUsers((currentUsers) =>
+      currentUsers.map((user) =>
+        user.id === userAction.user.id
+          ? {
+              ...user,
+              status: user.status === "Active" ? "Inactive" : "Active",
+            }
+          : user,
+      ),
+    );
+    setUserAction(null);
+  }
+
+  function confirmDelete() {
+    if (!userAction || userAction.kind !== "delete") return;
+
+    setUsers((currentUsers) =>
+      currentUsers.filter((user) => user.id !== userAction.user.id),
+    );
+    setUserAction(null);
+  }
 
   const summaryCards = [
     {
@@ -189,6 +223,122 @@ export default function UserRegistrationDashboard() {
               <UserRegistrationForm />
             </DialogContent>
           </Dialog>
+
+          <Dialog
+            open={userAction !== null}
+            onOpenChange={(open) => {
+              if (!open) setUserAction(null);
+            }}
+          >
+            <DialogContent className="max-w-md">
+              {userAction?.kind === "view" && (
+                <>
+                  <DialogHeader>
+                    <DialogTitle>{userAction.user.name}</DialogTitle>
+                    <DialogDescription>
+                      User account details and access information.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="grid gap-3 rounded-lg border border-slate-200 bg-slate-50 p-4 text-sm">
+                    <div className="flex justify-between gap-4">
+                      <span className="text-slate-500">User ID</span>
+                      <span className="font-medium text-slate-900">
+                        {userAction.user.id}
+                      </span>
+                    </div>
+                    <div className="flex justify-between gap-4">
+                      <span className="text-slate-500">Email</span>
+                      <span className="font-medium text-slate-900">
+                        {userAction.user.email}
+                      </span>
+                    </div>
+                    <div className="flex justify-between gap-4">
+                      <span className="text-slate-500">Role</span>
+                      <span className="font-medium text-slate-900">
+                        {userAction.user.role}
+                      </span>
+                    </div>
+                    <div className="flex justify-between gap-4">
+                      <span className="text-slate-500">Center</span>
+                      <span className="font-medium text-slate-900">
+                        {userAction.user.center ?? "No center assigned"}
+                      </span>
+                    </div>
+                    <div className="flex justify-between gap-4">
+                      <span className="text-slate-500">Status</span>
+                      <span className="font-medium text-slate-900">
+                        {userAction.user.status}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="flex justify-end">
+                    <DialogClose asChild>
+                      <button className="inline-flex h-9 items-center rounded-md border border-slate-300 px-4 text-sm font-medium text-slate-700 hover:bg-slate-50">
+                        Close
+                      </button>
+                    </DialogClose>
+                  </div>
+                </>
+              )}
+
+              {userAction?.kind === "status" && (
+                <>
+                  <DialogHeader>
+                    <DialogTitle>Change user status?</DialogTitle>
+                    <DialogDescription>
+                      {userAction.user.name} is currently{" "}
+                      {userAction.user.status.toLowerCase()}. This will change
+                      the account to{" "}
+                      {userAction.user.status === "Active"
+                        ? "inactive"
+                        : "active"}
+                      .
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="flex justify-end gap-2">
+                    <DialogClose asChild>
+                      <button className="inline-flex h-9 items-center rounded-md border border-slate-300 px-4 text-sm font-medium text-slate-700 hover:bg-slate-50">
+                        Cancel
+                      </button>
+                    </DialogClose>
+                    <button
+                      type="button"
+                      onClick={confirmStatusChange}
+                      className="inline-flex h-9 items-center rounded-md bg-[#183b68] px-4 text-sm font-medium text-white hover:bg-[#102d52]"
+                    >
+                      Change status
+                    </button>
+                  </div>
+                </>
+              )}
+
+              {userAction?.kind === "delete" && (
+                <>
+                  <DialogHeader>
+                    <DialogTitle>Delete this user?</DialogTitle>
+                    <DialogDescription>
+                      This will remove {userAction.user.name} from the user
+                      list. This action cannot be undone.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="flex justify-end gap-2">
+                    <DialogClose asChild>
+                      <button className="inline-flex h-9 items-center rounded-md border border-slate-300 px-4 text-sm font-medium text-slate-700 hover:bg-slate-50">
+                        Cancel
+                      </button>
+                    </DialogClose>
+                    <button
+                      type="button"
+                      onClick={confirmDelete}
+                      className="inline-flex h-9 items-center rounded-md bg-red-600 px-4 text-sm font-medium text-white hover:bg-red-700"
+                    >
+                      Delete user
+                    </button>
+                  </div>
+                </>
+              )}
+            </DialogContent>
+          </Dialog>
         </div>
 
         <UsersFilters
@@ -211,9 +361,12 @@ export default function UserRegistrationDashboard() {
             totalUsers={filteredUsers.length}
             itemsPerPage={filteredUsers.length}
             onPageChange={() => {}}
-            onViewUser={() => {}}
-            onChangeStatus={() => {}}
-            onDeleteUser={() => {}}
+            onViewUser={(user) => openUserAction("view", user)}
+            onChangeStatus={(user) => openUserAction("status", user)}
+            onDeleteUser={(id) => {
+              const user = users.find((candidate) => candidate.id === id);
+              if (user) openUserAction("delete", user);
+            }}
           />
         </div>
       </div>
