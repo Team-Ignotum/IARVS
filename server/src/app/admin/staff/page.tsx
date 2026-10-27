@@ -23,7 +23,7 @@ import {
 import UsersFilters from "@/components/admin/users/UsersFilters";
 import { filterUsers } from "@/components/admin/users/filters";
 import { AdminBreadcrumb } from "@/components/admin/AdminBreadcrumb";
-import StaffRegistrationForm from "@/app/admin/user-registration/StaffRegistrationForm";
+import UserRegistrationForm from "@/app/admin/user-registration/UserRegistrationForm";
 import {
   Dialog,
   DialogContent,
@@ -142,7 +142,7 @@ export default function StaffPage() {
                     <DialogHeader>
                       <DialogTitle>Register staff</DialogTitle>
                     </DialogHeader>
-                    <StaffRegistrationForm />
+                    <UserRegistrationForm />
                   </DialogContent>
                 </Dialog>
               </div>

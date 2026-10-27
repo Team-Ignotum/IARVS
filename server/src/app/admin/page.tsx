@@ -3,13 +3,7 @@
 
 import { AdminSidebar } from "@/components/Asidebar";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+import Link from "next/link";
 import {
   Briefcase,
   Building,
@@ -170,27 +164,19 @@ export default function AdminPage() {
 
               {/* Dashboard Buttons */}
               <div className="flex flex-wrap items-center gap-2 sm:ml-auto sm:justify-end">
-                <Dialog>
-                  <DialogTrigger asChild>
-                    <button className="inline-flex h-10 items-center justify-center gap-2 rounded-md border border-slate-300 bg-white px-3.5 text-sm font-medium text-slate-700 transition-colors hover:border-slate-400 hover:bg-slate-50">
-                      <UserPlusIcon className="h-4 w-4" />
-                      Register
-                    </button>
-                  </DialogTrigger>
-                  <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto">
-                    <DialogHeader>
-                      <DialogTitle>Register staff</DialogTitle>
-                    </DialogHeader>
-                    <StaffRegistrationForm />
-                  </DialogContent>
-                </Dialog>
+                <Link
+                  href="/admin/user-registration"
+                  className="inline-flex h-10 items-center justify-center gap-2 rounded-md border border-slate-300 bg-white px-3.5 text-sm font-medium text-slate-700 transition-colors hover:border-slate-400 hover:bg-slate-50"
+                >
+                  <UserPlusIcon className="h-4 w-4" />
+                  Register
+                </Link>
 
-                <button className="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-[#183b68] px-3.5 text-sm font-medium text-white transition-colors hover:bg-[#102d52]">
-                  <Download className="h-4 w-4" />
                 <button
                   type="button"
                   className="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-[#183b68] px-3.5 text-sm font-medium text-white transition-colors hover:bg-[#102d52] focus-visible:outline-2 focus-visible:outline-blue-600 dark:bg-blue-700 dark:hover:bg-blue-600"
                 >
+                  <Download className="h-4 w-4" />
                   <Plus className="h-4 w-4" />
                   Export Report
                 </button>

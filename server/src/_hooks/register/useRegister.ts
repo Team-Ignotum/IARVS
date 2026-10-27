@@ -12,9 +12,9 @@ export interface RegisterInput {
   lastName: string;
   role: UserRole;
   center: string;
-  regNumber: string;
-  stNumber: string;
-  intake: string;
+  regNumber?: string;
+  stNumber?: string;
+  intake?: string;
 }
 
 // This is the successful response returned after the account is created.
