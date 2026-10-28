@@ -10,7 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { REGIONAL_CENTRES, STUDY_CENTRES } from "@/lib/centres";
+import { useCenters } from "@/_hooks/register/useCenters";
 import { ChevronDown, X } from "lucide-react";
 
 type Role = "STUDENT" | "ADMIN" | "STAFF" | "SUPER_STAFF";
@@ -21,7 +21,7 @@ type Values = {
   firstName: string;
   lastName: string;
   role: Role;
-  center: string;
+  centerId: string;
   regNumber: string;
   stNumber: string;
   intake: string;
@@ -42,7 +42,7 @@ const EMPTY: Values = {
   firstName: "",
   lastName: "",
   role: "STAFF",
-  center: "",
+  centerId: "",
   regNumber: "",
   stNumber: "",
   intake: "",
@@ -70,7 +70,7 @@ function validate(values: Values): Errors {
   }
   if (!values.firstName.trim()) errors.firstName = "First name is required.";
   if (!values.lastName.trim()) errors.lastName = "Last name is required.";
-  if (!values.center.trim()) errors.center = "Center is required.";
+  if (!values.centerId.trim()) errors.centerId = "Select a centre from the list.";
   if (values.regNumber && !/^\d{9}$/.test(values.regNumber)) {
     errors.regNumber = "Registration number must be exactly 9 digits.";
   }
@@ -92,7 +92,10 @@ export default function UserRegistrationForm() {
   const [errors, setErrors] = useState<Errors>({});
   const [submittedEmail, setSubmittedEmail] = useState<string | null>(null);
   const [centreMenuOpen, setCentreMenuOpen] = useState(false);
+  // The visible text is the centre name; only the code is stored in the form.
+  const [centreQuery, setCentreQuery] = useState("");
   const centrePickerRef = useRef<HTMLDivElement>(null);
+  const { data: centres = [], isLoading, isError } = useCenters();
 
   useEffect(() => {
     function closeCentreMenu(event: PointerEvent) {
@@ -117,12 +120,8 @@ export default function UserRegistrationForm() {
     }));
   }
 
-  const centreSearch = form.center.trim().toLowerCase();
-  const filteredRegionalCentres = REGIONAL_CENTRES.filter((centre) =>
-    centre.toLowerCase().includes(centreSearch),
-  );
-  const filteredStudyCentres = STUDY_CENTRES.filter((centre) =>
-    centre.toLowerCase().includes(centreSearch),
+  const filteredCentres = centres.filter((centre) =>
+    centre.centerName.toLowerCase().includes(centreQuery.trim().toLowerCase()),
   );
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -134,7 +133,7 @@ export default function UserRegistrationForm() {
       email: form.email.trim().toLowerCase(),
       firstName: form.firstName.trim(),
       lastName: form.lastName.trim(),
-      center: form.center.trim(),
+      centerId: form.centerId.trim(),
       regNumber: form.regNumber.trim(),
       stNumber: form.stNumber.trim().toUpperCase(),
       intake: form.intake.trim(),
@@ -144,6 +143,7 @@ export default function UserRegistrationForm() {
     if (Object.keys(found).length) return;
 
     setForm(EMPTY);
+    setCentreQuery("");
     setSubmittedEmail(normalized.email);
   }
 
@@ -321,29 +321,32 @@ export default function UserRegistrationForm() {
           Center
           <div ref={centrePickerRef} className="relative">
             <input
-              className={`${inputClass(!!errors.center)} pr-16`}
+              className={`${inputClass(!!errors.centerId)} pr-16`}
               placeholder="Type or select a centre"
-              value={form.center}
+              value={centreQuery}
               onFocus={() => setCentreMenuOpen(true)}
               onChange={(event) => {
-                updateField("center", event.target.value);
+                setCentreQuery(event.target.value);
+                // Typing invalidates the previous selection so a stale code is never submitted.
+                updateField("centerId", "");
                 setCentreMenuOpen(true);
               }}
               onKeyDown={(event) => {
                 if (event.key === "Escape") setCentreMenuOpen(false);
               }}
-              aria-invalid={!!errors.center}
+              aria-invalid={!!errors.centerId}
               role="combobox"
               aria-autocomplete="list"
               aria-expanded={centreMenuOpen}
               aria-controls="centre-options"
             />
-            {form.center && (
+            {centreQuery && (
               <button
                 type="button"
                 aria-label="Clear center"
                 onClick={() => {
-                  updateField("center", "");
+                  updateField("centerId", "");
+                  setCentreQuery("");
                   setCentreMenuOpen(true);
                 }}
                 className="absolute right-8 top-1/2 -translate-y-1/2 rounded p-1 text-slate-400 transition-colors hover:bg-slate-200 hover:text-slate-700"
@@ -369,62 +372,48 @@ export default function UserRegistrationForm() {
                 role="listbox"
                 className="absolute z-20 mt-1 max-h-64 w-full overflow-y-auto rounded-md border border-slate-300 bg-white p-1 shadow-lg"
               >
-                {filteredRegionalCentres.length > 0 && (
-                  <div>
-                    <p className="px-2 py-1.5 text-xs font-semibold uppercase tracking-wide text-slate-500">
-                      Regional Centres
-                    </p>
-                    {filteredRegionalCentres.map((centre) => (
-                      <button
-                        key={centre}
-                        type="button"
-                        role="option"
-                        aria-selected={form.center === centre}
-                        onClick={() => {
-                          updateField("center", centre);
-                          setCentreMenuOpen(false);
-                        }}
-                        className="block w-full rounded px-2 py-2 text-left text-base text-slate-900 hover:bg-slate-100"
-                      >
-                        {centre}
-                      </button>
-                    ))}
-                  </div>
+                {isLoading && (
+                  <p className="px-2 py-2 text-sm text-slate-500">
+                    Loading centres…
+                  </p>
                 )}
-                {filteredStudyCentres.length > 0 && (
-                  <div>
-                    <p className="px-2 py-1.5 text-xs font-semibold uppercase tracking-wide text-slate-500">
-                      Study Centres
-                    </p>
-                    {filteredStudyCentres.map((centre) => (
-                      <button
-                        key={centre}
-                        type="button"
-                        role="option"
-                        aria-selected={form.center === centre}
-                        onClick={() => {
-                          updateField("center", centre);
-                          setCentreMenuOpen(false);
-                        }}
-                        className="block w-full rounded px-2 py-2 text-left text-base text-slate-900 hover:bg-slate-100"
-                      >
-                        {centre}
-                      </button>
-                    ))}
-                  </div>
+                {isError && (
+                  <p role="alert" className="px-2 py-2 text-sm text-red-700">
+                    Unable to load centres. Try again later.
+                  </p>
                 )}
-                {filteredRegionalCentres.length === 0 &&
-                  filteredStudyCentres.length === 0 && (
-                    <p className="px-2 py-2 text-sm text-slate-500">
-                      No matching centres
-                    </p>
-                  )}
+                {!isLoading &&
+                  !isError &&
+                  filteredCentres.map((centre) => (
+                    <button
+                      key={centre.centerId}
+                      type="button"
+                      role="option"
+                      aria-selected={form.centerId === centre.centerId}
+                      onClick={() => {
+                        updateField("centerId", centre.centerId);
+                        setCentreQuery(centre.centerName);
+                        setCentreMenuOpen(false);
+                      }}
+                      className="flex w-full items-center justify-between gap-2 rounded px-2 py-2 text-left text-base text-slate-900 hover:bg-slate-100"
+                    >
+                      {centre.centerName}
+                      <span className="text-xs text-slate-400">
+                        {centre.centerId}
+                      </span>
+                    </button>
+                  ))}
+                {!isLoading && !isError && filteredCentres.length === 0 && (
+                  <p className="px-2 py-2 text-sm text-slate-500">
+                    No matching centres
+                  </p>
+                )}
               </div>
             )}
           </div>
-          {errors.center && (
+          {errors.centerId && (
             <span className="mt-1.5 block text-sm font-normal text-red-700">
-              {errors.center}
+              {errors.centerId}
             </span>
           )}
         </label>
