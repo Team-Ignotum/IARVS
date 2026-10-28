@@ -1,3 +1,5 @@
+﻿"use client";
+
 import {
   Select,
   SelectContent,
@@ -6,8 +8,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import FilterBar from "@/components/admin/FilterBar";
+import { useCenters } from "@/_hooks/register/useCenters";
 
-import { UserRole, UserStatus, OUSL_CENTERS, UserCenterFilter } from "./types";
+import { UserRole, UserStatus, UserCenterFilter } from "./types";
 
 interface UsersFiltersProps {
   roleFilter: "all" | UserRole;
@@ -30,6 +33,8 @@ export default function UsersFilters({
   onCenterChange,
   onSearchChange,
 }: UsersFiltersProps) {
+  const { data: centers = [], isLoading: centersLoading } = useCenters();
+
   return (
     <FilterBar>
       {/* Filter based on Role */}
@@ -47,8 +52,8 @@ export default function UsersFilters({
             <SelectItem value="all">All Roles</SelectItem>
             <SelectItem value="Student">Student</SelectItem>
             <SelectItem value="Staff">Staff</SelectItem>
-            <SelectItem value="SuperStaff">SuperStaff</SelectItem>
-            <SelectItem value="SuperAdmin">SuperAdmin</SelectItem>
+            <SelectItem value="Admin">Admin</SelectItem>
+            <SelectItem value="SuperStaff">Super Staff</SelectItem>
           </SelectContent>
         </Select>
       </FilterBar.Field>
@@ -87,11 +92,17 @@ export default function UsersFilters({
           <SelectContent>
             <SelectItem value="all">All Centers</SelectItem>
 
-            {OUSL_CENTERS.map((center) => (
-              <SelectItem key={center.code} value={center.code}>
-                {center.name}
+            {centersLoading ? (
+              <SelectItem value="__loading" disabled>
+                Loading…
               </SelectItem>
-            ))}
+            ) : (
+              centers.map((center) => (
+                <SelectItem key={center.centerId} value={center.centerId}>
+                  {center.centerName}
+                </SelectItem>
+              ))
+            )}
 
             <SelectItem value="none">No Center</SelectItem>
           </SelectContent>

@@ -1,6 +1,6 @@
-"use client";
+﻿"use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { AdminSidebar } from "@/components/Asidebar";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { AdminHeader } from "@/components/admin/AdminHeader";
@@ -20,117 +20,43 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-import { useStudentDashboard } from "@/_hooks/admin/useAdminDashboard";
+import { useAdminStats } from "@/_hooks/admin/useAdminDashboard";
+import { useUsers } from "@/_hooks/admin/useUsers";
+import { useDebouncedValue } from "@/_hooks/core/useDebouncedValue";
 
-import { StudentRecord, StudentStatus } from "@/components/admin/users/types";
+import { UserStatus } from "@/components/admin/users/types";
+import {
+  mapAdminUserToStudent,
+  toDbStatus,
+} from "@/components/admin/users/utils";
 
 import StudentFilters from "@/components/admin/students/StudentFilters";
 
-// SAMPLE STUDENT DATA
-
-const sampleStudents: StudentRecord[] = [
-  {
-    id: "1",
-    name: "Chen, Wei",
-    email: "s92068709@ousl.lk",
-    studentId: "STU-882910",
-    registeredCenter: "Colombo Regional Center",
-    registrationNo: "REG-882910",
-    status: "Approved",
-    avatar: "",
-  },
-  {
-    id: "2",
-    name: "Rodriguez, Elena",
-    email: "s92068710@ousl.lk",
-    studentId: "STU-994032",
-    registeredCenter: "Jaffna Regional Center",
-    registrationNo: "REG-994032",
-    status: "Pending",
-    avatar: "",
-  },
-  {
-    id: "3",
-    name: "Smith, Marcus",
-    email: "s92068711@ousl.lk",
-    studentId: "STU-120934",
-    registeredCenter: "Kandy Regional Center",
-    registrationNo: "REG-120934",
-    status: "Expired",
-    avatar: "",
-  },
-  {
-    id: "4",
-    name: "Thompson, David",
-    email: "s92068712@ousl.lk",
-    studentId: "STU-554210",
-    registeredCenter: "Colombo Regional Center",
-    registrationNo: "REG-554210",
-    status: "Approved",
-    avatar: "",
-  },
-];
+const PAGE_SIZE = 5;
 
 // STUDENT PAGE
 
 export default function StudentPage() {
-  const { stats } = useStudentDashboard();
+  const { stats } = useAdminStats();
 
   // FILTER STATES
 
-  const [statusFilter, setStatusFilter] = useState<"all" | StudentStatus>(
-    "all",
-  );
-
-  const [batchFilter, setBatchFilter] = useState<"all" | string>("all");
-
+  const [statusFilter, setStatusFilter] = useState<"all" | UserStatus>("all");
   const [search, setSearch] = useState("");
+  const [page, setPage] = useState(1);
+  const debouncedSearch = useDebouncedValue(search);
 
-  const batchOptions = ["2023", "2024", "2025"];
+  // STUDENT LIST (server-side filtering + pagination)
 
-  // FILTER STUDENTS
-
-  const filteredStudents = sampleStudents.filter((student) => {
-    const searchValue = search.toLowerCase().trim();
-
-    const matchesSearch =
-      searchValue === "" ||
-      student.name.toLowerCase().includes(searchValue) ||
-      student.email.toLowerCase().includes(searchValue) ||
-      student.studentId.toLowerCase().includes(searchValue) ||
-      student.registrationNo.toLowerCase().includes(searchValue) ||
-      student.registeredCenter.toLowerCase().includes(searchValue);
-
-    const matchesStatus =
-      statusFilter === "all" || student.status === statusFilter;
-
-    return matchesSearch && matchesStatus;
+  const { users, total, totalPages, isLoading, error } = useUsers({
+    role: "STUDENT",
+    status: toDbStatus(statusFilter),
+    search: debouncedSearch.trim() || undefined,
+    page,
+    pageSize: PAGE_SIZE,
   });
 
-  // PAGINATION
-
-  const [currentPage, setCurrentPage] = useState(1);
-
-  const studentsPerPage = 5;
-
-  const totalPages = Math.ceil(filteredStudents.length / studentsPerPage);
-
-  useEffect(() => {
-    if (filteredStudents.length === 0) {
-      setCurrentPage(1);
-      return;
-    }
-
-    if (currentPage > totalPages) {
-      setCurrentPage(totalPages);
-    }
-  }, [currentPage, filteredStudents.length, totalPages]);
-
-  const startIndex = (currentPage - 1) * studentsPerPage;
-
-  const endIndex = startIndex + studentsPerPage;
-
-  const currentStudents = filteredStudents.slice(startIndex, endIndex);
+  const students = users.map(mapAdminUserToStudent);
 
   // SUMMARY CARDS
 
@@ -142,14 +68,14 @@ export default function StudentPage() {
       iconClass: "bg-[#eef2ff] text-[#4f46e5]",
     },
     {
-      label: "Approved Students",
-      value: stats.approvedStudents,
+      label: "Active Students",
+      value: stats.activeStudents,
       icon: BadgeCheck,
       iconClass: "bg-[#ecfdf5] text-[#10b981]",
     },
     {
-      label: "Pending Students",
-      value: stats.pendingStudents,
+      label: "Inactive Students",
+      value: stats.inactiveStudents,
       icon: Hourglass,
       iconClass: "bg-[#fff7ed] text-[#f59e0b]",
     },
@@ -160,17 +86,9 @@ export default function StudentPage() {
       <AdminSidebar />
 
       <SidebarInset>
-        {
-          // PAGE HEADER
-        }
-
         <AdminHeader />
 
-        {/* PAGE CONTENT */}
-
         <div className="flex flex-1 flex-col gap-4 bg-gray-100 p-6">
-          {/* BREADCRUMB */}
-
           <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
             {/* TITLE + BUTTONS */}
 
@@ -233,20 +151,14 @@ export default function StudentPage() {
             <div className="mt-6">
               <StudentFilters
                 statusFilter={statusFilter}
-                batchFilter={batchFilter}
-                batchOptions={batchOptions}
                 search={search}
                 onStatusChange={(value) => {
-                  setStatusFilter(value as "all" | StudentStatus);
-                  setCurrentPage(1);
-                }}
-                onBatchChange={(value) => {
-                  setBatchFilter(value);
-                  setCurrentPage(1);
+                  setStatusFilter(value);
+                  setPage(1);
                 }}
                 onSearchChange={(value) => {
                   setSearch(value);
-                  setCurrentPage(1);
+                  setPage(1);
                 }}
               />
             </div>
@@ -280,15 +192,38 @@ export default function StudentPage() {
                   </TableHeader>
 
                   <TableBody>
-                    {currentStudents.length > 0 ? (
-                      currentStudents.map((student) => (
+                    {isLoading ? (
+                      <TableRow>
+                        <TableCell
+                          colSpan={6}
+                          className="px-5 py-10 text-center text-sm text-slate-500"
+                        >
+                          Loading students...
+                        </TableCell>
+                      </TableRow>
+                    ) : error ? (
+                      <TableRow>
+                        <TableCell
+                          colSpan={6}
+                          className="px-5 py-10 text-center text-sm text-red-600"
+                        >
+                          {error}
+                        </TableCell>
+                      </TableRow>
+                    ) : students.length === 0 ? (
+                      <TableRow>
+                        <TableCell
+                          colSpan={6}
+                          className="px-5 py-10 text-center text-sm text-slate-500"
+                        >
+                          No students found for the selected filters.
+                        </TableCell>
+                      </TableRow>
+                    ) : (
+                      students.map((student) => (
                         <TableRow
                           key={student.id}
-                          className={`border-b border-slate-200 transition-colors last:border-b-0 hover:bg-slate-50 ${
-                            student.status === "Expired"
-                              ? "bg-red-50/40"
-                              : "bg-white"
-                          }`}
+                          className="border-b border-slate-200 bg-white transition-colors last:border-b-0 hover:bg-slate-50"
                         >
                           <TableCell className="px-5 py-4">
                             <div className="flex items-center gap-3">
@@ -314,31 +249,23 @@ export default function StudentPage() {
                           </TableCell>
 
                           <TableCell className="px-5 py-4 text-sm font-medium text-slate-700">
-                            {student.studentId}
+                            {student.studentId ?? "—"}
                           </TableCell>
 
                           <TableCell className="px-5 py-4 text-sm text-slate-700">
-                            {student.registeredCenter}
+                            {student.centerName ?? "—"}
                           </TableCell>
 
-                          <TableCell
-                            className={`px-5 py-4 text-sm font-medium ${
-                              student.status === "Expired"
-                                ? "text-red-600"
-                                : "text-slate-700"
-                            }`}
-                          >
-                            {student.registrationNo}
+                          <TableCell className="px-5 py-4 text-sm font-medium text-slate-700">
+                            {student.registrationNo ?? "—"}
                           </TableCell>
 
                           <TableCell className="px-5 py-4">
                             <span
                               className={`inline-flex rounded-full border px-3 py-1 text-[11px] font-semibold uppercase ${
-                                student.status === "Approved"
+                                student.status === "Active"
                                   ? "border-emerald-200 bg-emerald-50 text-emerald-600"
-                                  : student.status === "Pending"
-                                    ? "border-amber-200 bg-amber-50 text-amber-500"
-                                    : "border-red-200 bg-red-50 text-red-600"
+                                  : "border-amber-200 bg-amber-50 text-amber-600"
                               }`}
                             >
                               {student.status}
@@ -353,45 +280,23 @@ export default function StudentPage() {
                                   label: "View Details",
                                   onSelect: () => console.log("view", student),
                                 },
-                                {
-                                  label: "Change Status",
-                                  onSelect: () =>
-                                    console.log("change", student),
-                                },
-                                {
-                                  label: "Delete User",
-                                  variant: "danger",
-                                  separator: true,
-                                  onSelect: () =>
-                                    console.log("delete", student.id),
-                                },
                               ]}
                             />
                           </TableCell>
                         </TableRow>
                       ))
-                    ) : (
-                      <TableRow>
-                        <TableCell
-                          colSpan={6}
-                          className="px-5 py-10 text-center text-sm text-slate-500"
-                        >
-                          No students found.
-                        </TableCell>
-                      </TableRow>
                     )}
                   </TableBody>
                 </Table>
               </div>
 
-              {/*  PAGINATION */}
               <AdminPagination
-                page={currentPage}
-                totalPages={totalPages || 1}
-                total={filteredStudents.length}
-                itemsPerPage={studentsPerPage}
+                page={page}
+                totalPages={totalPages}
+                total={total}
+                itemsPerPage={PAGE_SIZE}
                 itemLabel="students"
-                onPageChange={setCurrentPage}
+                onPageChange={setPage}
               />
             </div>
           </div>

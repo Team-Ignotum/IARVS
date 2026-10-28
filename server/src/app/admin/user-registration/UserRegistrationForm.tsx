@@ -11,6 +11,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useCenters } from "@/_hooks/register/useCenters";
+import { useRegister } from "@/_hooks/register/useRegister";
 import { ChevronDown, X } from "lucide-react";
 
 type Role = "STUDENT" | "ADMIN" | "STAFF" | "SUPER_STAFF";
@@ -96,6 +97,7 @@ export default function UserRegistrationForm() {
   const [centreQuery, setCentreQuery] = useState("");
   const centrePickerRef = useRef<HTMLDivElement>(null);
   const { data: centres = [], isLoading, isError } = useCenters();
+  const register = useRegister();
 
   useEffect(() => {
     function closeCentreMenu(event: PointerEvent) {
@@ -124,7 +126,7 @@ export default function UserRegistrationForm() {
     centre.centerName.toLowerCase().includes(centreQuery.trim().toLowerCase()),
   );
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
     const normalized = {
@@ -142,9 +144,32 @@ export default function UserRegistrationForm() {
     setErrors(found);
     if (Object.keys(found).length) return;
 
-    setForm(EMPTY);
-    setCentreQuery("");
-    setSubmittedEmail(normalized.email);
+    try {
+      await register.mutateAsync({
+        userId: normalized.userId,
+        email: normalized.email,
+        password: normalized.password,
+        firstName: normalized.firstName,
+        lastName: normalized.lastName,
+        role: normalized.role,
+        centerId: normalized.centerId,
+        // Optional fields are omitted rather than sent empty, otherwise the API rejects them.
+        ...(normalized.regNumber ? { regNumber: normalized.regNumber } : {}),
+        ...(normalized.stNumber ? { stNumber: normalized.stNumber } : {}),
+        ...(normalized.intake ? { intake: normalized.intake } : {}),
+      });
+
+      setForm(EMPTY);
+      setCentreQuery("");
+      setSubmittedEmail(normalized.email);
+    } catch (error) {
+      setErrors({
+        form:
+          error instanceof Error && error.message
+            ? error.message
+            : "Unable to create the account.",
+      });
+    }
   }
 
   if (submittedEmail) {
@@ -154,7 +179,8 @@ export default function UserRegistrationForm() {
           role="status"
           className="text-sm font-medium leading-6 text-emerald-800"
         >
-          Invite sent to {submittedEmail}. It expires in 48 hours.
+          Account created for {submittedEmail}. The user can now sign in with the
+          password you set.
         </p>
         <button
           type="button"
@@ -473,9 +499,11 @@ export default function UserRegistrationForm() {
 
       <button
         type="submit"
+        disabled={register.isPending}
+        aria-busy={register.isPending}
         className="mt-0.5 inline-flex h-10 items-center justify-center rounded-lg bg-[#183b68] px-5 font-sans text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[#102d52] focus:outline-none focus:ring-2 focus:ring-[#183b68]/30 disabled:opacity-60"
       >
-        Create user
+        {register.isPending ? "Creating…" : "Create user"}
       </button>
     </form>
   );

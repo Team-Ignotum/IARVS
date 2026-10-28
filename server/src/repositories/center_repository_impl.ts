@@ -16,4 +16,8 @@ export class CenterRepository {
       where: { centerId },
     });
   }
+
+  count(): Promise<number> {
+    return prisma.center.count();
+  }
 }

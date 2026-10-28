@@ -1,4 +1,5 @@
-import type {User} from "../generated/client"
+import type { User } from "../generated/client";
+import type { Prisma } from "../generated/client";
 import prisma from "@/lib/prisma"
 
 
@@ -66,5 +67,42 @@ export class UserRepository{
     return prisma.user.delete({
         where: {userId}
     })
+  }
+
+  //Aggregated role/status counts for the dashboard cards
+  groupByRoleAndStatus() {
+    return prisma.user.groupBy({
+      by: ["role", "status"],
+      _count: { _all: true },
+    });
+  }
+
+  //Admin listing: never selects passwordHash or other credentials
+  findForAdmin(where: Prisma.UserWhereInput, skip: number, take: number) {
+    return prisma.user.findMany({
+      where,
+      select: {
+        userId: true,
+        firstName: true,
+        lastName: true,
+        email: true,
+        role: true,
+        status: true,
+        stNumber: true,
+        regNumber: true,
+        intake: true,
+        createdAt: true,
+        center: {
+          select: { centerId: true, centerName: true },
+        },
+      },
+      orderBy: [{ createdAt: "desc" }, { userId: "asc" }],
+      skip,
+      take,
+    });
+  }
+
+  countForAdmin(where: Prisma.UserWhereInput) {
+    return prisma.user.count({ where });
   }
 }

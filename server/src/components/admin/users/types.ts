@@ -1,49 +1,37 @@
-export type UserRole = "Student" | "Staff" | "SuperStaff" | "SuperAdmin";
+﻿export type UserRole = "Student" | "Staff" | "Admin" | "SuperStaff";
 export type UserStatus = "Active" | "Inactive";
-export type UserCenter =
-  | "WP10"
-  | "CP20"
-  | "SP30"
-  | "NP40"
-  | "NC50"
-  | "EP60"
-  | "NW70"
-  | "UP80"
-  | "SG90"
-  | "SP31"
-  | "SP33"
-  | "EP61"
-  | "UP81"
-  | "SP32"
-  | "WP11"
-  | "CP21"
-  | "WP12"
-  | "SG91"
-  | "NP42"
-  | "NP44"
-  | "UP82"
-  | "NP43"
-  | "NC51"
-  | "NW71"
-  | "NW73"
-  | "EP62"
-  | "NP41";
 
-export type UserCenterFilter = "all" | "none" | UserCenter;
+/**
+ * Centre filter value: "all" disables the filter, "none" matches users without
+ * a centre, anything else is a centre code (e.g. "WP10").
+ */
+export type UserCenterFilter = "all" | "none" | (string & {});
 
-export type ApiUserRole = "student" | "staff" | "superStaff" | "superAdmin";
+export type DbRole = "STUDENT" | "STAFF" | "ADMIN" | "SUPER_STAFF";
+export type DbStatus = "ACTIVE" | "INACTIVE";
 
-export type StudentStatus = "Approved" | "Pending" | "Expired";
-
-export interface ApiUserRecord {
-  id: string;
-  email: string;
+/** Shape returned by GET /api/admin/users */
+export interface AdminUser {
+  userId: string;
   firstName: string;
   lastName: string;
-  role: ApiUserRole;
-  isActive: boolean;
-  batchNo: string | null;
+  email: string;
+  role: DbRole;
+  status: DbStatus;
+  centerId: string | null;
+  centerName: string | null;
+  stNumber: string | null;
+  regNumber: string | null;
+  intake: string | null;
   createdAt: string;
+}
+
+export interface UserListResponse {
+  users: AdminUser[];
+  page: number;
+  pageSize: number;
+  total: number;
+  totalPages: number;
 }
 
 export interface UserRecord {
@@ -52,8 +40,20 @@ export interface UserRecord {
   email: string;
   role: UserRole;
   status: UserStatus;
-  center: UserCenter | null;
+  center: string | null;
+  centerName: string | null;
   createdAt: string;
+  avatar?: string;
+}
+
+export interface StudentRecord {
+  id: string;
+  name: string;
+  email: string;
+  studentId: string | null;
+  centerName: string | null;
+  registrationNo: string | null;
+  status: UserStatus;
   avatar?: string;
 }
 
@@ -62,35 +62,3 @@ export interface ColumnConfig {
   label: string;
   render?: (user: UserRecord) => React.ReactNode;
 }
-
-export const OUSL_CENTERS: { 
-  code: UserCenter; 
-  name: string }[] = [
-  { code: "WP10", name: "Colombo" },
-  { code: "CP20", name: "Kandy" },
-  { code: "SP30", name: "Matara" },
-  { code: "NP40", name: "Jaffna" },
-  { code: "NC50", name: "Anuradhapura" },
-  { code: "EP60", name: "Batticaloa" },
-  { code: "NW70", name: "Kurunegala" },
-  { code: "UP80", name: "Badulla" },
-  { code: "SG90", name: "Ratnapura" },
-  { code: "SP31", name: "Ambalangoda" },
-  { code: "SP33", name: "Ambalantota" },
-  { code: "EP61", name: "Ampara" },
-  { code: "UP81", name: "Bandarawela" },
-  { code: "SP32", name: "Galle" },
-  { code: "WP11", name: "Gampaha" },
-  { code: "CP21", name: "Hatton" },
-  { code: "WP12", name: "Kalutara" },
-  { code: "SG91", name: "Kegalle" },
-  { code: "NP42", name: "Kilinochchi" },
-  { code: "NP44", name: "Mannar" },
-  { code: "UP82", name: "Monaragala" },
-  { code: "NP43", name: "Mullaitivu" },
-  { code: "NC51", name: "Polonnaruwa" },
-  { code: "NW71", name: "Puttalam" },
-  { code: "NW73", name: "Nattandiya" },
-  { code: "EP62", name: "Trincomalee" },
-  { code: "NP41", name: "Vavuniya" },
-];
