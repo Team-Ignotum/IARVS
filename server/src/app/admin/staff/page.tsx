@@ -40,7 +40,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 
-const PAGE_SIZE = 10;
+const PAGE_SIZE = 5;
 
 export default function StaffPage() {
   const { stats } = useAdminStats();
