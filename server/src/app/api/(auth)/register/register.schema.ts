@@ -9,7 +9,7 @@ export const registrationSchema = z.object({
 
   role: z.enum(["STUDENT", "ADMIN", "STAFF", "SUPER_STAFF"]),
 
-  center: z.string().trim().min(1, "Center is required"),
+  centerId: z.string().trim().min(1, "Center is required"),
   regNumber: z
     .string()
     .regex(/^\d{9}$/, "Registration number must be exactly 9 digits")

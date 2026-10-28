@@ -76,3 +76,8 @@ export type CurriculumModule = Prisma.CurriculumModuleModel
  * 
  */
 export type AcademicRecord = Prisma.AcademicRecordModel
+/**
+ * Model Center
+ * 
+ */
+export type Center = Prisma.CenterModel

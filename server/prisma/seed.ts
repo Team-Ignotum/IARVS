@@ -1,4 +1,4 @@
-import { PrismaPg } from "@prisma/adapter-pg";
+﻿import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "../src/generated/client";
 import pg from "pg";
 import { config } from "dotenv";
@@ -17,6 +17,38 @@ const pool = new pg.Pool({
 
 const adapter = new PrismaPg(pool);
 const prisma = new PrismaClient({ adapter });
+
+// Regional centres are shared reference data: seeded once, referenced by all users.
+// Codes come from the university's centre register.
+const CENTERS = [
+  { centerId: "WP10", centerName: "Colombo" },
+  { centerId: "CP20", centerName: "Kandy" },
+  { centerId: "SP30", centerName: "Matara" },
+  { centerId: "NP40", centerName: "Jaffna" },
+  { centerId: "NC50", centerName: "Anuradhapura" },
+  { centerId: "EP60", centerName: "Batticaloa" },
+  { centerId: "NW70", centerName: "Kurunegala" },
+  { centerId: "UP80", centerName: "Badulla" },
+  { centerId: "SG90", centerName: "Ratnapura" },
+  { centerId: "SP31", centerName: "Ambalangoda" },
+  { centerId: "UP81", centerName: "Bandarawela" },
+  { centerId: "SP32", centerName: "Galle" },
+  { centerId: "WP11", centerName: "Gampaha" },
+  { centerId: "NC51", centerName: "Polonnaruwa" },
+  { centerId: "SG91", centerName: "Kegalle" },
+  { centerId: "EP61", centerName: "Ampara" },
+  { centerId: "SP33", centerName: "Ambalantota" },
+  { centerId: "CP21", centerName: "Hatton" },
+  { centerId: "WP12", centerName: "Kalutara" },
+  { centerId: "NW72", centerName: "Kuliyapitiya" },
+  { centerId: "UP82", centerName: "Monaragala" },
+  { centerId: "NW71", centerName: "Puttalam" },
+  { centerId: "EP62", centerName: "Trincomalee" },
+  { centerId: "NP41", centerName: "Vavuniya" },
+  { centerId: "NP42", centerName: "Kilinochchi" },
+  { centerId: "NP43", centerName: "Mullaitivu" },
+  { centerId: "NP44", centerName: "Mannar" },
+];
 
 async function main() {
   // Validate passwords BEFORE deleting any data
@@ -48,6 +80,12 @@ async function main() {
   await prisma.programme.deleteMany();
   await prisma.user.deleteMany();
 
+  // Reference data survives reseeding, so it is upserted rather than deleted.
+  await prisma.center.createMany({
+    data: CENTERS,
+    skipDuplicates: true,
+  });
+
   // Create Admin
   const admin = await prisma.user.create({
     data: {
@@ -57,7 +95,7 @@ async function main() {
       email: "admin@iarvs.lk",
       passwordHash: adminHash,
       role: "ADMIN",
-      center: "OUSL",
+      center: { connect: { centerId: "WP10" } },
       status: "ACTIVE",
       isActive: true,
     },
@@ -72,7 +110,7 @@ async function main() {
       email: "staff@iarvs.lk",
       passwordHash: staffHash,
       role: "STAFF",
-      center: "OUSL",
+      center: { connect: { centerId: "WP10" } },
       status: "ACTIVE",
       isActive: true,
     },
@@ -89,7 +127,7 @@ async function main() {
       email: "student@iarvs.lk",
       passwordHash: studentHash,
       role: "STUDENT",
-      center: "OUSL",
+      center: { connect: { centerId: "WP10" } },
       status: "ACTIVE",
       isActive: true,
     },

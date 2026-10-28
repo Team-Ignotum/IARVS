@@ -11,7 +11,7 @@ export interface RegisterInput {
   firstName: string;
   lastName: string;
   role: UserRole;
-  center: string;
+  centerId: string;
   regNumber?: string;
   stNumber?: string;
   intake?: string;

@@ -57,7 +57,8 @@ export const ModelName = {
   StudentEnrollment: 'StudentEnrollment',
   Module: 'Module',
   CurriculumModule: 'CurriculumModule',
-  AcademicRecord: 'AcademicRecord'
+  AcademicRecord: 'AcademicRecord',
+  Center: 'Center'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -88,7 +89,7 @@ export const UserScalarFieldEnum = {
   firstName: 'firstName',
   lastName: 'lastName',
   role: 'role',
-  center: 'center',
+  centerId: 'centerId',
   isActive: 'isActive',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
@@ -182,6 +183,18 @@ export const AcademicRecordScalarFieldEnum = {
 } as const
 
 export type AcademicRecordScalarFieldEnum = (typeof AcademicRecordScalarFieldEnum)[keyof typeof AcademicRecordScalarFieldEnum]
+
+
+export const CenterScalarFieldEnum = {
+  id: 'id',
+  centerId: 'centerId',
+  centerName: 'centerName',
+  isActive: 'isActive',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type CenterScalarFieldEnum = (typeof CenterScalarFieldEnum)[keyof typeof CenterScalarFieldEnum]
 
 
 export const SortOrder = {

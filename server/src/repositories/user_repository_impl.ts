@@ -37,12 +37,20 @@ export class UserRepository{
     firstName: string;
     lastName: string;
     role: "STUDENT" | "ADMIN" | "STAFF" | "SUPER_STAFF";
-    center: string;
+    centerId: string;
     regNumber?: string | null;
     stNumber?: string | null;
     intake?: string | null;
   }) {
-    return prisma.user.create({ data });
+    const { centerId, ...userData } = data;
+
+    return prisma.user.create({
+      data: {
+        ...userData,
+        // Links the user to an existing centre; the centre row is never created here.
+        center: { connect: { centerId } },
+      },
+    });
   }
 
   //update users by email
