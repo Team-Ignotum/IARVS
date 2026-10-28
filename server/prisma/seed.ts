@@ -50,6 +50,44 @@ const CENTERS = [
   { centerId: "NP44", centerName: "Mannar" },
 ];
 
+// Seeded accounts all belong to the main campus centre.
+const DEFAULT_CENTER_CODE = "WP10";
+
+// Email format follows the existing <role>@iarvs.lk convention; extra accounts
+// get a numeric suffix so each address stays unique.
+const ADMINS = [
+  { userId: "IA01", firstName: "Chamidu", lastName: "Dilshan", email: "admin@iarvs.lk" },
+  { userId: "IA02", firstName: "Nadeesha", lastName: "Perera", email: "admin2@iarvs.lk" },
+  { userId: "IA03", firstName: "Sanjeewa", lastName: "Bandara", email: "admin3@iarvs.lk" },
+  { userId: "IA04", firstName: "Dilini", lastName: "Wickramasinghe", email: "admin4@iarvs.lk" },
+];
+
+const STAFF = [
+  { userId: "IS01", firstName: "Thilina", lastName: "Chandima", email: "staff@iarvs.lk" },
+  { userId: "IS02", firstName: "Aisha", lastName: "Rahman", email: "staff2@iarvs.lk" },
+  { userId: "IS03", firstName: "Daniel", lastName: "Smith", email: "staff3@iarvs.lk" },
+  { userId: "IS04", firstName: "Kasun", lastName: "Fernando", email: "staff4@iarvs.lk" },
+  { userId: "IS05", firstName: "Hiruni", lastName: "Jayasinghe", email: "staff5@iarvs.lk" },
+  { userId: "IS06", firstName: "Ruwan", lastName: "Silva", email: "staff6@iarvs.lk" },
+  { userId: "IS07", firstName: "Tharindu", lastName: "Weerasinghe", email: "staff7@iarvs.lk" },
+  { userId: "IS08", firstName: "Ishara", lastName: "Gunasekara", email: "staff8@iarvs.lk" },
+  { userId: "IS09", firstName: "Malith", lastName: "Rajapaksha", email: "staff9@iarvs.lk" },
+  { userId: "IS10", firstName: "Sanduni", lastName: "Herath", email: "staff10@iarvs.lk" },
+];
+
+const STUDENTS = [
+  { userId: "IST01", firstName: "Ruchira", lastName: "Lakshan", email: "student@iarvs.lk", regNumber: "721425539", stNumber: "S92065539", intake: "23/24" },
+  { userId: "IST02", firstName: "Chen", lastName: "Wei", email: "student2@iarvs.lk", regNumber: "721425540", stNumber: "S92065540", intake: "23/24" },
+  { userId: "IST03", firstName: "Elena", lastName: "Rodriguez", email: "student3@iarvs.lk", regNumber: "721425541", stNumber: "S92065541", intake: "23/24" },
+  { userId: "IST04", firstName: "Marcus", lastName: "Smith", email: "student4@iarvs.lk", regNumber: "721425542", stNumber: "S92065542", intake: "23/24" },
+  { userId: "IST05", firstName: "David", lastName: "Thompson", email: "student5@iarvs.lk", regNumber: "721425543", stNumber: "S92065543", intake: "23/24" },
+  { userId: "IST06", firstName: "Amaya", lastName: "Senanayake", email: "student6@iarvs.lk", regNumber: "721425544", stNumber: "S92065544", intake: "24/25" },
+  { userId: "IST07", firstName: "Thilini", lastName: "Abeywardena", email: "student7@iarvs.lk", regNumber: "721425545", stNumber: "S92065545", intake: "24/25" },
+  { userId: "IST08", firstName: "Kavindu", lastName: "Dissanayake", email: "student8@iarvs.lk", regNumber: "721425546", stNumber: "S92065546", intake: "24/25" },
+  { userId: "IST09", firstName: "Nimal", lastName: "Jayawardena", email: "student9@iarvs.lk", regNumber: "721425547", stNumber: "S92065547", intake: "24/25" },
+  { userId: "IST10", firstName: "Sithmi", lastName: "Karunaratne", email: "student10@iarvs.lk", regNumber: "721425548", stNumber: "S92065548", intake: "24/25" },
+];
+
 async function main() {
   // Validate passwords BEFORE deleting any data
   const adminPassword = process.env.ADMIN_SEED_PASSWORD;
@@ -86,63 +124,46 @@ async function main() {
     skipDuplicates: true,
   });
 
-  // Create Admin
-  const admin = await prisma.user.create({
-    data: {
-      userId: "IA01",
-      firstName: "Chamidu",
-      lastName: "Dilshan",
-      email: "admin@iarvs.lk",
+  const center = await prisma.center.findUniqueOrThrow({
+    where: { centerId: DEFAULT_CENTER_CODE },
+  });
+
+  const users = [
+    ...ADMINS.map((user) => ({
+      ...user,
+      role: "ADMIN" as const,
       passwordHash: adminHash,
-      role: "ADMIN",
-      center: { connect: { centerId: "WP10" } },
-      status: "ACTIVE",
-      isActive: true,
-    },
-  });
-
-  // Create Staff
-  const staff = await prisma.user.create({
-    data: {
-      userId: "IS01",
-      firstName: "Thilina",
-      lastName: "Chandima",
-      email: "staff@iarvs.lk",
+    })),
+    ...STAFF.map((user) => ({
+      ...user,
+      role: "STAFF" as const,
       passwordHash: staffHash,
-      role: "STAFF",
-      center: { connect: { centerId: "WP10" } },
-      status: "ACTIVE",
+    })),
+    ...STUDENTS.map((user) => ({
+      ...user,
+      role: "STUDENT" as const,
+      passwordHash: studentHash,
+    })),
+  ];
+
+  await prisma.user.createMany({
+    data: users.map((user) => ({
+      ...user,
+      centerId: center.id,
+      status: "ACTIVE" as const,
       isActive: true,
-    },
+    })),
   });
 
-  // Create Student
-  const student = await prisma.user.create({
-    data: {
-      userId: "IST01",
-      regNumber: "721425539",
-      stNumber: "S92065539",
-      firstName: "Ruchira",
-      lastName: "Lakshan",
-      email: "student@iarvs.lk",
-      passwordHash: studentHash,
-      role: "STUDENT",
-      center: { connect: { centerId: "WP10" } },
-      status: "ACTIVE",
-      isActive: true,
-    },
+  const counts = await prisma.user.groupBy({
+    by: ["role"],
+    _count: { _all: true },
   });
 
   console.log("Users seeded successfully:");
-  console.table([
-    { role: admin.role, email: admin.email, userId: admin.userId },
-    { role: staff.role, email: staff.email, userId: staff.userId },
-    {
-      role: student.role,
-      email: student.email,
-      userId: student.userId,
-    },
-  ]);
+  console.table(
+    counts.map((row) => ({ role: row.role, users: row._count._all })),
+  );
 }
 
 main()
