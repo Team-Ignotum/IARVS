@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { AdminSidebar } from "@/components/Asidebar";
@@ -12,16 +12,24 @@ import {
   Plus,
   Users,
 } from "lucide-react";
-import { useAdminDashboard } from "@/_hooks/admin/useAdminDashboard";
+import { useAdminStats } from "@/_hooks/admin/useAdminDashboard";
+import { useUsers } from "@/_hooks/admin/useUsers";
+import { useDebouncedValue } from "@/_hooks/core/useDebouncedValue";
 import UsersTable from "@/components/admin/users/userTable";
 import {
+  UserCenterFilter,
   UserRecord,
   UserRole,
   UserStatus,
-  UserCenterFilter,
 } from "@/components/admin/users/types";
+import {
+  mapAdminUserToRecord,
+  toCenterParam,
+  toDbRole,
+  toDbStatus,
+} from "@/components/admin/users/utils";
 import UsersFilters from "@/components/admin/users/UsersFilters";
-import { filterUsers } from "@/components/admin/users/filters";
+import UserStatusDialog from "@/components/admin/users/UserStatusDialog";
 import { AdminBreadcrumb } from "@/components/admin/AdminBreadcrumb";
 import UserRegistrationForm from "@/app/admin/user-registration/UserRegistrationForm";
 import {
@@ -32,45 +40,29 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 
-// sample user records
-const sampleUsers: UserRecord[] = [
-  {
-    id: "OUSL-ST-001",
-    name: "Aisha Rahman",
-    email: "aisha@university.edu",
-    role: "Staff",
-    status: "Active",
-    center: "WP10",
-    createdAt: "2025-08-01",
-    avatar: "",
-  },
-  {
-    id: "OUSL-ST-002",
-    name: "Daniel Smith",
-    email: "daniel@university.edu",
-    role: "Staff",
-    status: "Inactive",
-    center: "UP82",
-    createdAt: "2025-07-15",
-    avatar: "",
-  },
-];
+const PAGE_SIZE = 10;
 
 export default function StaffPage() {
-  const { stats } = useAdminDashboard();
+  const { stats } = useAdminStats();
   const [registrationOpen, setRegistrationOpen] = useState(false);
-  const [roleFilter, setRoleFilter] = useState<"all" | UserRole>("all");
+  const [roleFilter, setRoleFilter] = useState<"all" | UserRole>("Staff");
   const [statusFilter, setStatusFilter] = useState<"all" | UserStatus>("all");
   const [centerFilter, setCenterFilter] = useState<UserCenterFilter>("all");
   const [search, setSearch] = useState("");
+  const [page, setPage] = useState(1);
+  const [statusUser, setStatusUser] = useState<UserRecord | null>(null);
+  const debouncedSearch = useDebouncedValue(search);
 
-  const filteredUsers = filterUsers({
-    users: sampleUsers,
-    roleFilter,
-    statusFilter,
-    centerFilter,
-    search,
+  const { users, total, totalPages, isLoading, error } = useUsers({
+    role: toDbRole(roleFilter),
+    status: toDbStatus(statusFilter),
+    center: toCenterParam(centerFilter),
+    search: debouncedSearch.trim() || undefined,
+    page,
+    pageSize: PAGE_SIZE,
   });
+
+  const rows = users.map(mapAdminUserToRecord);
 
   // These cards intentionally reflect people-focused admin stats instead of project metrics.
   const summaryCards = [
@@ -82,7 +74,7 @@ export default function StaffPage() {
     },
     {
       label: "Centers",
-      value: stats.centers,
+      value: stats.totalCenters,
       icon: GraduationCap,
       iconClass: "bg-[#ecfeff] text-[#0891b2]",
     },
@@ -179,29 +171,46 @@ export default function StaffPage() {
                 statusFilter={statusFilter}
                 centerFilter={centerFilter}
                 search={search}
-                onRoleChange={setRoleFilter}
-                onStatusChange={setStatusFilter}
-                onCenterChange={setCenterFilter}
-                onSearchChange={setSearch}
+                onRoleChange={(value) => {
+                  setRoleFilter(value);
+                  setPage(1);
+                }}
+                onStatusChange={(value) => {
+                  setStatusFilter(value);
+                  setPage(1);
+                }}
+                onCenterChange={(value) => {
+                  setCenterFilter(value);
+                  setPage(1);
+                }}
+                onSearchChange={(value) => {
+                  setSearch(value);
+                  setPage(1);
+                }}
               />
               <div className="mt-4">
                 <UsersTable
-                  users={filteredUsers}
-                  isLoading={false}
-                  fetchError={null}
-                  page={1}
-                  totalPages={1}
-                  totalUsers={filteredUsers.length}
-                  itemsPerPage={filteredUsers.length}
-                  onPageChange={() => {}}
+                  users={rows}
+                  isLoading={isLoading}
+                  fetchError={error}
+                  page={page}
+                  totalPages={totalPages}
+                  totalUsers={total}
+                  itemsPerPage={PAGE_SIZE}
+                  onPageChange={setPage}
                   onViewUser={(user) => console.log("view", user)}
-                  onChangeStatus={(user) => console.log("change", user)}
+                  onChangeStatus={setStatusUser}
                   onDeleteUser={(id) => console.log("delete", id)}
                 />
               </div>
             </div>
           </div>
         </div>
+
+        <UserStatusDialog
+          user={statusUser}
+          onClose={() => setStatusUser(null)}
+        />
       </SidebarInset>
     </SidebarProvider>
   );

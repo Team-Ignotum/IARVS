@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import {
@@ -10,7 +10,9 @@ import {
   X,
   Users,
 } from "lucide-react";
-import { useAdminDashboard } from "@/_hooks/admin/useAdminDashboard";
+import { useAdminStats } from "@/_hooks/admin/useAdminDashboard";
+import { useUsers } from "@/_hooks/admin/useUsers";
+import { useDebouncedValue } from "@/_hooks/core/useDebouncedValue";
 import {
   Dialog,
   DialogClose,
@@ -22,101 +24,56 @@ import {
 } from "@/components/ui/dialog";
 import UsersFilters from "@/components/admin/users/UsersFilters";
 import UsersTable from "@/components/admin/users/userTable";
-import { filterUsers } from "@/components/admin/users/filters";
+import UserStatusDialog from "@/components/admin/users/UserStatusDialog";
 import {
   UserCenterFilter,
   UserRecord,
   UserRole,
   UserStatus,
 } from "@/components/admin/users/types";
+import {
+  mapAdminUserToRecord,
+  toCenterParam,
+  toDbRole,
+  toDbStatus,
+} from "@/components/admin/users/utils";
 import UserRegistrationForm from "./UserRegistrationForm";
 
-const sampleUsers: UserRecord[] = [
-  {
-    id: "OUSL-AD-001",
-    name: "Nadeesha Perera",
-    email: "nadeesha@university.edu",
-    role: "SuperAdmin",
-    status: "Active",
-    center: null,
-    createdAt: "2025-08-01",
-  },
-  {
-    id: "OUSL-ST-001",
-    name: "Aisha Rahman",
-    email: "aisha@university.edu",
-    role: "Staff",
-    status: "Active",
-    center: "WP10",
-    createdAt: "2025-08-01",
-  },
-  {
-    id: "OUSL-ST-002",
-    name: "Daniel Smith",
-    email: "daniel@university.edu",
-    role: "Staff",
-    status: "Inactive",
-    center: "UP82",
-    createdAt: "2025-07-15",
-  },
-  {
-    id: "OUSL-SU-014",
-    name: "Kasun Fernando",
-    email: "kasun@university.edu",
-    role: "Student",
-    status: "Active",
-    center: "CP20",
-    createdAt: "2025-06-20",
-  },
-];
+const PAGE_SIZE = 10;
 
-type UserActionKind = "view" | "status" | "delete";
+type UserActionKind = "view" | "delete";
 type UserAction = { kind: UserActionKind; user: UserRecord } | null;
 
 export default function UserRegistrationDashboard() {
-  const { stats } = useAdminDashboard();
-  const [users, setUsers] = useState<UserRecord[]>(sampleUsers);
+  const { stats } = useAdminStats();
   const [registrationOpen, setRegistrationOpen] = useState(false);
   const [userAction, setUserAction] = useState<UserAction>(null);
+  const [statusUser, setStatusUser] = useState<UserRecord | null>(null);
   const [roleFilter, setRoleFilter] = useState<"all" | UserRole>("all");
   const [statusFilter, setStatusFilter] = useState<"all" | UserStatus>("all");
   const [centerFilter, setCenterFilter] = useState<UserCenterFilter>("all");
   const [search, setSearch] = useState("");
+  const [page, setPage] = useState(1);
+  const debouncedSearch = useDebouncedValue(search);
 
-  const filteredUsers = filterUsers({
-    users,
-    roleFilter,
-    statusFilter,
-    centerFilter,
-    search,
+  const { users, total, totalPages, isLoading, error } = useUsers({
+    role: toDbRole(roleFilter),
+    status: toDbStatus(statusFilter),
+    center: toCenterParam(centerFilter),
+    search: debouncedSearch.trim() || undefined,
+    page,
+    pageSize: PAGE_SIZE,
   });
+
+  const rows = users.map(mapAdminUserToRecord);
 
   function openUserAction(kind: UserActionKind, user: UserRecord) {
     setUserAction({ kind, user });
   }
 
-  function confirmStatusChange() {
-    if (!userAction || userAction.kind !== "status") return;
-
-    setUsers((currentUsers) =>
-      currentUsers.map((user) =>
-        user.id === userAction.user.id
-          ? {
-              ...user,
-              status: user.status === "Active" ? "Inactive" : "Active",
-            }
-          : user,
-      ),
-    );
-    setUserAction(null);
-  }
-
-  function confirmDelete() {
-    if (!userAction || userAction.kind !== "delete") return;
-
-    setUsers((currentUsers) =>
-      currentUsers.filter((user) => user.id !== userAction.user.id),
-    );
+  // TODO: deletions need their own endpoint (DELETE /api/admin/users/[userId]);
+  // closing the dialog is a no-op for now.
+  function closeUserAction() {
     setUserAction(null);
   }
 
@@ -135,13 +92,13 @@ export default function UserRegistrationDashboard() {
     },
     {
       label: "Active Users",
-      value: stats.activeStaff,
+      value: stats.activeUsers,
       icon: Activity,
       iconClass: "bg-[#ecfdf5] text-[#10b981]",
     },
     {
       label: "Administrators",
-      value: 4,
+      value: stats.totalAdmins + stats.totalSuperStaff,
       icon: ShieldCheck,
       iconClass: "bg-[#fff7ed] text-[#f59e0b]",
     },
@@ -261,7 +218,9 @@ export default function UserRegistrationDashboard() {
                     <div className="flex justify-between gap-4">
                       <span className="text-slate-500">Center</span>
                       <span className="font-medium text-slate-900">
-                        {userAction.user.center ?? "No center assigned"}
+                        {userAction.user.centerName ??
+                          userAction.user.center ??
+                          "No center assigned"}
                       </span>
                     </div>
                     <div className="flex justify-between gap-4">
@@ -277,37 +236,6 @@ export default function UserRegistrationDashboard() {
                         Close
                       </button>
                     </DialogClose>
-                  </div>
-                </>
-              )}
-
-              {userAction?.kind === "status" && (
-                <>
-                  <DialogHeader>
-                    <DialogTitle>Change user status?</DialogTitle>
-                    <DialogDescription>
-                      {userAction.user.name} is currently{" "}
-                      {userAction.user.status.toLowerCase()}. This will change
-                      the account to{" "}
-                      {userAction.user.status === "Active"
-                        ? "inactive"
-                        : "active"}
-                      .
-                    </DialogDescription>
-                  </DialogHeader>
-                  <div className="flex justify-end gap-2">
-                    <DialogClose asChild>
-                      <button className="inline-flex h-9 items-center rounded-md border border-slate-300 px-4 text-sm font-medium text-slate-700 hover:bg-slate-50">
-                        Cancel
-                      </button>
-                    </DialogClose>
-                    <button
-                      type="button"
-                      onClick={confirmStatusChange}
-                      className="inline-flex h-9 items-center rounded-md bg-[#183b68] px-4 text-sm font-medium text-white hover:bg-[#102d52]"
-                    >
-                      Change status
-                    </button>
                   </div>
                 </>
               )}
@@ -329,7 +257,7 @@ export default function UserRegistrationDashboard() {
                     </DialogClose>
                     <button
                       type="button"
-                      onClick={confirmDelete}
+                      onClick={closeUserAction}
                       className="inline-flex h-9 items-center rounded-md bg-red-600 px-4 text-sm font-medium text-white hover:bg-red-700"
                     >
                       Delete user
@@ -346,30 +274,44 @@ export default function UserRegistrationDashboard() {
           statusFilter={statusFilter}
           centerFilter={centerFilter}
           search={search}
-          onRoleChange={setRoleFilter}
-          onStatusChange={setStatusFilter}
-          onCenterChange={setCenterFilter}
-          onSearchChange={setSearch}
+          onRoleChange={(value) => {
+            setRoleFilter(value);
+            setPage(1);
+          }}
+          onStatusChange={(value) => {
+            setStatusFilter(value);
+            setPage(1);
+          }}
+          onCenterChange={(value) => {
+            setCenterFilter(value);
+            setPage(1);
+          }}
+          onSearchChange={(value) => {
+            setSearch(value);
+            setPage(1);
+          }}
         />
         <div className="mt-4">
           <UsersTable
-            users={filteredUsers}
-            isLoading={false}
-            fetchError={null}
-            page={1}
-            totalPages={1}
-            totalUsers={filteredUsers.length}
-            itemsPerPage={filteredUsers.length}
-            onPageChange={() => {}}
+            users={rows}
+            isLoading={isLoading}
+            fetchError={error}
+            page={page}
+            totalPages={totalPages}
+            totalUsers={total}
+            itemsPerPage={PAGE_SIZE}
+            onPageChange={setPage}
             onViewUser={(user) => openUserAction("view", user)}
-            onChangeStatus={(user) => openUserAction("status", user)}
+            onChangeStatus={setStatusUser}
             onDeleteUser={(id) => {
-              const user = users.find((candidate) => candidate.id === id);
+              const user = rows.find((candidate) => candidate.id === id);
               if (user) openUserAction("delete", user);
             }}
           />
         </div>
       </div>
+
+      <UserStatusDialog user={statusUser} onClose={() => setStatusUser(null)} />
     </div>
   );
 }

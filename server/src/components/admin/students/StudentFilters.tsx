@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { Search, RotateCcw } from "lucide-react";
 
@@ -10,25 +10,19 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-import { StudentStatus } from "@/components/admin/users/types";
+import { UserStatus } from "@/components/admin/users/types";
 
 interface StudentFiltersProps {
-  statusFilter: "all" | StudentStatus;
-  batchFilter: "all" | string;
-  batchOptions: string[];
+  statusFilter: "all" | UserStatus;
   search: string;
-  onStatusChange: (value: "all" | StudentStatus) => void;
-  onBatchChange: (value: "all" | string) => void;
+  onStatusChange: (value: "all" | UserStatus) => void;
   onSearchChange: (value: string) => void;
 }
 
 export default function StudentFilters({
   statusFilter,
-  batchFilter,
-  batchOptions,
   search,
   onStatusChange,
-  onBatchChange,
   onSearchChange,
 }: StudentFiltersProps) {
   return (
@@ -47,35 +41,15 @@ export default function StudentFilters({
       <div className="flex items-center gap-2">
         <Select
           value={statusFilter}
-          onValueChange={(value) => onStatusChange(value as "all" | StudentStatus)}
+          onValueChange={(value) => onStatusChange(value as "all" | UserStatus)}
         >
           <SelectTrigger className="h-10 min-w-[170px] bg-white text-sm text-slate-700">
-            <SelectValue placeholder="All Application" />
+            <SelectValue placeholder="All Statuses" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Applications</SelectItem>
-            <SelectItem value="Approved">Approved</SelectItem>
-            <SelectItem value="Pending">Pending</SelectItem>
-            <SelectItem value="Expired">Expired</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-
-      <div className="flex items-center gap-2">
-        <Select
-          value={batchFilter}
-          onValueChange={(value) => onBatchChange(value as "all" | string)}
-        >
-          <SelectTrigger className="h-10 min-w-[170px] bg-white text-sm text-slate-700">
-            <SelectValue placeholder="All Intakes" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Intakes</SelectItem>
-            {batchOptions.map((batch) => (
-              <SelectItem key={batch} value={batch}>
-                {batch}
-              </SelectItem>
-            ))}
+            <SelectItem value="all">All Statuses</SelectItem>
+            <SelectItem value="Active">Active</SelectItem>
+            <SelectItem value="Inactive">Inactive</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -85,7 +59,6 @@ export default function StudentFilters({
         aria-label="Clear filters"
         onClick={() => {
           onStatusChange("all");
-          onBatchChange("all");
           onSearchChange("");
         }}
         className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 transition hover:bg-slate-100 hover:text-slate-900"

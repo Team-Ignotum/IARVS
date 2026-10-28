@@ -403,7 +403,8 @@ export const ModelName = {
   StudentEnrollment: 'StudentEnrollment',
   Module: 'Module',
   CurriculumModule: 'CurriculumModule',
-  AcademicRecord: 'AcademicRecord'
+  AcademicRecord: 'AcademicRecord',
+  Center: 'Center'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -419,7 +420,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "programme" | "curriculumVersion" | "studentEnrollment" | "module" | "curriculumModule" | "academicRecord"
+    modelProps: "user" | "programme" | "curriculumVersion" | "studentEnrollment" | "module" | "curriculumModule" | "academicRecord" | "center"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -941,6 +942,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    Center: {
+      payload: Prisma.$CenterPayload<ExtArgs>
+      fields: Prisma.CenterFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.CenterFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CenterPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.CenterFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CenterPayload>
+        }
+        findFirst: {
+          args: Prisma.CenterFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CenterPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.CenterFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CenterPayload>
+        }
+        findMany: {
+          args: Prisma.CenterFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CenterPayload>[]
+        }
+        create: {
+          args: Prisma.CenterCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CenterPayload>
+        }
+        createMany: {
+          args: Prisma.CenterCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.CenterCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CenterPayload>[]
+        }
+        delete: {
+          args: Prisma.CenterDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CenterPayload>
+        }
+        update: {
+          args: Prisma.CenterUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CenterPayload>
+        }
+        deleteMany: {
+          args: Prisma.CenterDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.CenterUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.CenterUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CenterPayload>[]
+        }
+        upsert: {
+          args: Prisma.CenterUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CenterPayload>
+        }
+        aggregate: {
+          args: Prisma.CenterAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateCenter>
+        }
+        groupBy: {
+          args: Prisma.CenterGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.CenterGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.CenterCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.CenterCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -992,7 +1067,7 @@ export const UserScalarFieldEnum = {
   firstName: 'firstName',
   lastName: 'lastName',
   role: 'role',
-  center: 'center',
+  centerId: 'centerId',
   isActive: 'isActive',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
@@ -1086,6 +1161,18 @@ export const AcademicRecordScalarFieldEnum = {
 } as const
 
 export type AcademicRecordScalarFieldEnum = (typeof AcademicRecordScalarFieldEnum)[keyof typeof AcademicRecordScalarFieldEnum]
+
+
+export const CenterScalarFieldEnum = {
+  id: 'id',
+  centerId: 'centerId',
+  centerName: 'centerName',
+  isActive: 'isActive',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type CenterScalarFieldEnum = (typeof CenterScalarFieldEnum)[keyof typeof CenterScalarFieldEnum]
 
 
 export const SortOrder = {
@@ -1394,6 +1481,7 @@ export type GlobalOmitConfig = {
   module?: Prisma.ModuleOmit
   curriculumModule?: Prisma.CurriculumModuleOmit
   academicRecord?: Prisma.AcademicRecordOmit
+  center?: Prisma.CenterOmit
 }
 
 /* Types for Logging */

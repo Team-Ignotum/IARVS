@@ -1,6 +1,7 @@
 import {hash} from "bcrypt-ts";
 import { Prisma } from "@/generated/client";
 import { UserRepository } from "@/repositories/user_repository_impl";
+import { CenterRepository } from "@/repositories/center_repository_impl";
 import type { RegisterInput} from "@/app/api/(auth)/register/register.schema";
 
 
@@ -18,6 +19,13 @@ export async function registerUser(input:RegisterInput){
     //hash the password
     const passwordHash = await hash(input.password, 12);
 
+    //the account can only link to a center that already exists
+    const center = await new CenterRepository().findByCenterId(input.centerId);
+
+    if (!center || !center.isActive) {
+        throw new Error("Invalid center");
+    }
+
     try {
        //create the user
        const user = await userRepository.create({
@@ -27,7 +35,7 @@ export async function registerUser(input:RegisterInput){
            firstName:input.firstName,
            lastName: input.lastName,
            role: input.role,
-           center: input.center,
+           centerId: input.centerId,
            regNumber:input.regNumber,
            stNumber:input.stNumber,
            intake:input.intake,

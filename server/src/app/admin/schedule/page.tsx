@@ -16,13 +16,8 @@ import {
   CheckCircle2,
 } from "lucide-react";
 import { AdminSidebar } from "@/components/Asidebar";
-import { AdminHeader } from "@/components/admin/AdminHeader";
-import { AdminBreadcrumb } from "@/components/admin/AdministrativeBreadcrumb";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 
-import { Calendar, Clock, X, ChevronDown, Check, AlertCircle, Power, CheckCircle2 } from "lucide-react";
-import { AdminSidebar } from "@/components/Asidebar";
-import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 type RegistrationType = "NEW_REGISTRATION" | "RE_REGISTRATION" | "ADD_DROP";
 type WindowStatus = "OPEN" | "SCHEDULED" | "CLOSED";
 
@@ -61,7 +56,7 @@ const STATUS_STYLES: Record<WindowStatus, string> = {
   CLOSED: "bg-slate-100 text-slate-600 border-slate-200",
 };
 
-// One fixed entry per registration type — saving always updates the
+// One fixed entry per registration type â€” saving always updates the
 // matching card instead of appending a new one.
 const initialCards: CardMap = {
   NEW_REGISTRATION: {
@@ -150,7 +145,7 @@ export default function RegistrationWindowMock() {
     setTypeMenuOpen(false);
   }
 
-  // Opens the generic "Manage Registration Window" flow — type stays
+  // Opens the generic "Manage Registration Window" flow â€” type stays
   // editable via the dropdown.
   function openGenericModal() {
     setForm(emptyForm);
@@ -159,7 +154,7 @@ export default function RegistrationWindowMock() {
     setOpen(true);
   }
 
-  // Triggered by a card's "Open now" switch — navigates straight into the
+  // Triggered by a card's "Open now" switch â€” navigates straight into the
   // form, pre-selected and pre-filled for that specific registration type.
   function openModalForType(type: RegistrationType) {
     const existing = cards[type];
@@ -176,7 +171,7 @@ export default function RegistrationWindowMock() {
     setOpen(true);
   }
 
-  // Direct close — no form needed to shut a window down.
+  // Direct close â€” no form needed to shut a window down.
   function closeNow(type: RegistrationType) {
     setCards((prev) => ({
       ...prev,
@@ -217,7 +212,7 @@ export default function RegistrationWindowMock() {
   // Triggered directly by the Save & Schedule button's onClick rather than
   // the form's onSubmit. Sandboxed preview iframes (this artifact preview
   // included) can silently block the native `submit` event, so we avoid
-  // depending on it entirely — the button calls this straight away.
+  // depending on it entirely â€” the button calls this straight away.
   function handleSave() {
     const validationError = validate();
     if (validationError) {
@@ -228,7 +223,7 @@ export default function RegistrationWindowMock() {
     setFormError("");
     setSaving(true);
 
-    // Mock async save — in the real app this calls
+    // Mock async save â€” in the real app this calls
     // useSaveRegistrationWindow().mutate(form)
     window.setTimeout(() => {
       const type = form.registrationType;
@@ -261,155 +256,93 @@ export default function RegistrationWindowMock() {
     <SidebarProvider>
       <AdminSidebar />
       <SidebarInset className="min-h-screen bg-slate-50 p-6 sm:p-10 font-sans">
-      <div className="max-w-3xl mx-auto">
-        <div className="flex items-center justify-between mb-1 gap-4">
-          <div>
-            <p className="text-xs font-medium tracking-wide text-slate-400 uppercase mb-1">
-              IARVS Admin
-            </p>
-            <h1 className="text-xl font-semibold text-slate-900">Registration Windows</h1>
-          </div>
-          <button
-            type="button"
-            onClick={openGenericModal}
-            className="inline-flex items-center gap-2 rounded-lg bg-[#183b68] px-4 py-2.5 text-sm font-medium text-white hover:bg-slate-800 active:bg-slate-950 transition-colors shrink-0"
-          >
-            <Calendar size={16} strokeWidth={2} />
-            Manage Registration Window
-          </button>
-        </div>
-        <p className="text-sm text-slate-500 mb-8">
-          Control when the student portal accepts registration and re-registration requests.
-          Each type has exactly one window.
-        </p>
-
-        <div className="space-y-3">
-          {TYPES.map((t) => {
-            const w = cards[t.value];
-            const isOpen = w.status === "OPEN";
-
-            return (
-              <div
-                key={t.value}
-                className={`bg-white border rounded-xl p-4 flex items-center justify-between gap-4 transition-colors duration-700 ${
-                  justUpdatedType === t.value ? "border-slate-900 bg-slate-50" : "border-slate-200"
-                }`}
-              >
-                <div className="min-w-0">
-                  <div className="flex items-center gap-2 mb-1.5">
-                    <span className="text-sm font-medium text-slate-900">{t.label}</span>
-                    <span
-                      className={`text-[11px] font-medium px-2 py-0.5 rounded-full border ${STATUS_STYLES[w.status]}`}
-                    >
-                      {w.status}
-                    </span>
-                    {justUpdatedType === t.value && (
-                      <span className="text-[11px] font-medium text-slate-500">Updated</span>
-                    )}
-                  </div>
-                  <div className="flex items-center gap-3 text-xs text-slate-500">
-                    <span className="flex items-center gap-1">
-                      <Clock size={12} />
-                      {formatRange(w.startAt, w.endAt)}
-                    </span>
-                    {w.batches && <span>Batches {w.batches}</span>}
-                  </div>
-                </div>
-
-                <div className="shrink-0 flex items-center gap-2">
-                  {isOpen && (
-                    <button
-                      type="button"
-                      onClick={() => openModalForType(t.value)}
-                      className="inline-flex items-center gap-1.5 text-xs font-medium text-slate-600 hover:text-slate-900 border border-slate-200 hover:border-slate-300 rounded-lg px-3 py-1.5 transition-colors"
-                    >
-                      Edit
-                    </button>
-                  )}
-                  <button
-                    type="button"
-                    onClick={() => (isOpen ? closeNow(t.value) : openModalForType(t.value))}
-                    className="inline-flex items-center gap-1.5 text-xs font-medium text-slate-600 hover:text-slate-900 border border-slate-200 hover:border-slate-300 rounded-lg px-3 py-1.5 transition-colors"
-                  >
-                    <Power size={12} />
-                    {isOpen ? "Close now" : "Open now"}
-                  </button>
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={openGenericModal}
-                className="inline-flex h-10 shrink-0 items-center justify-center gap-2 rounded-md bg-[#183b68] px-3.5 text-sm font-medium text-white transition-colors hover:bg-[#102d52]"
-              >
-                <Calendar size={16} strokeWidth={2} />
-                Manage Registration Window
-              </button>
+        <div className="max-w-3xl mx-auto">
+          <div className="flex items-center justify-between mb-1 gap-4">
+            <div>
+              <p className="text-xs font-medium tracking-wide text-slate-400 uppercase mb-1">
+                IARVS Admin
+              </p>
+              <h1 className="text-xl font-semibold text-slate-900">
+                Registration Windows
+              </h1>
             </div>
+            <button
+              type="button"
+              onClick={openGenericModal}
+              className="inline-flex items-center gap-2 rounded-lg bg-[#183b68] px-4 py-2.5 text-sm font-medium text-white hover:bg-slate-800 active:bg-slate-950 transition-colors shrink-0"
+            >
+              <Calendar size={16} strokeWidth={2} />
+              Manage Registration Window
+            </button>
+          </div>
+          <p className="text-sm text-slate-500 mb-8">
+            Control when the student portal accepts registration and
+            re-registration requests. Each type has exactly one window.
+          </p>
 
-            <div className="mt-6 space-y-3">
-              {TYPES.map((t) => {
-                const w = cards[t.value];
-                const isOpen = w.status === "OPEN";
+          <div className="space-y-3">
+            {TYPES.map((t) => {
+              const w = cards[t.value];
+              const isOpen = w.status === "OPEN";
 
-                return (
-                  <div
-                    key={t.value}
-                    className={`flex items-center justify-between gap-4 rounded-xl border bg-white p-4 transition-colors duration-700 ${
-                      justUpdatedType === t.value
-                        ? "border-slate-900 bg-slate-50"
-                        : "border-slate-200"
-                    }`}
-                  >
-                    <div className="min-w-0">
-                      <div className="mb-1.5 flex items-center gap-2">
-                        <span className="text-sm font-medium text-slate-900">
-                          {t.label}
+              return (
+                <div
+                  key={t.value}
+                  className={`flex items-center justify-between gap-4 rounded-xl border bg-white p-4 transition-colors duration-700 ${
+                    justUpdatedType === t.value
+                      ? "border-slate-900 bg-slate-50"
+                      : "border-slate-200"
+                  }`}
+                >
+                  <div className="min-w-0">
+                    <div className="mb-1.5 flex items-center gap-2">
+                      <span className="text-sm font-medium text-slate-900">
+                        {t.label}
+                      </span>
+                      <span
+                        className={`rounded-full border px-2 py-0.5 text-[11px] font-medium ${STATUS_STYLES[w.status]}`}
+                      >
+                        {w.status}
+                      </span>
+                      {justUpdatedType === t.value && (
+                        <span className="text-[11px] font-medium text-slate-500">
+                          Updated
                         </span>
-                        <span
-                          className={`rounded-full border px-2 py-0.5 text-[11px] font-medium ${STATUS_STYLES[w.status]}`}
-                        >
-                          {w.status}
-                        </span>
-                        {justUpdatedType === t.value && (
-                          <span className="text-[11px] font-medium text-slate-500">
-                            Updated
-                          </span>
-                        )}
-                      </div>
-                      <div className="flex items-center gap-3 text-xs text-slate-500">
-                        <span className="flex items-center gap-1">
-                          <Clock size={12} />
-                          {formatRange(w.startAt, w.endAt)}
-                        </span>
-                        {w.batches && <span>Batches {w.batches}</span>}
-                      </div>
-                    </div>
-
-                    <div className="flex shrink-0 items-center gap-2">
-                      {isOpen && (
-                        <button
-                          type="button"
-                          onClick={() => openModalForType(t.value)}
-                          className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-600 transition-colors hover:border-slate-300 hover:text-slate-900"
-                        >
-                          Edit
-                        </button>
                       )}
+                    </div>
+                    <div className="flex items-center gap-3 text-xs text-slate-500">
+                      <span className="flex items-center gap-1">
+                        <Clock size={12} />
+                        {formatRange(w.startAt, w.endAt)}
+                      </span>
+                      {w.batches && <span>Batches {w.batches}</span>}
+                    </div>
+                  </div>
+
+                  <div className="flex shrink-0 items-center gap-2">
+                    {isOpen && (
                       <button
                         type="button"
-                        onClick={() =>
-                          isOpen ? closeNow(t.value) : openModalForType(t.value)
-                        }
+                        onClick={() => openModalForType(t.value)}
                         className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-600 transition-colors hover:border-slate-300 hover:text-slate-900"
                       >
-                        <Power size={12} />
-                        {isOpen ? "Close now" : "Open now"}
+                        Edit
                       </button>
-                    </div>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() =>
+                        isOpen ? closeNow(t.value) : openModalForType(t.value)
+                      }
+                      className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-600 transition-colors hover:border-slate-300 hover:text-slate-900"
+                    >
+                      <Power size={12} />
+                      {isOpen ? "Close now" : "Open now"}
+                    </button>
                   </div>
-                );
-              })}
-            </div>
+                </div>
+              );
+            })}
           </div>
         </div>
 
@@ -574,12 +507,12 @@ export default function RegistrationWindowMock() {
           </div>
         )}
 
-      {toast && (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 bg-slate-900 text-white text-sm font-medium px-4 py-2.5 rounded-lg shadow-lg">
-          <CheckCircle2 size={16} className="text-emerald-400" />
-          {toast}
-        </div>
-      )}
+        {toast && (
+          <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 bg-slate-900 text-white text-sm font-medium px-4 py-2.5 rounded-lg shadow-lg">
+            <CheckCircle2 size={16} className="text-emerald-400" />
+            {toast}
+          </div>
+        )}
       </SidebarInset>
     </SidebarProvider>
   );

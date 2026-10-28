@@ -13,14 +13,14 @@ import {
   Users,
 } from "lucide-react";
 
-import { useAdminDashboard } from "@/_hooks/admin/useAdminDashboard";
+import { useAdminStats } from "@/_hooks/admin/useAdminDashboard";
 import { AdminBreadcrumb } from "@/components/admin/AdministrativeBreadcrumb";
 import { AdminHeader } from "@/components/admin/AdminHeader";
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 export default function AdminPage() {
-  const { stats } = useAdminDashboard();
+  const { stats } = useAdminStats();
 
   // ================= DASHBOARD SUMMARY CARDS =================
 
@@ -48,7 +48,7 @@ export default function AdminPage() {
     },
     {
       label: "Total Centers",
-      value: stats.centers,
+      value: stats.totalCenters,
       icon: Building,
       iconClass:
         "bg-[#ecfeff] text-[#0891b2] dark:bg-cyan-950 dark:text-cyan-300",
