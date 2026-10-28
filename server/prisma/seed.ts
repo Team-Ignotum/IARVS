@@ -50,7 +50,8 @@ const CENTERS = [
   { centerId: "NP44", centerName: "Mannar" },
 ];
 
-// Seeded accounts all belong to the main campus centre.
+// Seeded accounts are spread across the centres round-robin so the admin
+// centre filters and per-centre reporting have varied data to work with.
 const DEFAULT_CENTER_CODE = "WP10";
 
 // Email format follows the existing <role>@iarvs.lk convention; extra accounts
@@ -124,9 +125,22 @@ async function main() {
     skipDuplicates: true,
   });
 
-  const center = await prisma.center.findUniqueOrThrow({
-    where: { centerId: DEFAULT_CENTER_CODE },
+  const centers = await prisma.center.findMany({
+    where: { isActive: true },
+    select: { id: true, centerId: true },
+    orderBy: { centerId: "asc" },
   });
+
+  if (centers.length === 0) {
+    throw new Error("No active centers found; seed the centers first");
+  }
+
+  // Colombo (the main campus) is first so the earliest accounts keep a sensible
+  // default, then the rest are assigned in a stable round-robin order.
+  const orderedCenters = [
+    ...centers.filter((center) => center.centerId === DEFAULT_CENTER_CODE),
+    ...centers.filter((center) => center.centerId !== DEFAULT_CENTER_CODE),
+  ];
 
   const users = [
     ...ADMINS.map((user) => ({
@@ -147,9 +161,9 @@ async function main() {
   ];
 
   await prisma.user.createMany({
-    data: users.map((user) => ({
+    data: users.map((user, index) => ({
       ...user,
-      centerId: center.id,
+      centerId: orderedCenters[index % orderedCenters.length].id,
       status: "ACTIVE" as const,
       isActive: true,
     })),

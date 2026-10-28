@@ -39,7 +39,7 @@ import {
 } from "@/components/admin/users/utils";
 import UserRegistrationForm from "./UserRegistrationForm";
 
-const PAGE_SIZE = 10;
+const PAGE_SIZE = 5;
 
 type UserActionKind = "view" | "delete";
 type UserAction = { kind: UserActionKind; user: UserRecord } | null;
