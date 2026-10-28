@@ -1,4 +1,3 @@
-
 "use client";
 
 import {
@@ -17,31 +16,19 @@ type ThemeContextType = {
   toggleTheme: () => void;
 };
 
-const ThemeContext = createContext<ThemeContextType | undefined>(
-  undefined
-);
+const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
-export function AdminThemeProvider({
-  children,
-}: {
-  children: ReactNode;
-}) {
-  const [theme, setThemeState] = useState<Theme>("light");
+export function AdminThemeProvider({ children }: { children: ReactNode }) {
+  const [theme, setThemeState] = useState<Theme>(() => {
+    if (typeof window === "undefined") return "light";
 
-  useEffect(() => {
     const saved = localStorage.getItem("iarvs-admin-theme");
-
-    if (saved === "light" || saved === "dark") {
-      setThemeState(saved);
-    }
-  }, []);
+    return saved === "dark" || saved === "light" ? saved : "light";
+  });
 
   useEffect(() => {
     localStorage.setItem("iarvs-admin-theme", theme);
-    document.documentElement.classList.toggle(
-      "dark",
-      theme === "dark"
-    );
+    document.documentElement.classList.toggle("dark", theme === "dark");
   }, [theme]);
 
   const setTheme = (nextTheme: Theme) => {
@@ -49,16 +36,12 @@ export function AdminThemeProvider({
   };
 
   const toggleTheme = () => {
-    setThemeState((current) =>
-      current === "light" ? "dark" : "light"
-    );
+    setThemeState((current) => (current === "light" ? "dark" : "light"));
   };
 
   return (
-    <ThemeContext.Provider
-      value={{ theme, setTheme, toggleTheme }}
-    >
-      {children}
+    <ThemeContext.Provider value={{ theme, setTheme, toggleTheme }}>
+      <div className="admin-theme min-h-screen">{children}</div>
     </ThemeContext.Provider>
   );
 }
@@ -67,9 +50,7 @@ export function useAdminTheme() {
   const context = useContext(ThemeContext);
 
   if (!context) {
-    throw new Error(
-      "useAdminTheme must be used inside AdminThemeProvider"
-    );
+    throw new Error("useAdminTheme must be used inside AdminThemeProvider");
   }
 
   return context;
