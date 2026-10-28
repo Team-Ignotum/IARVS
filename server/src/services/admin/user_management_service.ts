@@ -1,4 +1,4 @@
-import type { Prisma } from "@/generated/client";
+import { Prisma } from "@/generated/client";
 import { UserRepository } from "@/repositories/user_repository_impl";
 import { CenterRepository } from "@/repositories/center_repository_impl";
 
@@ -48,6 +48,27 @@ export interface UserListResult {
   pageSize: number;
   total: number;
   totalPages: number;
+}
+
+type AdminUserRow = Awaited<
+  ReturnType<UserRepository["findForAdmin"]>
+>[number];
+
+function toAdminUser(row: AdminUserRow): AdminUser {
+  return {
+    userId: row.userId,
+    firstName: row.firstName,
+    lastName: row.lastName,
+    email: row.email,
+    role: row.role,
+    status: row.status,
+    centerId: row.center?.centerId ?? null,
+    centerName: row.center?.centerName ?? null,
+    stNumber: row.stNumber,
+    regNumber: row.regNumber,
+    intake: row.intake,
+    createdAt: row.createdAt.toISOString(),
+  };
 }
 
 export async function getDashboardStats(): Promise<DashboardStats> {
@@ -141,23 +162,29 @@ export async function listUsers(
   ]);
 
   return {
-    users: rows.map((row) => ({
-      userId: row.userId,
-      firstName: row.firstName,
-      lastName: row.lastName,
-      email: row.email,
-      role: row.role,
-      status: row.status,
-      centerId: row.center?.centerId ?? null,
-      centerName: row.center?.centerName ?? null,
-      stNumber: row.stNumber,
-      regNumber: row.regNumber,
-      intake: row.intake,
-      createdAt: row.createdAt.toISOString(),
-    })),
+    users: rows.map(toAdminUser),
     page,
     pageSize,
     total,
     totalPages: Math.max(1, Math.ceil(total / pageSize)),
   };
+}
+
+export async function updateUserStatus(
+  userId: string,
+  status: "ACTIVE" | "INACTIVE",
+): Promise<AdminUser | null> {
+  try {
+    return toAdminUser(await new UserRepository().updateStatus(userId, status));
+  } catch (error) {
+    // P2025 = record to update not found
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === "P2025"
+    ) {
+      return null;
+    }
+
+    throw error;
+  }
 }

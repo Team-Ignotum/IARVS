@@ -24,6 +24,7 @@ import {
 } from "@/components/ui/dialog";
 import UsersFilters from "@/components/admin/users/UsersFilters";
 import UsersTable from "@/components/admin/users/userTable";
+import UserStatusDialog from "@/components/admin/users/UserStatusDialog";
 import {
   UserCenterFilter,
   UserRecord,
@@ -40,13 +41,14 @@ import UserRegistrationForm from "./UserRegistrationForm";
 
 const PAGE_SIZE = 10;
 
-type UserActionKind = "view" | "status" | "delete";
+type UserActionKind = "view" | "delete";
 type UserAction = { kind: UserActionKind; user: UserRecord } | null;
 
 export default function UserRegistrationDashboard() {
   const { stats } = useAdminStats();
   const [registrationOpen, setRegistrationOpen] = useState(false);
   const [userAction, setUserAction] = useState<UserAction>(null);
+  const [statusUser, setStatusUser] = useState<UserRecord | null>(null);
   const [roleFilter, setRoleFilter] = useState<"all" | UserRole>("all");
   const [statusFilter, setStatusFilter] = useState<"all" | UserStatus>("all");
   const [centerFilter, setCenterFilter] = useState<UserCenterFilter>("all");
@@ -69,8 +71,8 @@ export default function UserRegistrationDashboard() {
     setUserAction({ kind, user });
   }
 
-  // TODO: status changes and deletions need their own endpoints
-  // (PATCH/DELETE /api/admin/users/[userId]); closing the dialog is a no-op for now.
+  // TODO: deletions need their own endpoint (DELETE /api/admin/users/[userId]);
+  // closing the dialog is a no-op for now.
   function closeUserAction() {
     setUserAction(null);
   }
@@ -238,37 +240,6 @@ export default function UserRegistrationDashboard() {
                 </>
               )}
 
-              {userAction?.kind === "status" && (
-                <>
-                  <DialogHeader>
-                    <DialogTitle>Change user status?</DialogTitle>
-                    <DialogDescription>
-                      {userAction.user.name} is currently{" "}
-                      {userAction.user.status.toLowerCase()}. This will change
-                      the account to{" "}
-                      {userAction.user.status === "Active"
-                        ? "inactive"
-                        : "active"}
-                      .
-                    </DialogDescription>
-                  </DialogHeader>
-                  <div className="flex justify-end gap-2">
-                    <DialogClose asChild>
-                      <button className="inline-flex h-9 items-center rounded-md border border-slate-300 px-4 text-sm font-medium text-slate-700 hover:bg-slate-50">
-                        Cancel
-                      </button>
-                    </DialogClose>
-                    <button
-                      type="button"
-                      onClick={closeUserAction}
-                      className="inline-flex h-9 items-center rounded-md bg-[#183b68] px-4 text-sm font-medium text-white hover:bg-[#102d52]"
-                    >
-                      Change status
-                    </button>
-                  </div>
-                </>
-              )}
-
               {userAction?.kind === "delete" && (
                 <>
                   <DialogHeader>
@@ -331,7 +302,7 @@ export default function UserRegistrationDashboard() {
             itemsPerPage={PAGE_SIZE}
             onPageChange={setPage}
             onViewUser={(user) => openUserAction("view", user)}
-            onChangeStatus={(user) => openUserAction("status", user)}
+            onChangeStatus={setStatusUser}
             onDeleteUser={(id) => {
               const user = rows.find((candidate) => candidate.id === id);
               if (user) openUserAction("delete", user);
@@ -339,6 +310,8 @@ export default function UserRegistrationDashboard() {
           />
         </div>
       </div>
+
+      <UserStatusDialog user={statusUser} onClose={() => setStatusUser(null)} />
     </div>
   );
 }

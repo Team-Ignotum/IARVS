@@ -10,4 +10,8 @@ export const userListQuerySchema = z.object({
   pageSize: z.coerce.number().int().min(1).max(100).default(10),
 });
 
+export const updateUserStatusSchema = z.object({
+  status: z.enum(["ACTIVE", "INACTIVE"]),
+});
+
 export type UserListQuery = z.infer<typeof userListQuerySchema>;

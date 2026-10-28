@@ -18,6 +18,7 @@ import { useDebouncedValue } from "@/_hooks/core/useDebouncedValue";
 import UsersTable from "@/components/admin/users/userTable";
 import {
   UserCenterFilter,
+  UserRecord,
   UserRole,
   UserStatus,
 } from "@/components/admin/users/types";
@@ -28,6 +29,7 @@ import {
   toDbStatus,
 } from "@/components/admin/users/utils";
 import UsersFilters from "@/components/admin/users/UsersFilters";
+import UserStatusDialog from "@/components/admin/users/UserStatusDialog";
 import { AdminBreadcrumb } from "@/components/admin/AdminBreadcrumb";
 import UserRegistrationForm from "@/app/admin/user-registration/UserRegistrationForm";
 import {
@@ -48,6 +50,7 @@ export default function StaffPage() {
   const [centerFilter, setCenterFilter] = useState<UserCenterFilter>("all");
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
+  const [statusUser, setStatusUser] = useState<UserRecord | null>(null);
   const debouncedSearch = useDebouncedValue(search);
 
   const { users, total, totalPages, isLoading, error } = useUsers({
@@ -196,13 +199,18 @@ export default function StaffPage() {
                   itemsPerPage={PAGE_SIZE}
                   onPageChange={setPage}
                   onViewUser={(user) => console.log("view", user)}
-                  onChangeStatus={(user) => console.log("change", user)}
+                  onChangeStatus={setStatusUser}
                   onDeleteUser={(id) => console.log("delete", id)}
                 />
               </div>
             </div>
           </div>
         </div>
+
+        <UserStatusDialog
+          user={statusUser}
+          onClose={() => setStatusUser(null)}
+        />
       </SidebarInset>
     </SidebarProvider>
   );
