@@ -313,20 +313,13 @@ export default function RegistrationWindowMock() {
                         )}
                       </div>
                       <div className="flex items-center gap-3 text-xs text-slate-500">
-                        <span className="flex items-center gap-1">
-                          <Clock size={12} />
-                          {formatRange(w.startAt, w.endAt)}
-                        </span>
-                      )}
-                    </div>
-                    <div className="flex items-center gap-3 text-xs text-slate-500">
-                      <span className="flex items-center gap-1">
-                        <Clock size={12} />
-                        {formatRange(w.startAt, w.endAt)}
-                      </span>
-                      {w.batches && <span>Batches {w.batches}</span>}
-                    </div>
-                  </div>
+                          <span className="flex items-center gap-1">
+                            <Clock size={12} />
+                            {formatRange(w.startAt, w.endAt)}
+                          </span>
+                          {w.batches && <span>Batches {w.batches}</span>}
+                        </div>
+                      </div>
 
                   <div className="flex shrink-0 items-center gap-2">
                     {isOpen && (
