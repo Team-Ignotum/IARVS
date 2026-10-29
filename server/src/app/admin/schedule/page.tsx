@@ -16,8 +16,6 @@ import {
   CheckCircle2,
 } from "lucide-react";
 import { AdminSidebar } from "@/components/Asidebar";
-import { AdminHeader } from "@/components/admin/AdminHeader";
-import { AdminBreadcrumb } from "@/components/admin/AdministrativeBreadcrumb";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 
 type RegistrationType = "NEW_REGISTRATION" | "RE_REGISTRATION" | "ADD_DROP";
@@ -58,7 +56,7 @@ const STATUS_STYLES: Record<WindowStatus, string> = {
   CLOSED: "bg-slate-100 text-slate-600 border-slate-200",
 };
 
-// One fixed entry per registration type — saving always updates the
+// One fixed entry per registration type â€” saving always updates the
 // matching card instead of appending a new one.
 const initialCards: CardMap = {
   NEW_REGISTRATION: {
@@ -147,7 +145,7 @@ export default function RegistrationWindowMock() {
     setTypeMenuOpen(false);
   }
 
-  // Opens the generic "Manage Registration Window" flow — type stays
+  // Opens the generic "Manage Registration Window" flow â€” type stays
   // editable via the dropdown.
   function openGenericModal() {
     setForm(emptyForm);
@@ -156,7 +154,7 @@ export default function RegistrationWindowMock() {
     setOpen(true);
   }
 
-  // Triggered by a card's "Open now" switch — navigates straight into the
+  // Triggered by a card's "Open now" switch â€” navigates straight into the
   // form, pre-selected and pre-filled for that specific registration type.
   function openModalForType(type: RegistrationType) {
     const existing = cards[type];
@@ -173,7 +171,7 @@ export default function RegistrationWindowMock() {
     setOpen(true);
   }
 
-  // Direct close — no form needed to shut a window down.
+  // Direct close â€” no form needed to shut a window down.
   function closeNow(type: RegistrationType) {
     setCards((prev) => ({
       ...prev,
@@ -214,7 +212,7 @@ export default function RegistrationWindowMock() {
   // Triggered directly by the Save & Schedule button's onClick rather than
   // the form's onSubmit. Sandboxed preview iframes (this artifact preview
   // included) can silently block the native `submit` event, so we avoid
-  // depending on it entirely — the button calls this straight away.
+  // depending on it entirely â€” the button calls this straight away.
   function handleSave() {
     const validationError = validate();
     if (validationError) {
@@ -225,7 +223,7 @@ export default function RegistrationWindowMock() {
     setFormError("");
     setSaving(true);
 
-    // Mock async save — in the real app this calls
+    // Mock async save â€” in the real app this calls
     // useSaveRegistrationWindow().mutate(form)
     window.setTimeout(() => {
       const type = form.registrationType;
@@ -319,35 +317,41 @@ export default function RegistrationWindowMock() {
                           <Clock size={12} />
                           {formatRange(w.startAt, w.endAt)}
                         </span>
-                        {w.batches && <span>Batches {w.batches}</span>}
-                      </div>
-                    </div>
-
-                    <div className="flex shrink-0 items-center gap-2">
-                      {isOpen && (
-                        <button
-                          type="button"
-                          onClick={() => openModalForType(t.value)}
-                          className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-600 transition-colors hover:border-slate-300 hover:text-slate-900"
-                        >
-                          Edit
-                        </button>
                       )}
-                      <button
-                        type="button"
-                        onClick={() =>
-                          isOpen ? closeNow(t.value) : openModalForType(t.value)
-                        }
-                        className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-600 transition-colors hover:border-slate-300 hover:text-slate-900"
-                      >
-                        <Power size={12} />
-                        {isOpen ? "Close now" : "Open now"}
-                      </button>
+                    </div>
+                    <div className="flex items-center gap-3 text-xs text-slate-500">
+                      <span className="flex items-center gap-1">
+                        <Clock size={12} />
+                        {formatRange(w.startAt, w.endAt)}
+                      </span>
+                      {w.batches && <span>Batches {w.batches}</span>}
                     </div>
                   </div>
-                );
-              })}
-            </div>
+
+                  <div className="flex shrink-0 items-center gap-2">
+                    {isOpen && (
+                      <button
+                        type="button"
+                        onClick={() => openModalForType(t.value)}
+                        className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-600 transition-colors hover:border-slate-300 hover:text-slate-900"
+                      >
+                        Edit
+                      </button>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() =>
+                        isOpen ? closeNow(t.value) : openModalForType(t.value)
+                      }
+                      className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-600 transition-colors hover:border-slate-300 hover:text-slate-900"
+                    >
+                      <Power size={12} />
+                      {isOpen ? "Close now" : "Open now"}
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
 
@@ -512,13 +516,12 @@ export default function RegistrationWindowMock() {
           </div>
         )}
 
-      {toast && (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 bg-slate-900 text-white text-sm font-medium px-4 py-2.5 rounded-lg shadow-lg">
-          <CheckCircle2 size={16} className="text-emerald-400" />
-          {toast}
-        </div>
-      )}
-        </main>
+        {toast && (
+          <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 bg-slate-900 text-white text-sm font-medium px-4 py-2.5 rounded-lg shadow-lg">
+            <CheckCircle2 size={16} className="text-emerald-400" />
+            {toast}
+          </div>
+        )}
       </SidebarInset>
     </SidebarProvider>
   );

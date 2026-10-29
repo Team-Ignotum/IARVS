@@ -42,11 +42,12 @@ model User {
   firstName    String
   lastName     String
   role         UserRole
-  center       String
+  centerId     Int?
   isActive     Boolean    @default(true)
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @updatedAt
 
+  center          Center? @relation(fields: [centerId], references: [id], onDelete: Restrict, onUpdate: Cascade)
   enrollments     StudentEnrollment[]
   academicRecords AcademicRecord[]
 
@@ -168,4 +169,17 @@ model AcademicRecord {
   @@index([moduleId])
   @@index([curriculumVersionId])
   @@map("academic_records")
+}
+
+model Center {
+  id         Int      @id @default(autoincrement())
+  centerId   String   @unique
+  centerName String
+  isActive   Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  users User[]
+
+  @@map("centers")
 }

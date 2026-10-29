@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import * as jose from "jose";
 import { registrationSchema } from "./register.schema";
 import { UserRepository } from "@/repositories/user_repository_impl";
+import { CenterRepository } from "@/repositories/center_repository_impl";
 import { Prisma } from "@/generated/client";
 import { hash } from "bcrypt-ts";
 
@@ -64,10 +65,17 @@ export async function POST(request: Request) {
       );
     }
 
-    // 6. Hash password
+    // 6. Ensure the referenced center exists and is active
+    const center = await new CenterRepository().findByCenterId(input.centerId);
+
+    if (!center || !center.isActive) {
+      return NextResponse.json({ error: "Invalid center" }, { status: 400 });
+    }
+
+    // 7. Hash password
     const passwordHash = await hash(input.password, 12);
 
-    // 7. Create user account
+    // 8. Create user account
     const user = await userRepository.create({
       userId: input.userId,
       email,
@@ -75,13 +83,13 @@ export async function POST(request: Request) {
       firstName: input.firstName,
       lastName: input.lastName,
       role: input.role,
-      center: input.center,
+      centerId: input.centerId,
       regNumber: input.regNumber,
       stNumber: input.stNumber,
       intake: input.intake,
     });
 
-    // 8. Generate JWT
+    // 9. Generate JWT
     const secret = new TextEncoder().encode(jwtSecret);
 
     const token = await new jose.SignJWT({
@@ -107,7 +115,7 @@ export async function POST(request: Request) {
       redirectUrl = `${baseUrl}/staff`;
     } 
 
-    // 9. Set authentication cookie
+    // 10. Set authentication cookie
     const response = NextResponse.json(
       {
         message: "Registration successful",
