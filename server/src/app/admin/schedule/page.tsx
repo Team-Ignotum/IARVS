@@ -17,6 +17,8 @@ import {
 } from "lucide-react";
 import { AdminSidebar } from "@/components/Asidebar";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
+import { AdminBreadcrumb } from "@/components/admin/AdministrativeBreadcrumb";
+import { AdminHeader } from "@/components/admin/AdminHeader";
 
 type RegistrationType = "NEW_REGISTRATION" | "RE_REGISTRATION" | "ADD_DROP";
 type WindowStatus = "OPEN" | "SCHEDULED" | "CLOSED";
@@ -260,28 +262,29 @@ export default function RegistrationWindowMock() {
         <main className="flex flex-1 flex-col gap-6 bg-[#f4f5f7] p-4 sm:p-6 lg:p-8">
           <AdminBreadcrumb currentPage="Schedule" />
           <div className="max-w-3xl mx-auto">
-        <div className="flex items-center justify-between mb-1 gap-4">
-          <div>
-            <p className="text-xs font-medium tracking-wide text-slate-400 uppercase mb-1">
-              IARVS Admin
+            <div className="flex items-center justify-between mb-1 gap-4">
+              <div>
+                <p className="text-xs font-medium tracking-wide text-slate-400 uppercase mb-1">
+                  IARVS Admin
+                </p>
+                <h1 className="text-xl font-semibold text-slate-900">
+                  Registration Windows
+                </h1>
+              </div>
+              <button
+                type="button"
+                onClick={openGenericModal}
+                className="inline-flex items-center gap-2 rounded-lg bg-[#183b68] px-4 py-2.5 text-sm font-medium text-white hover:bg-slate-800 active:bg-slate-950 transition-colors shrink-0"
+              >
+                <Calendar size={16} strokeWidth={2} />
+                Manage Registration Window
+              </button>
+            </div>
+            <p className="text-sm text-slate-500 mb-8">
+              Control when the student portal accepts registration and
+              re-registration requests. Each type has exactly one window.
             </p>
-            <h1 className="text-xl font-semibold text-slate-900">Registration Windows</h1>
-          </div>
-          <button
-            type="button"
-            onClick={openGenericModal}
-            className="inline-flex items-center gap-2 rounded-lg bg-[#183b68] px-4 py-2.5 text-sm font-medium text-white hover:bg-slate-800 active:bg-slate-950 transition-colors shrink-0"
-          >
-            <Calendar size={16} strokeWidth={2} />
-            Manage Registration Window
-          </button>
-        </div>
-        <p className="text-sm text-slate-500 mb-8">
-          Control when the student portal accepts registration and re-registration requests.
-          Each type has exactly one window.
-        </p>
 
-        <div className="space-y-3">
             <div className="mt-6 space-y-3">
               {TYPES.map((t) => {
                 const w = cards[t.value];
@@ -313,40 +316,40 @@ export default function RegistrationWindowMock() {
                         )}
                       </div>
                       <div className="flex items-center gap-3 text-xs text-slate-500">
-                          <span className="flex items-center gap-1">
-                            <Clock size={12} />
-                            {formatRange(w.startAt, w.endAt)}
-                          </span>
-                          {w.batches && <span>Batches {w.batches}</span>}
-                        </div>
+                        <span className="flex items-center gap-1">
+                          <Clock size={12} />
+                          {formatRange(w.startAt, w.endAt)}
+                        </span>
+                        {w.batches && <span>Batches {w.batches}</span>}
                       </div>
+                    </div>
 
-                  <div className="flex shrink-0 items-center gap-2">
-                    {isOpen && (
+                    <div className="flex shrink-0 items-center gap-2">
+                      {isOpen && (
+                        <button
+                          type="button"
+                          onClick={() => openModalForType(t.value)}
+                          className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-600 transition-colors hover:border-slate-300 hover:text-slate-900"
+                        >
+                          Edit
+                        </button>
+                      )}
                       <button
                         type="button"
-                        onClick={() => openModalForType(t.value)}
+                        onClick={() =>
+                          isOpen ? closeNow(t.value) : openModalForType(t.value)
+                        }
                         className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-600 transition-colors hover:border-slate-300 hover:text-slate-900"
                       >
-                        Edit
+                        <Power size={12} />
+                        {isOpen ? "Close now" : "Open now"}
                       </button>
-                    )}
-                    <button
-                      type="button"
-                      onClick={() =>
-                        isOpen ? closeNow(t.value) : openModalForType(t.value)
-                      }
-                      className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-600 transition-colors hover:border-slate-300 hover:text-slate-900"
-                    >
-                      <Power size={12} />
-                      {isOpen ? "Close now" : "Open now"}
-                    </button>
+                    </div>
                   </div>
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
           </div>
-        </div>
 
         {open && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -515,6 +518,7 @@ export default function RegistrationWindowMock() {
             {toast}
           </div>
         )}
+        </main>
       </SidebarInset>
     </SidebarProvider>
   );
