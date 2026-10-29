@@ -255,58 +255,67 @@ export default function RegistrationWindowMock() {
   return (
     <SidebarProvider>
       <AdminSidebar />
-      <SidebarInset className="min-h-screen bg-slate-50 p-6 sm:p-10 font-sans">
-        <div className="max-w-3xl mx-auto">
-          <div className="flex items-center justify-between mb-1 gap-4">
-            <div>
-              <p className="text-xs font-medium tracking-wide text-slate-400 uppercase mb-1">
-                IARVS Admin
-              </p>
-              <h1 className="text-xl font-semibold text-slate-900">
-                Registration Windows
-              </h1>
-            </div>
-            <button
-              type="button"
-              onClick={openGenericModal}
-              className="inline-flex items-center gap-2 rounded-lg bg-[#183b68] px-4 py-2.5 text-sm font-medium text-white hover:bg-slate-800 active:bg-slate-950 transition-colors shrink-0"
-            >
-              <Calendar size={16} strokeWidth={2} />
-              Manage Registration Window
-            </button>
+      <SidebarInset className="min-h-screen bg-slate-50 font-sans">
+        <AdminHeader />
+        <main className="flex flex-1 flex-col gap-6 bg-[#f4f5f7] p-4 sm:p-6 lg:p-8">
+          <AdminBreadcrumb currentPage="Schedule" />
+          <div className="max-w-3xl mx-auto">
+        <div className="flex items-center justify-between mb-1 gap-4">
+          <div>
+            <p className="text-xs font-medium tracking-wide text-slate-400 uppercase mb-1">
+              IARVS Admin
+            </p>
+            <h1 className="text-xl font-semibold text-slate-900">Registration Windows</h1>
           </div>
-          <p className="text-sm text-slate-500 mb-8">
-            Control when the student portal accepts registration and
-            re-registration requests. Each type has exactly one window.
-          </p>
+          <button
+            type="button"
+            onClick={openGenericModal}
+            className="inline-flex items-center gap-2 rounded-lg bg-[#183b68] px-4 py-2.5 text-sm font-medium text-white hover:bg-slate-800 active:bg-slate-950 transition-colors shrink-0"
+          >
+            <Calendar size={16} strokeWidth={2} />
+            Manage Registration Window
+          </button>
+        </div>
+        <p className="text-sm text-slate-500 mb-8">
+          Control when the student portal accepts registration and re-registration requests.
+          Each type has exactly one window.
+        </p>
 
-          <div className="space-y-3">
-            {TYPES.map((t) => {
-              const w = cards[t.value];
-              const isOpen = w.status === "OPEN";
+        <div className="space-y-3">
+            <div className="mt-6 space-y-3">
+              {TYPES.map((t) => {
+                const w = cards[t.value];
+                const isOpen = w.status === "OPEN";
 
-              return (
-                <div
-                  key={t.value}
-                  className={`flex items-center justify-between gap-4 rounded-xl border bg-white p-4 transition-colors duration-700 ${
-                    justUpdatedType === t.value
-                      ? "border-slate-900 bg-slate-50"
-                      : "border-slate-200"
-                  }`}
-                >
-                  <div className="min-w-0">
-                    <div className="mb-1.5 flex items-center gap-2">
-                      <span className="text-sm font-medium text-slate-900">
-                        {t.label}
-                      </span>
-                      <span
-                        className={`rounded-full border px-2 py-0.5 text-[11px] font-medium ${STATUS_STYLES[w.status]}`}
-                      >
-                        {w.status}
-                      </span>
-                      {justUpdatedType === t.value && (
-                        <span className="text-[11px] font-medium text-slate-500">
-                          Updated
+                return (
+                  <div
+                    key={t.value}
+                    className={`flex items-center justify-between gap-4 rounded-xl border bg-white p-4 transition-colors duration-700 ${
+                      justUpdatedType === t.value
+                        ? "border-slate-900 bg-slate-50"
+                        : "border-slate-200"
+                    }`}
+                  >
+                    <div className="min-w-0">
+                      <div className="mb-1.5 flex items-center gap-2">
+                        <span className="text-sm font-medium text-slate-900">
+                          {t.label}
+                        </span>
+                        <span
+                          className={`rounded-full border px-2 py-0.5 text-[11px] font-medium ${STATUS_STYLES[w.status]}`}
+                        >
+                          {w.status}
+                        </span>
+                        {justUpdatedType === t.value && (
+                          <span className="text-[11px] font-medium text-slate-500">
+                            Updated
+                          </span>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-3 text-xs text-slate-500">
+                        <span className="flex items-center gap-1">
+                          <Clock size={12} />
+                          {formatRange(w.startAt, w.endAt)}
                         </span>
                       )}
                     </div>

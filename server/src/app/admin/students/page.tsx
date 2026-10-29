@@ -4,6 +4,7 @@ import { useState } from "react";
 import { AdminSidebar } from "@/components/Asidebar";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { AdminHeader } from "@/components/admin/AdminHeader";
+import { AdminBreadcrumb } from "@/components/admin/AdministrativeBreadcrumb";
 import AdminPagination from "@/components/admin/AdminPagination";
 import StatsGrid from "@/components/admin-dashboard/StatsGrid";
 import { Button } from "@/components/ui/button";
@@ -89,6 +90,8 @@ export default function StudentPage() {
         <AdminHeader />
 
         <div className="flex flex-1 flex-col gap-4 bg-gray-100 p-6">
+          <AdminBreadcrumb currentPage="Students" />
+
           <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
             {/* TITLE + BUTTONS */}
 
