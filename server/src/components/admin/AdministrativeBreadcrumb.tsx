@@ -7,7 +7,11 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 
-export function AdminBreadcrumb() {
+export function AdminBreadcrumb({
+  currentPage = "Administrative",
+}: {
+  currentPage?: string;
+}) {
   return (
     <Breadcrumb>
       <BreadcrumbList>
@@ -18,7 +22,7 @@ export function AdminBreadcrumb() {
         <BreadcrumbSeparator />
 
         <BreadcrumbItem>
-          <BreadcrumbPage>Administrative</BreadcrumbPage>
+          <BreadcrumbPage>{currentPage}</BreadcrumbPage>
         </BreadcrumbItem>
       </BreadcrumbList>
     </Breadcrumb>
