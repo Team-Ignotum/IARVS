@@ -9,7 +9,9 @@ export default function AdminLayout({
 }>) {
   return (
     <AdminThemeProvider>
-      {children}
+      <div className="min-h-screen bg-white text-slate-900 dark:bg-[#020817] dark:text-slate-100">
+        {children}
+      </div>
     </AdminThemeProvider>
   );
 }

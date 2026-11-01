@@ -1,6 +1,7 @@
+
 "use client";
 
-import StatCard, { StatCardProps } from "./StatCard";
+import StatCard, { type StatCardProps } from "./StatCard";
 
 interface StatsGridProps {
   stats: StatCardProps[];

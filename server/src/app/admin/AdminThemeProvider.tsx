@@ -17,6 +17,8 @@ type ThemeContextType = {
   toggleTheme: () => void;
 };
 
+const THEME_STORAGE_KEY = "iarvs-admin-theme";
+
 const ThemeContext = createContext<ThemeContextType | undefined>(
   undefined
 );
@@ -27,36 +29,71 @@ export function AdminThemeProvider({
   children: ReactNode;
 }) {
   const [theme, setThemeState] = useState<Theme>("light");
+  const [isThemeLoaded, setIsThemeLoaded] = useState(false);
 
+  // 1. Restore the previously selected theme on page load
   useEffect(() => {
-    const saved = localStorage.getItem("iarvs-admin-theme");
+    try {
+      const savedTheme = window.localStorage.getItem(
+        THEME_STORAGE_KEY
+      );
 
-    if (saved === "light" || saved === "dark") {
-      setThemeState(saved);
+      const initialTheme: Theme =
+        savedTheme === "dark" ? "dark" : "light";
+
+      setThemeState(initialTheme);
+
+      document.documentElement.classList.toggle(
+        "dark",
+        initialTheme === "dark"
+      );
+    } catch (error) {
+      console.error("Failed to load admin theme:", error);
+    } finally {
+      setIsThemeLoaded(true);
     }
   }, []);
 
+  // 2. Apply and persist theme after initialization
   useEffect(() => {
-    localStorage.setItem("iarvs-admin-theme", theme);
+    if (!isThemeLoaded) return;
+
     document.documentElement.classList.toggle(
       "dark",
       theme === "dark"
     );
-  }, [theme]);
 
+    document.documentElement.style.colorScheme = theme;
+
+    try {
+      window.localStorage.setItem(
+        THEME_STORAGE_KEY,
+        theme
+      );
+    } catch (error) {
+      console.error("Failed to save admin theme:", error);
+    }
+  }, [theme, isThemeLoaded]);
+
+  // 3. Select light or dark mode
   const setTheme = (nextTheme: Theme) => {
     setThemeState(nextTheme);
   };
 
+  // 4. Toggle between light and dark mode
   const toggleTheme = () => {
-    setThemeState((current) =>
-      current === "light" ? "dark" : "light"
+    setThemeState((currentTheme) =>
+      currentTheme === "light" ? "dark" : "light"
     );
   };
 
   return (
     <ThemeContext.Provider
-      value={{ theme, setTheme, toggleTheme }}
+      value={{
+        theme,
+        setTheme,
+        toggleTheme,
+      }}
     >
       {children}
     </ThemeContext.Provider>
