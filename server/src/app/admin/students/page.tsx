@@ -111,7 +111,7 @@ export default function StudentPage() {
 
                 <Button
                   type="button"
-                  className="bg-[#4f46e5] text-white hover:bg-[#4338ca]"
+                  className="bg-[#183b68] text-white hover:bg-[#4338ca]"
                 >
                   <Download className="h-4 w-4" />
                   Export CSV
@@ -121,7 +121,7 @@ export default function StudentPage() {
 
                 <Button
                   type="button"
-                  className="bg-[#4f46e5] text-white hover:bg-[#4338ca]"
+                  className="bg-[#183b68] text-white hover:bg-[#4338ca]"
                 >
                   <Plus className="h-4 w-4" />
                   Add Student
