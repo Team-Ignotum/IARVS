@@ -8,8 +8,7 @@ import crest from "../favicon.ico.png";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import React, { useState ,useEffect} from "react";
-
+import React, { useState, useEffect } from "react";
 
 import { useLogin } from "@/_hooks/login/useLogin";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
@@ -18,7 +17,6 @@ import { useRouter } from "next/navigation";
 type ToastVariant = "default" | "destructive";
 
 const LoginPage = () => {
-
   const loginMutation = useLogin();
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
@@ -40,7 +38,6 @@ const LoginPage = () => {
 
     return () => clearTimeout(timer);
   }, [toastData.open, toastData.title, toastData.description]);
-  
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -77,7 +74,6 @@ const LoginPage = () => {
       });
     }
   };
-
 
   return (
     <main className="min-h-screen w-full">
@@ -245,7 +241,7 @@ const LoginPage = () => {
                   placeholder="e.g. s20007000@ousl.lk "
                   autoComplete="username"
                   required
-                  className="h-13 rounded-lg border-[#d9dee6] bg-[#fafafa] px-5 text-[15px] shadow-sm focus-visible:border-[#21385f] focus-visible:ring-2 focus-visible:ring-[#21385f]/20"
+                  className="h-13 rounded-lg border-[#d9dee6] bg-[#fafafa] px-5 text-[15px] text-[#071936] placeholder:text-slate-400 shadow-sm focus-visible:border-[#21385f] focus-visible:ring-2 focus-visible:ring-[#21385f]/20"
                 />
               </div>
 
@@ -265,7 +261,7 @@ const LoginPage = () => {
                     placeholder="Enter your password"
                     autoComplete="current-password"
                     required
-                    className="h-13 rounded-lg border-[#d9dee6] bg-[#fafafa] px-5 text-[15px] shadow-sm focus-visible:border-[#21385f] focus-visible:ring-2 focus-visible:ring-[#21385f]/20"
+                    className="h-13 rounded-lg border-[#d9dee6] bg-[#fafafa] px-5 text-[15px] text-[#071936] placeholder:text-slate-400 shadow-sm focus-visible:border-[#21385f] focus-visible:ring-2 focus-visible:ring-[#21385f]/20"
                   />
 
                   <Button

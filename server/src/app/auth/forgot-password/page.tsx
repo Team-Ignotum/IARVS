@@ -39,14 +39,10 @@ export default function ForgotPasswordPage() {
           />
 
           <div className="space-y-1">
+            <p className="text-sm">ශ්‍රී ලංකා විවෘත විශ්වවිද්‍යාලය</p>
+            <p className="text-sm">இலங்கை திறந்த பல்கலைக்கழகம்</p>
             <p className="text-base font-medium">
               The Open University of Sri Lanka
-            </p>
-            <p className="text-sm">
-              இலங்கை திறந்த பல்கலைக்கழகம்
-            </p>
-            <p className="text-sm">
-              ශ්‍රී ලංකා විවෘත විශ්වවිද්‍යාලය
             </p>
           </div>
         </div>
@@ -68,8 +64,7 @@ export default function ForgotPasswordPage() {
           </h1>
 
           <p className="mt-5 max-w-[370px] text-sm leading-6 text-slate-300">
-            One account for your courses, results, library
-            and campus services.
+            One account for your courses, results, library and campus services.
           </p>
         </div>
 
@@ -185,8 +180,8 @@ export default function ForgotPasswordPage() {
           )}
 
           <p className="mt-12 text-center text-sm leading-6 text-neutral-500">
-            Enter your username or email address and we will send
-            you instructions on how to create a new password.
+            Enter your username or email address and we will send you
+            instructions on how to create a new password.
           </p>
 
           <div className="mt-12 text-sm leading-6 text-neutral-600">
@@ -201,10 +196,7 @@ export default function ForgotPasswordPage() {
               </a>
               , ext. 1175 / 1176
             </p>
-            <a
-              href="mailto:ithelpdesk@ou.ac.lk"
-              className="underline"
-            >
+            <a href="mailto:ithelpdesk@ou.ac.lk" className="underline">
               ithelpdesk@ou.ac.lk
             </a>
           </div>

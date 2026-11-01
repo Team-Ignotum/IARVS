@@ -155,7 +155,13 @@ export default function UsersFilters({
               >
                 {center.name}
               </SelectItem>
-            ))}
+            ) : (
+              centers.map((center) => (
+                <SelectItem key={center.centerId} value={center.centerId}>
+                  {center.centerName}
+                </SelectItem>
+              ))
+            )}
 
             <SelectItem value="none" className={itemClassName}>
               No Center

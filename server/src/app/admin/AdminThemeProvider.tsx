@@ -1,4 +1,3 @@
-
 "use client";
 
 import {
@@ -104,9 +103,7 @@ export function useAdminTheme() {
   const context = useContext(ThemeContext);
 
   if (!context) {
-    throw new Error(
-      "useAdminTheme must be used inside AdminThemeProvider"
-    );
+    throw new Error("useAdminTheme must be used inside AdminThemeProvider");
   }
 
   return context;
