@@ -14,22 +14,16 @@ import {
 import type { StudentStatus } from "@/components/admin/users/types";
 
 interface StudentFiltersProps {
-  statusFilter: "all" | StudentStatus;
-  batchFilter: "all" | string;
-  batchOptions: string[];
+  statusFilter: "all" | UserStatus;
   search: string;
-  onStatusChange: (value: "all" | StudentStatus) => void;
-  onBatchChange: (value: "all" | string) => void;
+  onStatusChange: (value: "all" | UserStatus) => void;
   onSearchChange: (value: string) => void;
 }
 
 export default function StudentFilters({
   statusFilter,
-  batchFilter,
-  batchOptions,
   search,
   onStatusChange,
-  onBatchChange,
   onSearchChange,
 }: StudentFiltersProps) {
   const handleReset = () => {

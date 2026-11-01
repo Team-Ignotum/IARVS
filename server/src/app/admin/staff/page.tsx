@@ -26,12 +26,19 @@ import type {
   UserRecord,
   UserRole,
   UserStatus,
-  UserCenterFilter,
 } from "@/components/admin/users/types";
 
 import UsersFilters from "@/components/admin/users/UsersFilters";
-import { filterUsers } from "@/components/admin/users/filters";
+import UserStatusDialog from "@/components/admin/users/UserStatusDialog";
 import { AdminBreadcrumb } from "@/components/admin/AdminBreadcrumb";
+import UserRegistrationForm from "@/app/admin/user-registration/UserRegistrationForm";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 // ---------------------------------------
 // SAMPLE USER RECORDS
@@ -77,13 +84,17 @@ export default function StaffPage() {
     useState<UserCenterFilter>("all");
 
   const [search, setSearch] = useState("");
+  const [page, setPage] = useState(1);
+  const [statusUser, setStatusUser] = useState<UserRecord | null>(null);
+  const debouncedSearch = useDebouncedValue(search);
 
-  const filteredUsers = filterUsers({
-    users: sampleUsers,
-    roleFilter,
-    statusFilter,
-    centerFilter,
-    search,
+  const { users, total, totalPages, isLoading, error } = useUsers({
+    role: toDbRole(roleFilter),
+    status: toDbStatus(statusFilter),
+    center: toCenterParam(centerFilter),
+    search: debouncedSearch.trim() || undefined,
+    page,
+    pageSize: PAGE_SIZE,
   });
 
   // ---------------------------------------
@@ -100,7 +111,7 @@ export default function StaffPage() {
     },
     {
       label: "Centers",
-      value: stats.centers,
+      value: stats.totalCenters,
       icon: GraduationCap,
       iconClass:
         "bg-cyan-50 text-cyan-600 dark:bg-cyan-500/20 dark:text-cyan-300",
@@ -315,10 +326,22 @@ export default function StaffPage() {
                 statusFilter={statusFilter}
                 centerFilter={centerFilter}
                 search={search}
-                onRoleChange={setRoleFilter}
-                onStatusChange={setStatusFilter}
-                onCenterChange={setCenterFilter}
-                onSearchChange={setSearch}
+                onRoleChange={(value) => {
+                  setRoleFilter(value);
+                  setPage(1);
+                }}
+                onStatusChange={(value) => {
+                  setStatusFilter(value);
+                  setPage(1);
+                }}
+                onCenterChange={(value) => {
+                  setCenterFilter(value);
+                  setPage(1);
+                }}
+                onSearchChange={(value) => {
+                  setSearch(value);
+                  setPage(1);
+                }}
               />
 
               <div className="mt-4">
@@ -345,6 +368,11 @@ export default function StaffPage() {
             </div>
           </div>
         </div>
+
+        <UserStatusDialog
+          user={statusUser}
+          onClose={() => setStatusUser(null)}
+        />
       </SidebarInset>
     </SidebarProvider>
   );

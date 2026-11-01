@@ -75,18 +75,23 @@ export async function POST(request: Request) {
       redirectUrl = `${baseUrl}/staff`;
     } else if (user.role === "ADMIN") {
       redirectUrl = `${baseUrl}/admin`;
+    } else if (user.role === "SUPER_STAFF") {
+      redirectUrl = `${baseUrl}/admin`;
     }
-    const respone = NextResponse.json({
+    const response = NextResponse.json({
       message: "Login Successful",
       redirectUrl: redirectUrl,
     });
 
-    // Set the JWT token in a secure HTTP cookie
-    respone.headers.set(
-      "Set-Cookie",
-      `token=${token}; Path=/; HttpOnly, sameSite:'lax'`,
-    );
-    return respone;
+    response.cookies.set("token", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      path: "/",
+      maxAge: 60 * 60,
+    });
+
+    return response;
   } catch (error) {
     console.error("Error during authentication", error);
     return NextResponse.json(

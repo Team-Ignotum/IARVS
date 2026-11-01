@@ -14,13 +14,7 @@ import AdminPagination from "@/components/admin/AdminPagination";
 import StatsGrid from "@/components/admin-dashboard/StatsGrid";
 import { Button } from "@/components/ui/button";
 
-import {
-  BadgeCheck,
-  Download,
-  Hourglass,
-  Plus,
-  Users,
-} from "lucide-react";
+import { BadgeCheck, Download, Hourglass, Plus, Users } from "lucide-react";
 
 import TableActionMenu from "@/components/admin/TableActionMenu";
 
@@ -104,7 +98,7 @@ const sampleStudents: StudentRecord[] = [
 // ---------------------------------------
 
 export default function StudentPage() {
-  const { stats } = useStudentDashboard();
+  const { stats } = useAdminStats();
 
   const [statusFilter, setStatusFilter] =
     useState<"all" | StudentStatus>("all");
@@ -137,7 +131,12 @@ export default function StudentPage() {
       statusFilter === "all" ||
       student.status === statusFilter;
 
-    return matchesSearch && matchesStatus;
+  const { users, total, totalPages, isLoading, error } = useUsers({
+    role: "STUDENT",
+    status: toDbStatus(statusFilter),
+    search: debouncedSearch.trim() || undefined,
+    page,
+    pageSize: PAGE_SIZE,
   });
 
   // ---------------------------------------
@@ -179,15 +178,15 @@ export default function StudentPage() {
         "bg-indigo-50 text-indigo-600 dark:bg-indigo-500/20 dark:text-indigo-300",
     },
     {
-      label: "Approved Students",
-      value: stats.approvedStudents,
+      label: "Active Students",
+      value: stats.activeStudents,
       icon: BadgeCheck,
       iconClass:
         "bg-emerald-50 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-300",
     },
     {
-      label: "Pending Students",
-      value: stats.pendingStudents,
+      label: "Inactive Students",
+      value: stats.inactiveStudents,
       icon: Hourglass,
       iconClass:
         "bg-amber-50 text-amber-600 dark:bg-amber-500/20 dark:text-amber-300",
@@ -321,20 +320,14 @@ export default function StudentPage() {
             <div className="mt-6">
               <StudentFilters
                 statusFilter={statusFilter}
-                batchFilter={batchFilter}
-                batchOptions={batchOptions}
                 search={search}
                 onStatusChange={(value) => {
-                  setStatusFilter(value as "all" | StudentStatus);
-                  setCurrentPage(1);
-                }}
-                onBatchChange={(value) => {
-                  setBatchFilter(value);
-                  setCurrentPage(1);
+                  setStatusFilter(value);
+                  setPage(1);
                 }}
                 onSearchChange={(value) => {
                   setSearch(value);
-                  setCurrentPage(1);
+                  setPage(1);
                 }}
               />
             </div>
@@ -391,8 +384,35 @@ export default function StudentPage() {
                   </TableHeader>
 
                   <TableBody>
-                    {currentStudents.length > 0 ? (
-                      currentStudents.map((student) => (
+                    {isLoading ? (
+                      <TableRow>
+                        <TableCell
+                          colSpan={6}
+                          className="px-5 py-10 text-center text-sm text-slate-500"
+                        >
+                          Loading students...
+                        </TableCell>
+                      </TableRow>
+                    ) : error ? (
+                      <TableRow>
+                        <TableCell
+                          colSpan={6}
+                          className="px-5 py-10 text-center text-sm text-red-600"
+                        >
+                          {error}
+                        </TableCell>
+                      </TableRow>
+                    ) : students.length === 0 ? (
+                      <TableRow>
+                        <TableCell
+                          colSpan={6}
+                          className="px-5 py-10 text-center text-sm text-slate-500"
+                        >
+                          No students found for the selected filters.
+                        </TableCell>
+                      </TableRow>
+                    ) : (
+                      students.map((student) => (
                         <TableRow
                           key={student.id}
                           className={`

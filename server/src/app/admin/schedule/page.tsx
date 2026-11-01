@@ -447,7 +447,6 @@ export default function RegistrationWindowMock() {
                       </span>
                     )}
                   </div>
-                </div>
 
                 <div className="flex shrink-0 items-center gap-2">
                   {isOpen && (
@@ -458,7 +457,8 @@ export default function RegistrationWindowMock() {
                       }
                       className={SECONDARY_BUTTON_CLASS}
                     >
-                      Edit
+                      <Power size={12} />
+                      {isOpen ? "Close now" : "Open now"}
                     </button>
                   )}
 
@@ -475,9 +475,9 @@ export default function RegistrationWindowMock() {
                     {isOpen ? "Close now" : "Open now"}
                   </button>
                 </div>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
         </div>
       </div>
 
@@ -663,7 +663,6 @@ export default function RegistrationWindowMock() {
                     className={INPUT_CLASS}
                   />
                 </div>
-              </div>
 
               {/* Grace period */}
               <div>
@@ -770,8 +769,7 @@ export default function RegistrationWindowMock() {
               </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
 
       {/* Success notification */}
       {toast && (
