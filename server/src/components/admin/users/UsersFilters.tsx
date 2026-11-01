@@ -11,23 +11,54 @@ import {
 
 import FilterBar from "@/components/admin/FilterBar";
 
-import {
-  OUSL_CENTERS,
-  type UserRole,
-  type UserStatus,
-  type UserCenterFilter,
+import type {
+  UserRole,
+  UserStatus,
+  UserCenterFilter,
 } from "./types";
+
+// ---------------------------------------
+// CENTER OPTIONS
+// ---------------------------------------
+// Temporary local options.
+// Replace these with your project's actual
+// center data source when available.
+
+interface CenterOption {
+  code: string;
+  name: string;
+}
+
+const OUSL_CENTERS: CenterOption[] = [
+  {
+    code: "WP10",
+    name: "WP10 - Colombo",
+  },
+  {
+    code: "UP82",
+    name: "UP82",
+  },
+];
+
+// ---------------------------------------
+// PROPS
+// ---------------------------------------
 
 interface UsersFiltersProps {
   roleFilter: "all" | UserRole;
   statusFilter: "all" | UserStatus;
   centerFilter: UserCenterFilter;
   search: string;
+
   onRoleChange: (value: "all" | UserRole) => void;
   onStatusChange: (value: "all" | UserStatus) => void;
   onCenterChange: (value: UserCenterFilter) => void;
   onSearchChange: (value: string) => void;
 }
+
+// ---------------------------------------
+// DARK MODE STYLES
+// ---------------------------------------
 
 const triggerClassName = `
   h-9 min-w-[140px]
@@ -59,6 +90,10 @@ const itemClassName = `
   dark:data-[state=checked]:bg-slate-700
 `;
 
+// ---------------------------------------
+// COMPONENT
+// ---------------------------------------
+
 export default function UsersFilters({
   roleFilter,
   statusFilter,
@@ -85,15 +120,24 @@ export default function UsersFilters({
           </SelectTrigger>
 
           <SelectContent className={contentClassName}>
-            <SelectItem value="all" className={itemClassName}>
+            <SelectItem
+              value="all"
+              className={itemClassName}
+            >
               All Roles
             </SelectItem>
 
-            <SelectItem value="Staff" className={itemClassName}>
+            <SelectItem
+              value="Staff"
+              className={itemClassName}
+            >
               Staff
             </SelectItem>
 
-            <SelectItem value="SuperStaff" className={itemClassName}>
+            <SelectItem
+              value="SuperStaff"
+              className={itemClassName}
+            >
               SuperStaff
             </SelectItem>
           </SelectContent>
@@ -114,15 +158,24 @@ export default function UsersFilters({
           </SelectTrigger>
 
           <SelectContent className={contentClassName}>
-            <SelectItem value="all" className={itemClassName}>
+            <SelectItem
+              value="all"
+              className={itemClassName}
+            >
               All Statuses
             </SelectItem>
 
-            <SelectItem value="Active" className={itemClassName}>
+            <SelectItem
+              value="Active"
+              className={itemClassName}
+            >
               Active
             </SelectItem>
 
-            <SelectItem value="Inactive" className={itemClassName}>
+            <SelectItem
+              value="Inactive"
+              className={itemClassName}
+            >
               Inactive
             </SelectItem>
           </SelectContent>
@@ -143,7 +196,10 @@ export default function UsersFilters({
           </SelectTrigger>
 
           <SelectContent className={contentClassName}>
-            <SelectItem value="all" className={itemClassName}>
+            <SelectItem
+              value="all"
+              className={itemClassName}
+            >
               All Centers
             </SelectItem>
 
@@ -155,22 +211,19 @@ export default function UsersFilters({
               >
                 {center.name}
               </SelectItem>
-            ) : (
-              centers.map((center) => (
-                <SelectItem key={center.centerId} value={center.centerId}>
-                  {center.centerName}
-                </SelectItem>
-              ))
-            )}
+            ))}
 
-            <SelectItem value="none" className={itemClassName}>
+            <SelectItem
+              value="none"
+              className={itemClassName}
+            >
               No Center
             </SelectItem>
           </SelectContent>
         </Select>
       </FilterBar.Field>
 
-      {/* SEARCH */}
+      {/* SEARCH FILTER */}
 
       <FilterBar.Search
         value={search}

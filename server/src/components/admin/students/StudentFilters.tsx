@@ -11,19 +11,46 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-import type { StudentStatus } from "@/components/admin/users/types";
+// ---------------------------------------
+// TYPES
+// ---------------------------------------
+
+export type StudentStatus =
+  | "Approved"
+  | "Pending"
+  | "Expired";
 
 interface StudentFiltersProps {
-  statusFilter: "all" | UserStatus;
+  statusFilter: "all" | StudentStatus;
+  batchFilter: string;
   search: string;
-  onStatusChange: (value: "all" | UserStatus) => void;
+
+  onStatusChange: (
+    value: "all" | StudentStatus
+  ) => void;
+
+  onBatchChange: (value: string) => void;
   onSearchChange: (value: string) => void;
 }
 
+// Temporary intake options.
+// Replace with real intake data when available.
+const batchOptions: string[] = [
+  "2023",
+  "2024",
+  "2025",
+];
+
+// ---------------------------------------
+// COMPONENT
+// ---------------------------------------
+
 export default function StudentFilters({
   statusFilter,
+  batchFilter,
   search,
   onStatusChange,
+  onBatchChange,
   onSearchChange,
 }: StudentFiltersProps) {
   const handleReset = () => {
@@ -31,6 +58,33 @@ export default function StudentFilters({
     onBatchChange("all");
     onSearchChange("");
   };
+
+  const triggerClassName = `
+    h-10 min-w-[170px]
+    border border-slate-200
+    bg-white text-sm text-slate-700
+    transition-colors
+    hover:bg-slate-50
+    dark:border-slate-600
+    dark:bg-[#0F172A]
+    dark:text-slate-100
+    dark:hover:bg-slate-800
+  `;
+
+  const contentClassName = `
+    border-slate-200
+    bg-white text-slate-900
+    dark:border-slate-700
+    dark:bg-[#1E293B]
+    dark:text-slate-100
+  `;
+
+  const itemClassName = `
+    cursor-pointer
+    dark:text-slate-100
+    dark:focus:bg-slate-700
+    dark:focus:text-white
+  `;
 
   return (
     <div
@@ -87,57 +141,40 @@ export default function StudentFilters({
         <Select
           value={statusFilter}
           onValueChange={(value) =>
-            onStatusChange(value as "all" | StudentStatus)
+            onStatusChange(
+              value as "all" | StudentStatus
+            )
           }
         >
-          <SelectTrigger
-            className="
-              h-10 min-w-[170px]
-              border border-slate-200
-              bg-white text-sm text-slate-700
-              hover:bg-slate-50
-              dark:border-slate-600
-              dark:bg-[#0F172A]
-              dark:text-slate-100
-              dark:hover:bg-slate-800
-            "
-          >
+          <SelectTrigger className={triggerClassName}>
             <SelectValue placeholder="All Applications" />
           </SelectTrigger>
 
-          <SelectContent
-            className="
-              border-slate-200 bg-white
-              text-slate-900
-              dark:border-slate-700
-              dark:bg-[#1E293B]
-              dark:text-slate-100
-            "
-          >
+          <SelectContent className={contentClassName}>
             <SelectItem
               value="all"
-              className="dark:focus:bg-slate-700 dark:focus:text-white"
+              className={itemClassName}
             >
               All Applications
             </SelectItem>
 
             <SelectItem
               value="Approved"
-              className="dark:focus:bg-slate-700 dark:focus:text-white"
+              className={itemClassName}
             >
               Approved
             </SelectItem>
 
             <SelectItem
               value="Pending"
-              className="dark:focus:bg-slate-700 dark:focus:text-white"
+              className={itemClassName}
             >
               Pending
             </SelectItem>
 
             <SelectItem
               value="Expired"
-              className="dark:focus:bg-slate-700 dark:focus:text-white"
+              className={itemClassName}
             >
               Expired
             </SelectItem>
@@ -150,37 +187,16 @@ export default function StudentFilters({
       <div className="flex items-center gap-2">
         <Select
           value={batchFilter}
-          onValueChange={(value) =>
-            onBatchChange(value)
-          }
+          onValueChange={onBatchChange}
         >
-          <SelectTrigger
-            className="
-              h-10 min-w-[170px]
-              border border-slate-200
-              bg-white text-sm text-slate-700
-              hover:bg-slate-50
-              dark:border-slate-600
-              dark:bg-[#0F172A]
-              dark:text-slate-100
-              dark:hover:bg-slate-800
-            "
-          >
+          <SelectTrigger className={triggerClassName}>
             <SelectValue placeholder="All Intakes" />
           </SelectTrigger>
 
-          <SelectContent
-            className="
-              border-slate-200 bg-white
-              text-slate-900
-              dark:border-slate-700
-              dark:bg-[#1E293B]
-              dark:text-slate-100
-            "
-          >
+          <SelectContent className={contentClassName}>
             <SelectItem
               value="all"
-              className="dark:focus:bg-slate-700 dark:focus:text-white"
+              className={itemClassName}
             >
               All Intakes
             </SelectItem>
@@ -189,10 +205,7 @@ export default function StudentFilters({
               <SelectItem
                 key={batch}
                 value={batch}
-                className="
-                  dark:focus:bg-slate-700
-                  dark:focus:text-white
-                "
+                className={itemClassName}
               >
                 {batch}
               </SelectItem>
@@ -201,7 +214,7 @@ export default function StudentFilters({
         </Select>
       </div>
 
-      {/* RESET FILTER BUTTON */}
+      {/* RESET BUTTON */}
 
       <button
         type="button"
