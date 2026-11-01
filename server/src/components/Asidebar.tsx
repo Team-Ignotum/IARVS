@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useEffect, useState } from "react";
@@ -75,6 +74,8 @@ type SupportTicket = {
 const SUPPORT_STORAGE_KEY = "iarvs-admin-support-demo";
 const SUPPORT_READ_KEY = "iarvs-admin-support-read";
 
+// ================= STYLING =================
+
 const COLLAPSED_BASE =
   "group-data-[collapsible=icon]:!size-8 " +
   "group-data-[collapsible=icon]:justify-center " +
@@ -82,13 +83,20 @@ const COLLAPSED_BASE =
   "group-data-[collapsible=icon]:mx-auto";
 
 const ACTIVE_CLASS =
-  "bg-[#021127] text-white hover:bg-[#021127] " +
-  "hover:text-white data-[active=true]:bg-[#021127] " +
+  "bg-[#021127] text-white " +
+  "hover:bg-[#021127] hover:text-white " +
+  "data-[active=true]:bg-[#021127] " +
   "data-[active=true]:text-white " +
-  "data-[active=true]:hover:bg-[#021127]";
+  "dark:!bg-[#1D4ED8] dark:!text-white " +
+  "dark:hover:!bg-[#1D4ED8] " +
+  "dark:data-[active=true]:!bg-[#1D4ED8] " +
+  "dark:data-[active=true]:!text-white";
 
 const INACTIVE_CLASS =
-  "text-[#737373] hover:bg-gray-100 hover:text-[#0A0A0A]";
+  "text-[#737373] hover:bg-gray-100 hover:text-[#0A0A0A] " +
+  "dark:text-slate-300 " +
+  "dark:hover:bg-[#1E293B] " +
+  "dark:hover:text-white";
 
 const menuBtnClass = (active: boolean) =>
   `${COLLAPSED_BASE} ${
@@ -154,11 +162,25 @@ function LogoHeader({
   collapsed: boolean;
 }) {
   return (
-    <SidebarHeader className="p-0 group-data-[collapsible=icon]:flex group-data-[collapsible=icon]:flex-col group-data-[collapsible=icon]:items-center">
+    <SidebarHeader
+      className="
+        bg-white
+        text-slate-900
+        dark:!bg-[#0F172A]
+        dark:text-slate-100
+        p-0
+        group-data-[collapsible=icon]:flex
+        group-data-[collapsible=icon]:flex-col
+        group-data-[collapsible=icon]:items-center
+      "
+    >
       <div
-        className={`flex items-center justify-between group-data-[collapsible=icon]:w-full group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:py-2 ${
-          collapsed ? "" : "pt-2 pl-2"
-        }`}
+        className={`flex items-center justify-between
+          group-data-[collapsible=icon]:w-full
+          group-data-[collapsible=icon]:justify-center
+          group-data-[collapsible=icon]:py-2
+          ${collapsed ? "" : "pt-2 pl-2"}
+        `}
       >
         <div className="flex min-w-0 items-center gap-2">
           <Image
@@ -170,19 +192,36 @@ function LogoHeader({
           />
 
           {!collapsed && (
-            <span className="truncate text-sm font-semibold tracking-wide">
+            <span className="truncate text-sm font-semibold tracking-wide text-slate-900 dark:text-white">
               IARVS PORTAL
             </span>
           )}
         </div>
 
         {!collapsed && (
-          <SidebarTrigger className="mr-3 h-9 w-9 shrink-0 [&_svg]:size-5" />
+          <SidebarTrigger
+            className="
+              mr-3 h-9 w-9 shrink-0
+              text-slate-600
+              hover:bg-slate-100
+              dark:text-slate-300
+              dark:hover:bg-[#1E293B]
+              [&_svg]:size-5
+            "
+          />
         )}
       </div>
 
       {collapsed && (
-        <SidebarTrigger className="mt-1 h-8 w-8 [&_svg]:size-4" />
+        <SidebarTrigger
+          className="
+            mt-1 h-8 w-8
+            text-slate-600
+            dark:text-slate-300
+            dark:hover:bg-[#1E293B]
+            [&_svg]:size-4
+          "
+        />
       )}
     </SidebarHeader>
   );
@@ -205,7 +244,16 @@ function NavMenu({
 }) {
   return (
     <SidebarGroup className="group-data-[collapsible=icon]:px-1.5">
-      <SidebarGroupLabel className="text-[11px] font-bold tracking-[0.1em] text-[#737373] uppercase">
+      <SidebarGroupLabel
+        className="
+          text-[11px]
+          font-bold
+          uppercase
+          tracking-[0.1em]
+          text-slate-500
+          dark:text-slate-400
+        "
+      >
         {label}
       </SidebarGroupLabel>
 
@@ -220,18 +268,15 @@ function NavMenu({
           return (
             <SidebarMenuItem
               key={item.href}
-              className="group-data-[collapsible=icon]:flex group-data-[collapsible=icon]:justify-center"
+              className="
+                group-data-[collapsible=icon]:flex
+                group-data-[collapsible=icon]:justify-center
+              "
             >
               <SidebarMenuButton
                 isActive={active}
-                title={
-                  collapsed
-                    ? item.label
-                    : undefined
-                }
-                onClick={() =>
-                  onNavigate(item.href)
-                }
+                title={collapsed ? item.label : undefined}
+                onClick={() => onNavigate(item.href)}
                 className={menuBtnClass(active)}
               >
                 <Icon strokeWidth={1.8} />
@@ -254,15 +299,14 @@ export function AdminSidebar() {
   const pathname = usePathname();
   const router = useRouter();
 
-  const { setOpenMobile, state } =
-    useSidebar();
+  const { setOpenMobile, state } = useSidebar();
 
   const collapsed = state === "collapsed";
 
-  const [unreadCount, setUnreadCount] =
-    useState(0);
+  const [unreadCount, setUnreadCount] = useState(0);
 
-  // Read support notifications from localStorage.
+  // ================= NOTIFICATION LISTENERS =================
+
   useEffect(() => {
     const refreshNotifications = () => {
       setUnreadCount(getUnreadSupportCount());
@@ -303,6 +347,8 @@ export function AdminSidebar() {
     };
   }, [pathname]);
 
+  // ================= NAVIGATION =================
+
   const navigate = (href: string) => {
     router.push(href);
     setOpenMobile(false);
@@ -314,11 +360,28 @@ export function AdminSidebar() {
   );
 
   return (
-    <Sidebar collapsible="icon">
+    <Sidebar
+      collapsible="icon"
+      className="
+        bg-white
+        text-slate-900
+        dark:!bg-[#0F172A]
+        dark:text-slate-100
+        [&_[data-slot=sidebar-inner]]:bg-white
+        dark:[&_[data-slot=sidebar-inner]]:!bg-[#0F172A]
+      "
+    >
       <LogoHeader collapsed={collapsed} />
 
-      {/* MAIN MENU */}
-      <SidebarContent className="flex flex-1 flex-col overflow-y-auto">
+      {/* ================= MAIN MENU ================= */}
+
+      <SidebarContent
+        className="
+          flex flex-1 flex-col overflow-y-auto
+          bg-white
+          dark:!bg-[#0F172A]
+        "
+      >
         <NavMenu
           pathname={pathname}
           onNavigate={navigate}
@@ -328,8 +391,21 @@ export function AdminSidebar() {
         />
       </SidebarContent>
 
-      {/* SUPPORT — BOTTOM */}
-      <SidebarFooter className="mt-auto shrink-0 border-t border-slate-200 px-2 py-3 dark:border-slate-700">
+      {/* ================= SUPPORT FOOTER ================= */}
+
+      <SidebarFooter
+        className="
+          mt-auto
+          shrink-0
+          border-t
+          border-slate-200
+          bg-white
+          px-2
+          py-3
+          dark:border-slate-700
+          dark:!bg-[#0F172A]
+        "
+      >
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton
@@ -343,12 +419,8 @@ export function AdminSidebar() {
                     }`
                   : undefined
               }
-              onClick={() =>
-                navigate("/admin/support")
-              }
-              className={`${menuBtnClass(
-                supportActive
-              )} relative`}
+              onClick={() => navigate("/admin/support")}
+              className={`${menuBtnClass(supportActive)} relative`}
             >
               <CircleHelp strokeWidth={1.8} />
 
@@ -360,32 +432,58 @@ export function AdminSidebar() {
               {unreadCount > 0 && (
                 <span
                   aria-label={`${unreadCount} unread student support messages`}
-                  className="ml-auto inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white group-data-[collapsible=icon]:absolute group-data-[collapsible=icon]:-right-1 group-data-[collapsible=icon]:-top-1 group-data-[collapsible=icon]:h-4 group-data-[collapsible=icon]:min-w-4"
+                  className="
+                    ml-auto
+                    inline-flex
+                    h-5
+                    min-w-5
+                    items-center
+                    justify-center
+                    rounded-full
+                    bg-red-500
+                    px-1
+                    text-[10px]
+                    font-bold
+                    text-white
+                    group-data-[collapsible=icon]:absolute
+                    group-data-[collapsible=icon]:-right-1
+                    group-data-[collapsible=icon]:-top-1
+                    group-data-[collapsible=icon]:h-4
+                    group-data-[collapsible=icon]:min-w-4
+                  "
                 >
-                  {unreadCount > 99
-                    ? "99+"
-                    : unreadCount}
+                  {unreadCount > 99 ? "99+" : unreadCount}
                 </span>
               )}
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
 
-        {/* SMALL NOTIFICATION DESCRIPTION */}
+        {/* UNREAD NOTIFICATION DESCRIPTION */}
         {!collapsed && unreadCount > 0 && (
           <button
             type="button"
-            onClick={() =>
-              navigate("/admin/support")
-            }
-            className="mt-1 flex w-full items-center gap-2 rounded-md px-2 text-left text-xs text-slate-500 hover:text-blue-600 dark:text-slate-400 dark:hover:text-blue-400"
+            onClick={() => navigate("/admin/support")}
+            className="
+              mt-1
+              flex
+              w-full
+              items-center
+              gap-2
+              rounded-md
+              px-2
+              text-left
+              text-xs
+              text-slate-500
+              hover:text-blue-600
+              dark:text-slate-400
+              dark:hover:text-blue-400
+            "
           >
             <Bell size={13} />
 
             {unreadCount} unread student{" "}
-            {unreadCount === 1
-              ? "message"
-              : "messages"}
+            {unreadCount === 1 ? "message" : "messages"}
           </button>
         )}
       </SidebarFooter>
