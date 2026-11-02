@@ -4,7 +4,7 @@ const globalForRedis = globalThis as unknown as {
   redisClient?: ReturnType<typeof createClient>;
 };
 
-const redis =
+export const redis =
   globalForRedis.redisClient ??
   createClient({
     url: process.env.REDIS_URL,
