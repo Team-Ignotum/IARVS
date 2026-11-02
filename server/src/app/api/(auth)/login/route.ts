@@ -1,185 +1,76 @@
+import { NextResponse } from "next/server";
+import { compare } from "bcrypt-ts";
+import { UserRepository } from "@/repositories/user_repository_impl";
+import { createOTPChallenge } from "@/lib/auth/otp";
+import { sendOTPEmail } from "@/lib/otp_email";
 
-import "server-only";
-
-import { SignJWT, jwtVerify } from "jose";
-import { cookies } from "next/headers";
-import prisma from "@/lib/prisma";
-
-// =====================================================
-// CONFIGURATION
-// =====================================================
-
-const JWT_SECRET = process.env.JWT_SECRET;
-const ISSUER = process.env.ISSUER;
-const AUDIENCE = process.env.AUDIENCE;
-
-if (!JWT_SECRET || !ISSUER || !AUDIENCE) {
-  throw new Error(
-    "JWT_SECRET, ISSUER and AUDIENCE must be configured"
-  );
-}
-
-const secret = new TextEncoder().encode(JWT_SECRET);
-
-const COOKIE_NAME = "token";
-const SESSION_DURATION = 60 * 60; // 1 hour
-
-// =====================================================
-// TYPES
-// =====================================================
-
-interface SessionUser {
-  userId: string;
-  email: string;
-  role: string;
-  firstName: string;
-  lastName: string;
-  sessionVersion: number;
-}
-
-// =====================================================
-// CREATE SESSION
-// Call ONLY after successful OTP verification
-// =====================================================
-
-export async function createSession(
-  user: SessionUser
-): Promise<void> {
-  const token = await new SignJWT({
-    id: user.userId,
-    email: user.email,
-    role: user.role,
-    fname: user.firstName,
-    lname: user.lastName,
-    sessionVersion: user.sessionVersion,
-  })
-    .setProtectedHeader({ alg: "HS256" })
-    .setSubject(user.userId)
-    .setIssuedAt()
-    .setIssuer(ISSUER!)
-    .setAudience(AUDIENCE!)
-    .setExpirationTime("1h")
-    .sign(secret);
-
-  const cookieStore = await cookies();
-
-  cookieStore.set(COOKIE_NAME, token, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
-    path: "/",
-    maxAge: SESSION_DURATION,
-  });
-}
-
-// =====================================================
-// GET SESSION
-// Validate JWT + check current database user
-// =====================================================
-
-export async function getSession() {
-  const cookieStore = await cookies();
-  const token = cookieStore.get(COOKIE_NAME)?.value;
-
-  if (!token) {
-    return null;
-  }
-
+export async function POST(request: Request) {
   try {
-    const { payload } = await jwtVerify(token, secret, {
-      algorithms: ["HS256"],
-      issuer: ISSUER!,
-      audience: AUDIENCE!,
+    const formData = await request.formData();
+
+    const email = formData.get("email");
+    const password = formData.get("password");
+
+    if (
+      typeof email !== "string" ||
+      typeof password !== "string" ||
+      !email.trim() ||
+      !password
+    ) {
+      return NextResponse.json(
+        { error: "Email and password are required" },
+        { status: 400 },
+      );
+    }
+
+    const userRepository = new UserRepository();
+
+    const user = await userRepository.getByEmail(email.trim().toLowerCase());
+
+    // Generic error prevents account enumeration.
+    if (!user || !user.passwordHash) {
+      return NextResponse.json(
+        { error: "Invalid email or password" },
+        { status: 401 },
+      );
+    }
+
+    const isPasswordValid = await compare(password, user.passwordHash);
+
+    if (!isPasswordValid) {
+      return NextResponse.json(
+        { error: "Invalid email or password" },
+        { status: 401 },
+      );
+    }
+
+    if (!user.isActive || user.status !== "ACTIVE") {
+      return NextResponse.json(
+        { error: "Account is unavailable" },
+        { status: 403 },
+      );
+    }
+
+    const { challenge, code, expiresIn } = await createOTPChallenge(
+      "LOGIN",
+      user.userId,
+    );
+
+    await sendOTPEmail(user.email, code, "LOGIN");
+
+    return NextResponse.json({
+      success: true,
+      message: "OTP sent to registered email",
+      requiresOTP: true,
+      challenge,
+      expiresIn,
     });
+  } catch (error) {
+    console.error("Login error:", error);
 
-    if (
-      typeof payload.sub !== "string" ||
-      typeof payload.sessionVersion !== "number" ||
-      typeof payload.id !== "string" ||
-      payload.id !== payload.sub
-    ) {
-      return null;
-    }
-
-    const user = await prisma.user.findUnique({
-      where: {
-        userId: payload.sub,
-      },
-    });
-
-    if (
-      !user ||
-      !user.isActive ||
-      user.status !== "ACTIVE"
-    ) {
-      return null;
-    }
-
-    // Reject sessions issued before a password reset.
-    if (
-      user.sessionVersion !== payload.sessionVersion
-    ) {
-      return null;
-    }
-
-    return user;
-  } catch {
-    return null;
+    return NextResponse.json(
+      { error: "Authentication failed" },
+      { status: 500 },
+    );
   }
-}
-
-// =====================================================
-// REQUIRE AUTHENTICATION
-// Use inside protected server routes
-// =====================================================
-
-export async function requireSession() {
-  const user = await getSession();
-
-  if (!user) {
-    throw new Error("UNAUTHORIZED");
-  }
-
-  return user;
-}
-
-// =====================================================
-// ROLE-BASED AUTHORIZATION
-// =====================================================
-
-export async function requireRole(
-  allowedRoles: SessionUser["role"][]
-) {
-  const user = await requireSession();
-
-  if (!allowedRoles.includes(user.role)) {
-    throw new Error("FORBIDDEN");
-  }
-
-  return user;
-}
-
-// =====================================================
-// DESTROY SESSION / LOGOUT
-// =====================================================
-
-export async function destroySession(): Promise<void> {
-  const cookieStore = await cookies();
-
-  cookieStore.delete(COOKIE_NAME);
-}
-
-// =====================================================
-// ROLE-BASED REDIRECTS
-// =====================================================
-
-export function getRedirectUrl(role: string): string {
-  const redirects: Record<string, string> = {
-    STUDENT: "/student",
-    STAFF: "/staff",
-    ADMIN: "/admin",
-    SUPER_STAFF: "/admin",
-  };
-
-  return redirects[role] ?? "/unauthorized";
 }

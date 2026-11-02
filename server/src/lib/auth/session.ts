@@ -107,6 +107,25 @@ export async function getSession() {
   }
 }
 
+export function getRedirectUrl(role: string): string {
+  switch (role) {
+    case "STUDENT":
+      return "/student";
+
+    case "STAFF":
+      return "/staff";
+    
+    case "ADMIN":
+      return "/admin"
+
+    case "SUPER_STAFF":
+      return "/super-staff";
+
+    default:
+      return "/unauthorized";
+  }
+}
+
 /**
  * Remove the authentication cookie.
  */

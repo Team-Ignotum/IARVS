@@ -2,10 +2,8 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { UserRepository } from "@/repositories/user_repository_impl";
-
 import { verifyOTP } from "@/lib/auth/otp";
-
-import { createSession } from "@/lib/auth/session";
+import { createSession, getRedirectUrl } from "@/lib/auth/session";
 
 const schema = z.object({
   challenge: z.string().regex(/^[a-f0-9]{64}$/),
@@ -25,6 +23,7 @@ export async function POST(request: Request) {
 
     const { challenge, code } = parsed.data;
 
+    // 1. Verify the OTP using Redis.
     const userId = await verifyOTP("LOGIN", challenge, code);
 
     if (!userId) {
@@ -34,6 +33,7 @@ export async function POST(request: Request) {
       );
     }
 
+    // 2. Retrieve the authenticated user.
     const userRepository = new UserRepository();
 
     const user = await userRepository.findByUserId(userId);
@@ -45,12 +45,17 @@ export async function POST(request: Request) {
       );
     }
 
+    // 3. Create JWT session only after OTP verification.
     await createSession(user);
 
+    // 4. Determine dashboard based on database role.
+    const redirectUrl = getRedirectUrl(user.role);
+
+    // 5. Return the correct destination.
     return NextResponse.json({
       success: true,
       message: "Login successful",
-      redirectUrl: "/",
+      redirectUrl,
     });
   } catch (error) {
     console.error("OTP verification error:", error);
