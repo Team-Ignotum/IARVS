@@ -1,102 +1,185 @@
-import { NextResponse } from "next/server";
-import { compare } from "bcrypt-ts";
-import * as jose from "jose";
-import { UserRepository } from "@/repositories/user_repository_impl";
 
+import "server-only";
 
-export async function POST(request: Request) {
-  const baseUrl = request.headers.get("origin");
+import { SignJWT, jwtVerify } from "jose";
+import { cookies } from "next/headers";
+import prisma from "@/lib/prisma";
 
-  const formData = await request.formData();
-  const email = formData.get("email") as string;
-  const password = formData.get("password") as string;
+// =====================================================
+// CONFIGURATION
+// =====================================================
 
-  if (!email) {
-    return NextResponse.json({ error: "Email is required" }, { status: 400 });
-  }
+const JWT_SECRET = process.env.JWT_SECRET;
+const ISSUER = process.env.ISSUER;
+const AUDIENCE = process.env.AUDIENCE;
 
-  if (!password) {
-    return NextResponse.json(
-      { error: "Password is required" },
-      { status: 400 },
-    );
+if (!JWT_SECRET || !ISSUER || !AUDIENCE) {
+  throw new Error(
+    "JWT_SECRET, ISSUER and AUDIENCE must be configured"
+  );
+}
+
+const secret = new TextEncoder().encode(JWT_SECRET);
+
+const COOKIE_NAME = "token";
+const SESSION_DURATION = 60 * 60; // 1 hour
+
+// =====================================================
+// TYPES
+// =====================================================
+
+interface SessionUser {
+  userId: string;
+  email: string;
+  role: string;
+  firstName: string;
+  lastName: string;
+  sessionVersion: number;
+}
+
+// =====================================================
+// CREATE SESSION
+// Call ONLY after successful OTP verification
+// =====================================================
+
+export async function createSession(
+  user: SessionUser
+): Promise<void> {
+  const token = await new SignJWT({
+    id: user.userId,
+    email: user.email,
+    role: user.role,
+    fname: user.firstName,
+    lname: user.lastName,
+    sessionVersion: user.sessionVersion,
+  })
+    .setProtectedHeader({ alg: "HS256" })
+    .setSubject(user.userId)
+    .setIssuedAt()
+    .setIssuer(ISSUER!)
+    .setAudience(AUDIENCE!)
+    .setExpirationTime("1h")
+    .sign(secret);
+
+  const cookieStore = await cookies();
+
+  cookieStore.set(COOKIE_NAME, token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    path: "/",
+    maxAge: SESSION_DURATION,
+  });
+}
+
+// =====================================================
+// GET SESSION
+// Validate JWT + check current database user
+// =====================================================
+
+export async function getSession() {
+  const cookieStore = await cookies();
+  const token = cookieStore.get(COOKIE_NAME)?.value;
+
+  if (!token) {
+    return null;
   }
 
   try {
-    const userRepository = new UserRepository();
-    const user = await userRepository.getByEmail(email);
-
-    if (!user) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
-    }
-
-    if (!user.passwordHash) {
-      return NextResponse.json({ error: "Invalid password" }, { status: 401 });
-    }
-
-    const isPasswordValid = await compare(password, user.passwordHash);
-
-    if (!isPasswordValid) {
-      return NextResponse.json({ error: "Invalid password" }, { status: 401 });
-    }
-
-    if (!user.isActive) {
-      return NextResponse.json(
-        {
-          error:
-            "Your account has been deactivated. Please contact an administrator.",
-        },
-        { status: 403 },
-      );
-    }
-
-    const secret = new TextEncoder().encode(process.env.JWT_SECRET!);
-    const algo = "HS256";
-
-    const token = await new jose.SignJWT({
-      id: user.userId,
-      email: user.email,
-      role: user.role.toString(),
-      fname: user.firstName,
-      lname: user.lastName,
-    })
-      .setProtectedHeader({ alg: algo })
-      .setIssuedAt()
-      .setIssuer(process.env.ISSUER!)
-      .setAudience(process.env.AUDIENCE!)
-      .setExpirationTime(process.env.JWT_EXPIRY!)
-      .sign(secret);
-
-    let redirectUrl = `${baseUrl}/unauthorized`;
-    
-    if (user.role === "STUDENT") {
-      redirectUrl = `${baseUrl}/student`;
-    } else if (user.role === "STAFF") {
-      redirectUrl = `${baseUrl}/staff`;
-    } else if (user.role === "ADMIN") {
-      redirectUrl = `${baseUrl}/admin`;
-    } else if (user.role === "SUPER_STAFF") {
-      redirectUrl = `${baseUrl}/admin`;
-    }
-    const response = NextResponse.json({
-      message: "Login Successful",
-      redirectUrl: redirectUrl,
+    const { payload } = await jwtVerify(token, secret, {
+      algorithms: ["HS256"],
+      issuer: ISSUER!,
+      audience: AUDIENCE!,
     });
 
-    response.cookies.set("token", token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      path: "/",
-      maxAge: 60 * 60,
+    if (
+      typeof payload.sub !== "string" ||
+      typeof payload.sessionVersion !== "number" ||
+      typeof payload.id !== "string" ||
+      payload.id !== payload.sub
+    ) {
+      return null;
+    }
+
+    const user = await prisma.user.findUnique({
+      where: {
+        userId: payload.sub,
+      },
     });
 
-    return response;
-  } catch (error) {
-    console.error("Error during authentication", error);
-    return NextResponse.json(
-      { error: "An error occurred during authentication" },
-      { status: 500 },
-    );
+    if (
+      !user ||
+      !user.isActive ||
+      user.status !== "ACTIVE"
+    ) {
+      return null;
+    }
+
+    // Reject sessions issued before a password reset.
+    if (
+      user.sessionVersion !== payload.sessionVersion
+    ) {
+      return null;
+    }
+
+    return user;
+  } catch {
+    return null;
   }
+}
+
+// =====================================================
+// REQUIRE AUTHENTICATION
+// Use inside protected server routes
+// =====================================================
+
+export async function requireSession() {
+  const user = await getSession();
+
+  if (!user) {
+    throw new Error("UNAUTHORIZED");
+  }
+
+  return user;
+}
+
+// =====================================================
+// ROLE-BASED AUTHORIZATION
+// =====================================================
+
+export async function requireRole(
+  allowedRoles: SessionUser["role"][]
+) {
+  const user = await requireSession();
+
+  if (!allowedRoles.includes(user.role)) {
+    throw new Error("FORBIDDEN");
+  }
+
+  return user;
+}
+
+// =====================================================
+// DESTROY SESSION / LOGOUT
+// =====================================================
+
+export async function destroySession(): Promise<void> {
+  const cookieStore = await cookies();
+
+  cookieStore.delete(COOKIE_NAME);
+}
+
+// =====================================================
+// ROLE-BASED REDIRECTS
+// =====================================================
+
+export function getRedirectUrl(role: string): string {
+  const redirects: Record<string, string> = {
+    STUDENT: "/student",
+    STAFF: "/staff",
+    ADMIN: "/admin",
+    SUPER_STAFF: "/admin",
+  };
+
+  return redirects[role] ?? "/unauthorized";
 }
