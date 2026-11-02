@@ -8,14 +8,16 @@ interface LoginInput {
 }
 
 interface LoginResponse {
+  success: boolean;
   message: string;
-  redirectUrl: string;
+  requiresOTP: boolean;
+  challenge: string;
+  expiresIn: number;
 }
 
 export function useLogin() {
   return useMutation<LoginResponse, Error, LoginInput>({
     mutationFn: async ({ email, password }) => {
-      // The login endpoint reads submitted credentials as multipart form data.
       const formData = new FormData();
 
       formData.append("email", email);
@@ -24,16 +26,28 @@ export function useLogin() {
       const response = await fetch("/api/login", {
         method: "POST",
         body: formData,
+        credentials: "same-origin",
       });
 
       const data = await response.json();
 
       if (!response.ok) {
-        // Convert API failures into a mutation error so the form can display them.
         throw new Error(data.error || "Login failed");
+      }
+
+      if (
+        data.requiresOTP !== true ||
+        typeof data.challenge !== "string" ||
+        typeof data.expiresIn !== "number"
+      ) {
+        throw new Error("Invalid authentication response");
       }
 
       return data as LoginResponse;
     },
+
+    // Authentication mutations should not
+    // automatically retry.
+    retry: false,
   });
 }
