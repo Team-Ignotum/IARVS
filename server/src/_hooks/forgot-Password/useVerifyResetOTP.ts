@@ -2,25 +2,22 @@
 
 import { useMutation } from "@tanstack/react-query";
 
-interface VerifyResetOTPInput {
+interface VerifyInput {
   challenge: string;
   code: string;
 }
 
-interface VerifyResetOTPResponse {
+interface VerifyResponse {
   success: boolean;
   resetToken: string;
-  expiresIn: number;
 }
 
 export function useVerifyResetOTP() {
-  return useMutation<VerifyResetOTPResponse, Error, VerifyResetOTPInput>({
+  return useMutation<VerifyResponse, Error, VerifyInput>({
     mutationFn: async (payload) => {
       const response = await fetch("/api/forgot-password/verify", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
 
@@ -31,10 +28,10 @@ export function useVerifyResetOTP() {
       }
 
       if (data.success !== true || typeof data.resetToken !== "string") {
-        throw new Error("Unexpected verification response");
+        throw new Error("Invalid verification response");
       }
 
-      return data as VerifyResetOTPResponse;
+      return data as VerifyResponse;
     },
     retry: false,
   });

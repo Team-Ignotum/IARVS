@@ -22,18 +22,20 @@ export async function POST(request: Request) {
       );
     }
 
-    const { resetToken, newPassword } = parsed.data;
+   const { resetToken, newPassword } = parsed.data;
 
-    const userId = await consumeResetToken(resetToken);
+   // Hash the password first
+   const passwordHash = await hash(newPassword, 12);
 
-    if (!userId) {
-      return NextResponse.json(
-        { error: "Invalid or expired reset token" },
-        { status: 401 },
-      );
-    }
+   // Then consume the reset token
+   const userId = await consumeResetToken(resetToken);
 
-    const passwordHash = await hash(newPassword, 12);
+   if (!userId) {
+     return NextResponse.json(
+       { error: "Invalid or expired reset token" },
+       { status: 401 },
+     );
+   }
 
     await prisma.user.update({
       where: { userId },

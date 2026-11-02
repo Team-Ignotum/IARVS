@@ -1,26 +1,53 @@
 "use client";
 
+import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
 
 import crest from "../favicon.ico.png";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import React, { useState, useEffect } from "react";
 
 import { useLogin } from "@/_hooks/login/useLogin";
-import { Eye, EyeOff, Loader2 } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useVerifyOTP } from "@/_hooks/otp/useVerifyOTP";
+import OTPDialog from "@/components/auth/otpDialog";
 
 type ToastVariant = "default" | "destructive";
 
 const LoginPage = () => {
-  const loginMutation = useLogin();
   const router = useRouter();
-  const [showPassword, setShowPassword] = useState(false);
+
+  // ==========================================
+  // TANSTACK QUERY CUSTOM HOOKS
+  // ==========================================
+
+  const loginMutation = useLogin();
+  const verifyMutation = useVerifyOTP();
+
   const loading = loginMutation.isPending;
+
+  // ==========================================
+  // LOGIN UI STATES
+  // ==========================================
+
+  const [showPassword, setShowPassword] = useState(false);
+
+  // ==========================================
+  // OTP STATES
+  // ==========================================
+
+  const [otpOpen, setOtpOpen] = useState(false);
+  const [otpChallenge, setOtpChallenge] = useState("");
+  const [otpEmail, setOtpEmail] = useState("");
+  const [otpExpiresIn, setOtpExpiresIn] = useState(300);
+
+  // ==========================================
+  // TOAST STATES
+  // ==========================================
 
   const [toastData, setToastData] = useState({
     open: false,
@@ -29,40 +56,72 @@ const LoginPage = () => {
     variant: "default" as ToastVariant,
   });
 
+  // Automatically dismiss toast after 3 seconds
   useEffect(() => {
     if (!toastData.open) return;
 
     const timer = setTimeout(() => {
-      setToastData((prev) => ({ ...prev, open: false }));
+      setToastData((prev) => ({
+        ...prev,
+        open: false,
+      }));
     }, 3000);
 
     return () => clearTimeout(timer);
   }, [toastData.open, toastData.title, toastData.description]);
+
+  // ==========================================
+  // LOGIN HANDLER
+  // ==========================================
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     const formData = new FormData(e.currentTarget);
 
-    try {
-      const data = await loginMutation.mutateAsync({
-        email: formData.get("email") as string,
-        password: formData.get("password") as string,
-      });
+    const email = String(formData.get("email") ?? "").trim();
 
-      // Your existing success toast
+    const password = String(formData.get("password") ?? "");
+
+    if (!email || !password) {
       setToastData({
         open: true,
-        title: "Access Granted",
-        description: "Welcome back. Initializing your workspace...",
-        variant: "default",
+        title: "Missing Credentials",
+        description: "Please enter your email and password.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const result = await loginMutation.mutateAsync({
+        email,
+        password,
       });
 
-      if (data.redirectUrl) {
-        setTimeout(() => router.push(data.redirectUrl), 800);
+      if (!result.requiresOTP) {
+        throw new Error("OTP verification was not initiated.");
       }
+
+      // Store OTP challenge returned by the backend.
+      setOtpChallenge(result.challenge);
+      setOtpEmail(email);
+      setOtpExpiresIn(result.expiresIn);
+
+      // Clear previous verification errors.
+      verifyMutation.reset();
+
+      // Open OTP popup.
+      setOtpOpen(true);
+
+      setToastData({
+        open: true,
+        title: "Verification Required",
+        description:
+          "A verification code has been sent to your registered email.",
+        variant: "default",
+      });
     } catch (error) {
-      // Your existing error toast
       setToastData({
         open: true,
         title: "Authentication Failed",
@@ -75,8 +134,58 @@ const LoginPage = () => {
     }
   };
 
+  // ==========================================
+  // VERIFY LOGIN OTP
+  // ==========================================
+
+  const handleVerifyLogin = async (code: string) => {
+    const result = await verifyMutation.mutateAsync({
+      challenge: otpChallenge,
+      code,
+    });
+
+    // Backend has now verified the OTP
+    // and created the HttpOnly session cookie.
+    setOtpOpen(false);
+    setOtpChallenge("");
+
+    setToastData({
+      open: true,
+      title: "Access Granted",
+      description: "OTP verified successfully. Initializing your workspace...",
+      variant: "default",
+    });
+
+    // Redirect only after OTP verification.
+    router.replace(result.redirectUrl);
+    router.refresh();
+  };
+
+  // ==========================================
+  // PAGE JSX
+  // ==========================================
+
   return (
     <main className="min-h-screen w-full">
+      {/* ======================================
+          OTP VERIFICATION POPUP
+      ====================================== */}
+
+      <OTPDialog
+        open={otpOpen}
+        onOpenChange={setOtpOpen}
+        challenge={otpChallenge}
+        email={otpEmail}
+        expiresIn={otpExpiresIn}
+        loading={verifyMutation.isPending}
+        error={verifyMutation.error?.message}
+        onVerify={handleVerifyLogin}
+      />
+
+      {/* ======================================
+          TOAST NOTIFICATION
+      ====================================== */}
+
       {toastData.open && (
         <div
           role="alert"
@@ -89,12 +198,18 @@ const LoginPage = () => {
           <div className="flex items-start justify-between gap-3">
             <div>
               <p className="font-semibold">{toastData.title}</p>
+
               <p className="mt-1 text-sm">{toastData.description}</p>
             </div>
 
             <button
               type="button"
-              onClick={() => setToastData((prev) => ({ ...prev, open: false }))}
+              onClick={() =>
+                setToastData((prev) => ({
+                  ...prev,
+                  open: false,
+                }))
+              }
               aria-label="Close notification"
               className="text-lg leading-none"
             >
@@ -103,10 +218,15 @@ const LoginPage = () => {
           </div>
         </div>
       )}
+
       <div className="grid min-h-screen w-full lg:grid-cols-2">
-        {/* LEFT PANEL — UNIVERSITY BRANDING */}
+        {/* ======================================
+            LEFT PANEL — UNIVERSITY BRANDING
+        ====================================== */}
+
         <section className="relative flex min-h-130 flex-col overflow-hidden bg-[#00152f] px-6 py-8 text-white sm:px-12 lg:min-h-screen lg:px-14 lg:py-10">
           {/* University Identity */}
+
           <div className="flex items-start gap-4 sm:gap-7">
             <Image
               src={crest}
@@ -121,6 +241,7 @@ const LoginPage = () => {
               <p className="mt-1 text-[17px] leading-6">
                 ශ්‍රී ලංකා විවෘත විශ්වවිද්‍යාලය
               </p>
+
               <p className="mt-1 text-[17px] leading-6">
                 இலங்கை திறந்த பல்கலைக்கழகம்
               </p>
@@ -132,6 +253,7 @@ const LoginPage = () => {
           </div>
 
           {/* Main Heading */}
+
           <div className="mt-12 max-w-112.5 lg:mt-14">
             <h1 className="text-[44px] font-light leading-none tracking-tight sm:text-[48px] lg:text-[52px]">
               Learning that
@@ -155,6 +277,7 @@ const LoginPage = () => {
           </div>
 
           {/* Decorative Network */}
+
           <div className="pointer-events-none absolute bottom-41.25 left-[55%] hidden -translate-x-1/2 md:block">
             <svg
               width="120"
@@ -179,11 +302,11 @@ const LoginPage = () => {
           </div>
 
           {/* Bottom Statistics */}
+
           <div className="mt-auto border-t border-[#29415f] pt-5">
             <div className="flex items-end gap-10 sm:gap-14">
               <div>
                 <p className="text-[24px] font-bold leading-none">40,000+</p>
-
                 <p className="mt-2 text-[7px] uppercase tracking-[0.16em] text-slate-400">
                   Learners
                 </p>
@@ -191,30 +314,27 @@ const LoginPage = () => {
 
               <div>
                 <p className="text-[17px] font-semibold leading-none">9</p>
-
-                <p className="mt-2 text-[6px] uppercase tracking-[0.14em] text-slate-400">
+                <p className="mt-2 text-[7px] uppercase tracking-[0.14em] text-slate-400">
                   Regional Centres
                 </p>
               </div>
 
               <div>
-                <p className="text-[17px] font-semibold leading-none">6</p>
-
-                <div>
-                  <p className="text-[20px] font-semibold leading-none">6</p>
-                  <p className="mt-2 text-[9px] uppercase tracking-[0.14em] text-slate-400">
-                    Faculties
-                  </p>
-                </div>
+                <p className="text-[20px] font-semibold leading-none">6</p>
+                <p className="mt-2 text-[9px] uppercase tracking-[0.14em] text-slate-400">
+                  Faculties
+                </p>
               </div>
             </div>
           </div>
         </section>
 
-        {/* RIGHT PANEL — LOGIN FORM */}
+        {/* ======================================
+            RIGHT PANEL — LOGIN FORM
+        ====================================== */}
+
         <section className="flex min-h-150 items-start justify-center bg-white px-6 py-14 sm:px-12 lg:min-h-screen lg:px-16 lg:pt-38.75">
           <div className="w-full max-w-122.5">
-            {/* Heading */}
             <h2 className="text-[34px] font-semibold tracking-tight text-[#071936]">
               Sign In
             </h2>
@@ -224,8 +344,10 @@ const LoginPage = () => {
             </p>
 
             {/* Login Form */}
+
             <form onSubmit={handleSubmit} className="mt-10">
               {/* Account */}
+
               <div className="space-y-2.5">
                 <Label
                   htmlFor="account"
@@ -237,15 +359,17 @@ const LoginPage = () => {
                 <Input
                   id="account"
                   name="email"
-                  type="text"
-                  placeholder="e.g. s20007000@ousl.lk "
+                  type="email"
+                  placeholder="e.g. s20007000@ousl.lk"
                   autoComplete="username"
                   required
+                  disabled={loading}
                   className="h-13 rounded-lg border-[#d9dee6] bg-[#fafafa] px-5 text-[15px] text-[#071936] placeholder:text-slate-400 shadow-sm focus-visible:border-[#21385f] focus-visible:ring-2 focus-visible:ring-[#21385f]/20"
                 />
               </div>
 
               {/* Password */}
+
               <div className="mt-8 space-y-2.5">
                 <Label
                   htmlFor="password"
@@ -253,6 +377,7 @@ const LoginPage = () => {
                 >
                   Password
                 </Label>
+
                 <div className="relative">
                   <Input
                     id="password"
@@ -261,6 +386,7 @@ const LoginPage = () => {
                     placeholder="Enter your password"
                     autoComplete="current-password"
                     required
+                    disabled={loading}
                     className="h-13 rounded-lg border-[#d9dee6] bg-[#fafafa] px-5 text-[15px] text-[#071936] placeholder:text-slate-400 shadow-sm focus-visible:border-[#21385f] focus-visible:ring-2 focus-visible:ring-[#21385f]/20"
                   />
 
@@ -285,6 +411,7 @@ const LoginPage = () => {
                 </div>
 
                 {/* Forgot Password Navigation */}
+
                 <div className="flex justify-end pt-2">
                   <Link
                     href="/auth/forgot-password"
@@ -296,6 +423,7 @@ const LoginPage = () => {
               </div>
 
               {/* Sign In Button */}
+
               <Button
                 type="submit"
                 disabled={loading}
@@ -313,6 +441,7 @@ const LoginPage = () => {
             </form>
 
             {/* IT Helpdesk */}
+
             <div className="mt-12 text-[14px] leading-6 text-neutral-600">
               <p>Trouble signing in? Contact the IT Helpdesk.</p>
 
