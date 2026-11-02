@@ -1,3 +1,6 @@
+
+"use client";
+
 import {
   Table,
   TableBody,
@@ -6,12 +9,12 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import AdminPagination from "@/components/admin/AdminPagination"
+
+import AdminPagination from "@/components/admin/AdminPagination";
 import TableActionMenu from "../TableActionMenu";
 import TableStateRows from "../TableStateRows";
 
-
-import { UserRecord } from "./types";
+import type { UserRecord } from "./types";
 import { userColumns } from "./columns";
 
 interface UsersTableProps {
@@ -43,73 +46,134 @@ export default function UsersTable({
   onDeleteUser,
 }: UsersTableProps) {
   return (
-    <div className="overflow-hidden rounded-lg border border-[#e4e7ed]">
+    <div
+      className="
+        overflow-hidden rounded-lg
+        border border-[#e4e7ed]
+        bg-white
+        transition-colors duration-200
+        dark:border-slate-700
+        dark:bg-[#1E293B]
+      "
+    >
       <Table>
-        {/*  Header*/}
+        {/* TABLE HEADER */}
+
         <TableHeader>
-          <TableRow className="bg-[#f8fafc] hover:bg-[#f8fafc]">
+          <TableRow
+            className="
+              border-b border-slate-200
+              bg-[#f8fafc]
+              hover:bg-[#f8fafc]
+              dark:border-slate-700
+              dark:bg-[#0F172A]
+              dark:hover:bg-[#0F172A]
+            "
+          >
             {userColumns.map((column) => (
               <TableHead
                 key={column.key}
-                className="px-4 text-[11px] font-bold uppercase tracking-wider text-slate-500"
+                className="
+                  px-4 text-[11px]
+                  font-bold uppercase tracking-wider
+                  text-slate-500
+                  dark:text-slate-300
+                "
               >
                 {column.label}
               </TableHead>
             ))}
 
-            <TableHead className="px-4 text-right text-[11px] font-bold uppercase tracking-wider text-slate-500">
+            <TableHead
+              className="
+                px-4 text-right
+                text-[11px] font-bold
+                uppercase tracking-wider
+                text-slate-500
+                dark:text-slate-300
+              "
+            >
               Actions
             </TableHead>
           </TableRow>
         </TableHeader>
 
-      {/* Table Body*/}
+        {/* TABLE BODY */}
+
         <TableBody>
+          {/* LOADING, ERROR, AND EMPTY STATES */}
 
           <TableStateRows
             colSpan={userColumns.length + 1}
             loading={isLoading}
             error={fetchError}
-            empty={!isLoading && !fetchError && users.length === 0}
+            empty={
+              !isLoading &&
+              !fetchError &&
+              users.length === 0
+            }
             loadingMessage="Loading users..."
             emptyMessage="No users found for the selected filters."
           />
+
+          {/* USER ROWS */}
+
           {!isLoading &&
             !fetchError &&
             users.map((user) => (
-              <TableRow key={user.id} className="bg-white hover:bg-[#fbfcff]">
-               
-                  {/* Dynamic Columns */}
-                   {userColumns.map((column)=> (
-                      <TableCell key={column.key}
-                         className="px-4 py-3" >
-                          {column.render
-                          ? column.render(user)
-                        :user[column.key as keyof UserRecord]}
-                        </TableCell>
-                   ))}
+              <TableRow
+                key={user.id}
+                className="
+                  border-b border-slate-200
+                  bg-white
+                  text-slate-700
+                  transition-colors
+                  hover:bg-[#fbfcff]
+                  dark:border-slate-700
+                  dark:bg-[#1E293B]
+                  dark:text-slate-200
+                  dark:hover:bg-slate-700/50
+                "
+              >
+                {/* DYNAMIC COLUMNS */}
 
-              
+                {userColumns.map((column) => (
+                  <TableCell
+                    key={column.key}
+                    className="
+                      px-4 py-3
+                      text-slate-700
+                      dark:text-slate-200
+                    "
+                  >
+                    {column.render
+                      ? column.render(user)
+                      : user[column.key as keyof UserRecord]}
+                  </TableCell>
+                ))}
 
-                {/* Actions */}
+                {/* ACTIONS */}
 
-                <TableCell className="px-4 py-3 text-right">
+                <TableCell className="px-4 py-3 text-right dark:text-slate-300">
                   <TableActionMenu
                     ariaLabel={`Actions for ${user.name}`}
                     items={[
                       {
                         label: "View Details",
-                        onSelect: () => onViewUser(user),
+                        onSelect: () =>
+                          onViewUser(user),
                       },
                       {
                         label: "Change Status",
-                        onSelect: () => onChangeStatus(user),
+                        onSelect: () =>
+                          onChangeStatus(user),
                       },
                       {
                         label: "Delete User",
                         variant: "danger",
                         separator: true,
-                        onSelect: () => onDeleteUser(user.id),
+                        onSelect: () =>
+                          onDeleteUser(user.id),
                       },
                     ]}
                   />
@@ -119,14 +183,26 @@ export default function UsersTable({
         </TableBody>
       </Table>
 
-      <AdminPagination
-        page={page}
-        totalPages={totalPages}
-        total={totalUsers}
-        itemsPerPage={itemsPerPage}
-        itemLabel="users"
-        onPageChange={onPageChange}
-      />
+      {/* PAGINATION */}
+
+      <div
+        className="
+          border-t border-slate-200
+          bg-white
+          dark:border-slate-700
+          dark:bg-[#0F172A]
+          dark:text-slate-300
+        "
+      >
+        <AdminPagination
+          page={page}
+          totalPages={totalPages}
+          total={totalUsers}
+          itemsPerPage={itemsPerPage}
+          itemLabel="users"
+          onPageChange={onPageChange}
+        />
+      </div>
     </div>
   );
 }

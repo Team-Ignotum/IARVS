@@ -1,4 +1,5 @@
-﻿"use client";
+
+"use client";
 
 import {
   Select,
@@ -7,21 +8,91 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import FilterBar from "@/components/admin/FilterBar";
-import { useCenters } from "@/_hooks/register/useCenters";
 
-import { UserRole, UserStatus, UserCenterFilter } from "./types";
+import FilterBar from "@/components/admin/FilterBar";
+
+import type {
+  UserRole,
+  UserStatus,
+  UserCenterFilter,
+} from "./types";
+
+// ---------------------------------------
+// CENTER OPTIONS
+// ---------------------------------------
+// Temporary local options.
+// Replace these with your project's actual
+// center data source when available.
+
+interface CenterOption {
+  code: string;
+  name: string;
+}
+
+const OUSL_CENTERS: CenterOption[] = [
+  {
+    code: "WP10",
+    name: "WP10 - Colombo",
+  },
+  {
+    code: "UP82",
+    name: "UP82",
+  },
+];
+
+// ---------------------------------------
+// PROPS
+// ---------------------------------------
 
 interface UsersFiltersProps {
   roleFilter: "all" | UserRole;
   statusFilter: "all" | UserStatus;
   centerFilter: UserCenterFilter;
   search: string;
+
   onRoleChange: (value: "all" | UserRole) => void;
   onStatusChange: (value: "all" | UserStatus) => void;
   onCenterChange: (value: UserCenterFilter) => void;
   onSearchChange: (value: string) => void;
 }
+
+// ---------------------------------------
+// DARK MODE STYLES
+// ---------------------------------------
+
+const triggerClassName = `
+  h-9 min-w-[140px]
+  border border-slate-200
+  bg-white text-sm text-slate-700
+  transition-colors
+  hover:bg-slate-50
+  focus:ring-indigo-500/20
+  dark:border-slate-600
+  dark:bg-[#0F172A]
+  dark:text-slate-100
+  dark:hover:bg-slate-800
+  dark:focus:ring-indigo-400/20
+`;
+
+const contentClassName = `
+  border-slate-200
+  bg-white text-slate-900
+  dark:border-slate-700
+  dark:bg-[#1E293B]
+  dark:text-slate-100
+`;
+
+const itemClassName = `
+  cursor-pointer
+  dark:text-slate-100
+  dark:focus:bg-slate-700
+  dark:focus:text-white
+  dark:data-[state=checked]:bg-slate-700
+`;
+
+// ---------------------------------------
+// COMPONENT
+// ---------------------------------------
 
 export default function UsersFilters({
   roleFilter,
@@ -33,80 +104,126 @@ export default function UsersFilters({
   onCenterChange,
   onSearchChange,
 }: UsersFiltersProps) {
-  const { data: centers = [], isLoading: centersLoading } = useCenters();
-
   return (
     <FilterBar>
-      {/* Filter based on Role */}
+      {/* ROLE FILTER */}
+
       <FilterBar.Field label="Role">
         <Select
           value={roleFilter}
-          onValueChange={(value: string) =>
+          onValueChange={(value) =>
             onRoleChange(value as "all" | UserRole)
           }
         >
-          <SelectTrigger className="h-8 w-32.5 bg-white">
-            <SelectValue />
+          <SelectTrigger className={triggerClassName}>
+            <SelectValue placeholder="All Roles" />
           </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Roles</SelectItem>
-            <SelectItem value="Staff">Staff</SelectItem>
-            <SelectItem value="Admin">Admin</SelectItem>
-            <SelectItem value="SuperStaff">Super Staff</SelectItem>
+
+          <SelectContent className={contentClassName}>
+            <SelectItem
+              value="all"
+              className={itemClassName}
+            >
+              All Roles
+            </SelectItem>
+
+            <SelectItem
+              value="Staff"
+              className={itemClassName}
+            >
+              Staff
+            </SelectItem>
+
+            <SelectItem
+              value="SuperStaff"
+              className={itemClassName}
+            >
+              SuperStaff
+            </SelectItem>
           </SelectContent>
         </Select>
       </FilterBar.Field>
 
-      {/* Filter based on Status */}
+      {/* STATUS FILTER */}
+
       <FilterBar.Field label="Status">
         <Select
           value={statusFilter}
-          onValueChange={(value: string) =>
+          onValueChange={(value) =>
             onStatusChange(value as "all" | UserStatus)
           }
         >
-          <SelectTrigger className="h-8 w-35 bg-white">
-            <SelectValue />
+          <SelectTrigger className={triggerClassName}>
+            <SelectValue placeholder="All Statuses" />
           </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Statuses</SelectItem>
-            <SelectItem value="Active">Active</SelectItem>
-            <SelectItem value="Inactive">Inactive</SelectItem>
+
+          <SelectContent className={contentClassName}>
+            <SelectItem
+              value="all"
+              className={itemClassName}
+            >
+              All Statuses
+            </SelectItem>
+
+            <SelectItem
+              value="Active"
+              className={itemClassName}
+            >
+              Active
+            </SelectItem>
+
+            <SelectItem
+              value="Inactive"
+              className={itemClassName}
+            >
+              Inactive
+            </SelectItem>
           </SelectContent>
         </Select>
       </FilterBar.Field>
 
-      {/* Filter based on Center */}
+      {/* CENTER FILTER */}
+
       <FilterBar.Field label="Centers">
         <Select
           value={centerFilter}
-          onValueChange={(value: string) =>
+          onValueChange={(value) =>
             onCenterChange(value as UserCenterFilter)
           }
         >
-          <SelectTrigger className="h-8 w-35 bg-white">
-            <SelectValue />
+          <SelectTrigger className={triggerClassName}>
+            <SelectValue placeholder="All Centers" />
           </SelectTrigger>
 
-          <SelectContent>
-            <SelectItem value="all">All Centers</SelectItem>
+          <SelectContent className={contentClassName}>
+            <SelectItem
+              value="all"
+              className={itemClassName}
+            >
+              All Centers
+            </SelectItem>
 
-            {centersLoading ? (
-              <SelectItem value="__loading" disabled>
-                Loading…
+            {OUSL_CENTERS.map((center) => (
+              <SelectItem
+                key={center.code}
+                value={center.code}
+                className={itemClassName}
+              >
+                {center.name}
               </SelectItem>
-            ) : (
-              centers.map((center) => (
-                <SelectItem key={center.centerId} value={center.centerId}>
-                  {center.centerName}
-                </SelectItem>
-              ))
-            )}
+            ))}
 
-            <SelectItem value="none">No Center</SelectItem>
+            <SelectItem
+              value="none"
+              className={itemClassName}
+            >
+              No Center
+            </SelectItem>
           </SelectContent>
         </Select>
       </FilterBar.Field>
+
+      {/* SEARCH FILTER */}
 
       <FilterBar.Search
         value={search}
