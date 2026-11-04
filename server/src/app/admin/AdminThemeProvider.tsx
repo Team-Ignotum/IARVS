@@ -16,32 +16,85 @@ type ThemeContextType = {
   toggleTheme: () => void;
 };
 
-const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
+const THEME_STORAGE_KEY = "iarvs-admin-theme";
 
-export function AdminThemeProvider({ children }: { children: ReactNode }) {
-  const [theme, setThemeState] = useState<Theme>(() => {
-    if (typeof window === "undefined") return "light";
+const ThemeContext = createContext<ThemeContextType | undefined>(
+  undefined
+);
 
-    const saved = localStorage.getItem("iarvs-admin-theme");
-    return saved === "dark" || saved === "light" ? saved : "light";
-  });
+export function AdminThemeProvider({
+  children,
+}: {
+  children: ReactNode;
+}) {
+  const [theme, setThemeState] = useState<Theme>("light");
+  const [isThemeLoaded, setIsThemeLoaded] = useState(false);
 
+  // 1. Restore the previously selected theme on page load
   useEffect(() => {
-    localStorage.setItem("iarvs-admin-theme", theme);
-    document.documentElement.classList.toggle("dark", theme === "dark");
-  }, [theme]);
+    try {
+      const savedTheme = window.localStorage.getItem(
+        THEME_STORAGE_KEY
+      );
 
+      const initialTheme: Theme =
+        savedTheme === "dark" ? "dark" : "light";
+
+      setThemeState(initialTheme);
+
+      document.documentElement.classList.toggle(
+        "dark",
+        initialTheme === "dark"
+      );
+    } catch (error) {
+      console.error("Failed to load admin theme:", error);
+    } finally {
+      setIsThemeLoaded(true);
+    }
+  }, []);
+
+  // 2. Apply and persist theme after initialization
+  useEffect(() => {
+    if (!isThemeLoaded) return;
+
+    document.documentElement.classList.toggle(
+      "dark",
+      theme === "dark"
+    );
+
+    document.documentElement.style.colorScheme = theme;
+
+    try {
+      window.localStorage.setItem(
+        THEME_STORAGE_KEY,
+        theme
+      );
+    } catch (error) {
+      console.error("Failed to save admin theme:", error);
+    }
+  }, [theme, isThemeLoaded]);
+
+  // 3. Select light or dark mode
   const setTheme = (nextTheme: Theme) => {
     setThemeState(nextTheme);
   };
 
+  // 4. Toggle between light and dark mode
   const toggleTheme = () => {
-    setThemeState((current) => (current === "light" ? "dark" : "light"));
+    setThemeState((currentTheme) =>
+      currentTheme === "light" ? "dark" : "light"
+    );
   };
 
   return (
-    <ThemeContext.Provider value={{ theme, setTheme, toggleTheme }}>
-      <div className="admin-theme min-h-screen">{children}</div>
+    <ThemeContext.Provider
+      value={{
+        theme,
+        setTheme,
+        toggleTheme,
+      }}
+    >
+      {children}
     </ThemeContext.Provider>
   );
 }

@@ -8,7 +8,6 @@ import {
   Building,
   Download,
   GraduationCap,
-  Plus,
   UserPlusIcon,
   Users,
 } from "lucide-react";
@@ -151,7 +150,6 @@ export default function AdminPage() {
                   className="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-[#183b68] px-3.5 text-sm font-medium text-white transition-colors hover:bg-[#102d52] focus-visible:outline-2 focus-visible:outline-blue-600 dark:bg-blue-700 dark:hover:bg-blue-600"
                 >
                   <Download className="h-4 w-4" />
-                  <Plus className="h-4 w-4" />
                   Export Report
                 </button>
               </div>

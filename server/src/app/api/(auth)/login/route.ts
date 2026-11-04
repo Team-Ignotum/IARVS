@@ -1,101 +1,75 @@
 import { NextResponse } from "next/server";
 import { compare } from "bcrypt-ts";
-import * as jose from "jose";
 import { UserRepository } from "@/repositories/user_repository_impl";
-
+import { createOTPChallenge } from "@/lib/auth/otp";
+import { sendOTPEmail } from "@/lib/otp_email";
 
 export async function POST(request: Request) {
-  const baseUrl = request.headers.get("origin");
-
-  const formData = await request.formData();
-  const email = formData.get("email") as string;
-  const password = formData.get("password") as string;
-
-  if (!email) {
-    return NextResponse.json({ error: "Email is required" }, { status: 400 });
-  }
-
-  if (!password) {
-    return NextResponse.json(
-      { error: "Password is required" },
-      { status: 400 },
-    );
-  }
-
   try {
-    const userRepository = new UserRepository();
-    const user = await userRepository.getByEmail(email);
+    const formData = await request.formData();
 
-    if (!user) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    const email = formData.get("email");
+    const password = formData.get("password");
+
+    if (
+      typeof email !== "string" ||
+      typeof password !== "string" ||
+      !email.trim() ||
+      !password
+    ) {
+      return NextResponse.json(
+        { error: "Email and password are required" },
+        { status: 400 },
+      );
     }
 
-    if (!user.passwordHash) {
-      return NextResponse.json({ error: "Invalid password" }, { status: 401 });
+    const userRepository = new UserRepository();
+
+    const user = await userRepository.getByEmail(email.trim().toLowerCase());
+
+    // Generic error prevents account enumeration.
+    if (!user || !user.passwordHash) {
+      return NextResponse.json(
+        { error: "Invalid email or password" },
+        { status: 401 },
+      );
     }
 
     const isPasswordValid = await compare(password, user.passwordHash);
 
     if (!isPasswordValid) {
-      return NextResponse.json({ error: "Invalid password" }, { status: 401 });
+      return NextResponse.json(
+        { error: "Invalid email or password" },
+        { status: 401 },
+      );
     }
 
-    if (!user.isActive) {
+    if (!user.isActive || user.status !== "ACTIVE") {
       return NextResponse.json(
-        {
-          error:
-            "Your account has been deactivated. Please contact an administrator.",
-        },
+        { error: "Account is unavailable" },
         { status: 403 },
       );
     }
 
-    const secret = new TextEncoder().encode(process.env.JWT_SECRET!);
-    const algo = "HS256";
+    const { challenge, code, expiresIn } = await createOTPChallenge(
+      "LOGIN",
+      user.userId,
+    );
 
-    const token = await new jose.SignJWT({
-      id: user.userId,
-      email: user.email,
-      role: user.role.toString(),
-      fname: user.firstName,
-      lname: user.lastName,
-    })
-      .setProtectedHeader({ alg: algo })
-      .setIssuedAt()
-      .setIssuer(process.env.ISSUER!)
-      .setAudience(process.env.AUDIENCE!)
-      .setExpirationTime(process.env.JWT_EXPIRY!)
-      .sign(secret);
+    await sendOTPEmail(user.email, code, "LOGIN");
 
-    let redirectUrl = `${baseUrl}/unauthorized`;
-    
-    if (user.role === "STUDENT") {
-      redirectUrl = `${baseUrl}/student`;
-    } else if (user.role === "STAFF") {
-      redirectUrl = `${baseUrl}/staff`;
-    } else if (user.role === "ADMIN") {
-      redirectUrl = `${baseUrl}/admin`;
-    } else if (user.role === "SUPER_STAFF") {
-      redirectUrl = `${baseUrl}/admin`;
-    }
-    const response = NextResponse.json({
-      message: "Login Successful",
-      redirectUrl: redirectUrl,
+    return NextResponse.json({
+      success: true,
+      message: "OTP sent to registered email",
+      requiresOTP: true,
+      challenge,
+      expiresIn,
     });
-
-    response.cookies.set("token", token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      path: "/",
-      maxAge: 60 * 60,
-    });
-
-    return response;
   } catch (error) {
-    console.error("Error during authentication", error);
+    console.error("Login error:", error);
+
     return NextResponse.json(
-      { error: "An error occurred during authentication" },
+      { error: "Authentication failed" },
       { status: 500 },
     );
   }

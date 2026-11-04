@@ -29,11 +29,13 @@ export type AggregateUser = {
 export type UserAvgAggregateOutputType = {
   id: number | null
   centerId: number | null
+  sessionVersion: number | null
 }
 
 export type UserSumAggregateOutputType = {
   id: number | null
   centerId: number | null
+  sessionVersion: number | null
 }
 
 export type UserMinAggregateOutputType = {
@@ -52,6 +54,7 @@ export type UserMinAggregateOutputType = {
   isActive: boolean | null
   createdAt: Date | null
   updatedAt: Date | null
+  sessionVersion: number | null
 }
 
 export type UserMaxAggregateOutputType = {
@@ -70,6 +73,7 @@ export type UserMaxAggregateOutputType = {
   isActive: boolean | null
   createdAt: Date | null
   updatedAt: Date | null
+  sessionVersion: number | null
 }
 
 export type UserCountAggregateOutputType = {
@@ -88,6 +92,7 @@ export type UserCountAggregateOutputType = {
   isActive: number
   createdAt: number
   updatedAt: number
+  sessionVersion: number
   _all: number
 }
 
@@ -95,11 +100,13 @@ export type UserCountAggregateOutputType = {
 export type UserAvgAggregateInputType = {
   id?: true
   centerId?: true
+  sessionVersion?: true
 }
 
 export type UserSumAggregateInputType = {
   id?: true
   centerId?: true
+  sessionVersion?: true
 }
 
 export type UserMinAggregateInputType = {
@@ -118,6 +125,7 @@ export type UserMinAggregateInputType = {
   isActive?: true
   createdAt?: true
   updatedAt?: true
+  sessionVersion?: true
 }
 
 export type UserMaxAggregateInputType = {
@@ -136,6 +144,7 @@ export type UserMaxAggregateInputType = {
   isActive?: true
   createdAt?: true
   updatedAt?: true
+  sessionVersion?: true
 }
 
 export type UserCountAggregateInputType = {
@@ -154,6 +163,7 @@ export type UserCountAggregateInputType = {
   isActive?: true
   createdAt?: true
   updatedAt?: true
+  sessionVersion?: true
   _all?: true
 }
 
@@ -259,6 +269,7 @@ export type UserGroupByOutputType = {
   isActive: boolean
   createdAt: Date
   updatedAt: Date
+  sessionVersion: number
   _count: UserCountAggregateOutputType | null
   _avg: UserAvgAggregateOutputType | null
   _sum: UserSumAggregateOutputType | null
@@ -300,6 +311,7 @@ export type UserWhereInput = {
   isActive?: Prisma.BoolFilter<"User"> | boolean
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
+  sessionVersion?: Prisma.IntFilter<"User"> | number
   center?: Prisma.XOR<Prisma.CenterNullableScalarRelationFilter, Prisma.CenterWhereInput> | null
   enrollments?: Prisma.StudentEnrollmentListRelationFilter
   academicRecords?: Prisma.AcademicRecordListRelationFilter
@@ -321,6 +333,7 @@ export type UserOrderByWithRelationInput = {
   isActive?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  sessionVersion?: Prisma.SortOrder
   center?: Prisma.CenterOrderByWithRelationInput
   enrollments?: Prisma.StudentEnrollmentOrderByRelationAggregateInput
   academicRecords?: Prisma.AcademicRecordOrderByRelationAggregateInput
@@ -345,6 +358,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   isActive?: Prisma.BoolFilter<"User"> | boolean
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
+  sessionVersion?: Prisma.IntFilter<"User"> | number
   center?: Prisma.XOR<Prisma.CenterNullableScalarRelationFilter, Prisma.CenterWhereInput> | null
   enrollments?: Prisma.StudentEnrollmentListRelationFilter
   academicRecords?: Prisma.AcademicRecordListRelationFilter
@@ -366,6 +380,7 @@ export type UserOrderByWithAggregationInput = {
   isActive?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  sessionVersion?: Prisma.SortOrder
   _count?: Prisma.UserCountOrderByAggregateInput
   _avg?: Prisma.UserAvgOrderByAggregateInput
   _max?: Prisma.UserMaxOrderByAggregateInput
@@ -392,6 +407,7 @@ export type UserScalarWhereWithAggregatesInput = {
   isActive?: Prisma.BoolWithAggregatesFilter<"User"> | boolean
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"User"> | Date | string
+  sessionVersion?: Prisma.IntWithAggregatesFilter<"User"> | number
 }
 
 export type UserCreateInput = {
@@ -408,6 +424,7 @@ export type UserCreateInput = {
   isActive?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
+  sessionVersion?: number
   center?: Prisma.CenterCreateNestedOneWithoutUsersInput
   enrollments?: Prisma.StudentEnrollmentCreateNestedManyWithoutStudentInput
   academicRecords?: Prisma.AcademicRecordCreateNestedManyWithoutStudentInput
@@ -429,6 +446,7 @@ export type UserUncheckedCreateInput = {
   isActive?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
+  sessionVersion?: number
   enrollments?: Prisma.StudentEnrollmentUncheckedCreateNestedManyWithoutStudentInput
   academicRecords?: Prisma.AcademicRecordUncheckedCreateNestedManyWithoutStudentInput
 }
@@ -447,6 +465,7 @@ export type UserUpdateInput = {
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sessionVersion?: Prisma.IntFieldUpdateOperationsInput | number
   center?: Prisma.CenterUpdateOneWithoutUsersNestedInput
   enrollments?: Prisma.StudentEnrollmentUpdateManyWithoutStudentNestedInput
   academicRecords?: Prisma.AcademicRecordUpdateManyWithoutStudentNestedInput
@@ -468,6 +487,7 @@ export type UserUncheckedUpdateInput = {
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sessionVersion?: Prisma.IntFieldUpdateOperationsInput | number
   enrollments?: Prisma.StudentEnrollmentUncheckedUpdateManyWithoutStudentNestedInput
   academicRecords?: Prisma.AcademicRecordUncheckedUpdateManyWithoutStudentNestedInput
 }
@@ -488,6 +508,7 @@ export type UserCreateManyInput = {
   isActive?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
+  sessionVersion?: number
 }
 
 export type UserUpdateManyMutationInput = {
@@ -504,6 +525,7 @@ export type UserUpdateManyMutationInput = {
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sessionVersion?: Prisma.IntFieldUpdateOperationsInput | number
 }
 
 export type UserUncheckedUpdateManyInput = {
@@ -522,6 +544,7 @@ export type UserUncheckedUpdateManyInput = {
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sessionVersion?: Prisma.IntFieldUpdateOperationsInput | number
 }
 
 export type UserCountOrderByAggregateInput = {
@@ -540,11 +563,13 @@ export type UserCountOrderByAggregateInput = {
   isActive?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  sessionVersion?: Prisma.SortOrder
 }
 
 export type UserAvgOrderByAggregateInput = {
   id?: Prisma.SortOrder
   centerId?: Prisma.SortOrder
+  sessionVersion?: Prisma.SortOrder
 }
 
 export type UserMaxOrderByAggregateInput = {
@@ -563,6 +588,7 @@ export type UserMaxOrderByAggregateInput = {
   isActive?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  sessionVersion?: Prisma.SortOrder
 }
 
 export type UserMinOrderByAggregateInput = {
@@ -581,11 +607,13 @@ export type UserMinOrderByAggregateInput = {
   isActive?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  sessionVersion?: Prisma.SortOrder
 }
 
 export type UserSumOrderByAggregateInput = {
   id?: Prisma.SortOrder
   centerId?: Prisma.SortOrder
+  sessionVersion?: Prisma.SortOrder
 }
 
 export type UserScalarRelationFilter = {
@@ -727,6 +755,7 @@ export type UserCreateWithoutEnrollmentsInput = {
   isActive?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
+  sessionVersion?: number
   center?: Prisma.CenterCreateNestedOneWithoutUsersInput
   academicRecords?: Prisma.AcademicRecordCreateNestedManyWithoutStudentInput
 }
@@ -747,6 +776,7 @@ export type UserUncheckedCreateWithoutEnrollmentsInput = {
   isActive?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
+  sessionVersion?: number
   academicRecords?: Prisma.AcademicRecordUncheckedCreateNestedManyWithoutStudentInput
 }
 
@@ -780,6 +810,7 @@ export type UserUpdateWithoutEnrollmentsInput = {
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sessionVersion?: Prisma.IntFieldUpdateOperationsInput | number
   center?: Prisma.CenterUpdateOneWithoutUsersNestedInput
   academicRecords?: Prisma.AcademicRecordUpdateManyWithoutStudentNestedInput
 }
@@ -800,6 +831,7 @@ export type UserUncheckedUpdateWithoutEnrollmentsInput = {
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sessionVersion?: Prisma.IntFieldUpdateOperationsInput | number
   academicRecords?: Prisma.AcademicRecordUncheckedUpdateManyWithoutStudentNestedInput
 }
 
@@ -817,6 +849,7 @@ export type UserCreateWithoutAcademicRecordsInput = {
   isActive?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
+  sessionVersion?: number
   center?: Prisma.CenterCreateNestedOneWithoutUsersInput
   enrollments?: Prisma.StudentEnrollmentCreateNestedManyWithoutStudentInput
 }
@@ -837,6 +870,7 @@ export type UserUncheckedCreateWithoutAcademicRecordsInput = {
   isActive?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
+  sessionVersion?: number
   enrollments?: Prisma.StudentEnrollmentUncheckedCreateNestedManyWithoutStudentInput
 }
 
@@ -870,6 +904,7 @@ export type UserUpdateWithoutAcademicRecordsInput = {
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sessionVersion?: Prisma.IntFieldUpdateOperationsInput | number
   center?: Prisma.CenterUpdateOneWithoutUsersNestedInput
   enrollments?: Prisma.StudentEnrollmentUpdateManyWithoutStudentNestedInput
 }
@@ -890,6 +925,7 @@ export type UserUncheckedUpdateWithoutAcademicRecordsInput = {
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sessionVersion?: Prisma.IntFieldUpdateOperationsInput | number
   enrollments?: Prisma.StudentEnrollmentUncheckedUpdateManyWithoutStudentNestedInput
 }
 
@@ -907,6 +943,7 @@ export type UserCreateWithoutCenterInput = {
   isActive?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
+  sessionVersion?: number
   enrollments?: Prisma.StudentEnrollmentCreateNestedManyWithoutStudentInput
   academicRecords?: Prisma.AcademicRecordCreateNestedManyWithoutStudentInput
 }
@@ -926,6 +963,7 @@ export type UserUncheckedCreateWithoutCenterInput = {
   isActive?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
+  sessionVersion?: number
   enrollments?: Prisma.StudentEnrollmentUncheckedCreateNestedManyWithoutStudentInput
   academicRecords?: Prisma.AcademicRecordUncheckedCreateNestedManyWithoutStudentInput
 }
@@ -975,6 +1013,7 @@ export type UserScalarWhereInput = {
   isActive?: Prisma.BoolFilter<"User"> | boolean
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
+  sessionVersion?: Prisma.IntFilter<"User"> | number
 }
 
 export type UserCreateManyCenterInput = {
@@ -992,6 +1031,7 @@ export type UserCreateManyCenterInput = {
   isActive?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
+  sessionVersion?: number
 }
 
 export type UserUpdateWithoutCenterInput = {
@@ -1008,6 +1048,7 @@ export type UserUpdateWithoutCenterInput = {
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sessionVersion?: Prisma.IntFieldUpdateOperationsInput | number
   enrollments?: Prisma.StudentEnrollmentUpdateManyWithoutStudentNestedInput
   academicRecords?: Prisma.AcademicRecordUpdateManyWithoutStudentNestedInput
 }
@@ -1027,6 +1068,7 @@ export type UserUncheckedUpdateWithoutCenterInput = {
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sessionVersion?: Prisma.IntFieldUpdateOperationsInput | number
   enrollments?: Prisma.StudentEnrollmentUncheckedUpdateManyWithoutStudentNestedInput
   academicRecords?: Prisma.AcademicRecordUncheckedUpdateManyWithoutStudentNestedInput
 }
@@ -1046,6 +1088,7 @@ export type UserUncheckedUpdateManyWithoutCenterInput = {
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sessionVersion?: Prisma.IntFieldUpdateOperationsInput | number
 }
 
 
@@ -1104,6 +1147,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   isActive?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  sessionVersion?: boolean
   center?: boolean | Prisma.User$centerArgs<ExtArgs>
   enrollments?: boolean | Prisma.User$enrollmentsArgs<ExtArgs>
   academicRecords?: boolean | Prisma.User$academicRecordsArgs<ExtArgs>
@@ -1126,6 +1170,7 @@ export type UserSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   isActive?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  sessionVersion?: boolean
   center?: boolean | Prisma.User$centerArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
@@ -1145,6 +1190,7 @@ export type UserSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   isActive?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  sessionVersion?: boolean
   center?: boolean | Prisma.User$centerArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
@@ -1164,9 +1210,10 @@ export type UserSelectScalar = {
   isActive?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  sessionVersion?: boolean
 }
 
-export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "email" | "passwordHash" | "regNumber" | "stNumber" | "intake" | "status" | "firstName" | "lastName" | "role" | "centerId" | "isActive" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
+export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "email" | "passwordHash" | "regNumber" | "stNumber" | "intake" | "status" | "firstName" | "lastName" | "role" | "centerId" | "isActive" | "createdAt" | "updatedAt" | "sessionVersion", ExtArgs["result"]["user"]>
 export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   center?: boolean | Prisma.User$centerArgs<ExtArgs>
   enrollments?: boolean | Prisma.User$enrollmentsArgs<ExtArgs>
@@ -1203,6 +1250,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     isActive: boolean
     createdAt: Date
     updatedAt: Date
+    sessionVersion: number
   }, ExtArgs["result"]["user"]>
   composites: {}
 }
@@ -1644,6 +1692,7 @@ export interface UserFieldRefs {
   readonly isActive: Prisma.FieldRef<"User", 'Boolean'>
   readonly createdAt: Prisma.FieldRef<"User", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"User", 'DateTime'>
+  readonly sessionVersion: Prisma.FieldRef<"User", 'Int'>
 }
     
 
