@@ -14,10 +14,12 @@ const transporter = nodemailer.createTransport({
 export async function sendOTPEmail(
   email: string,
   code: string,
-  purpose: "LOGIN" | "RESET",
+  purpose: "LOGIN" | "RESET" | "2FA_CHANGE",
 ) {
   const subject =
-    purpose === "LOGIN"
+  purpose === "2FA_CHANGE"
+    ? "IARVS - Security Settings Verification"
+    :purpose === "LOGIN"
       ? "IARVS - Login Verification"
       : "IARVS - Password Reset";
 

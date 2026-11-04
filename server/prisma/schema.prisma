@@ -31,25 +31,25 @@ enum PassStatus {
 }
 
 model User {
-  id           Int        @id @default(autoincrement())
-  userId       String     @unique
-  email        String     @unique
-  passwordHash String
-  regNumber    String?    @unique
-  stNumber     String?    @unique
-  intake       String?
-  status       UserStatus @default(ACTIVE)
-  firstName    String
-  lastName     String
-  role         UserRole
-  centerId     Int?
-  isActive     Boolean    @default(true)
-  createdAt    DateTime   @default(now())
-  updatedAt    DateTime   @updatedAt
-  sessionVersion Int     @default(0)
-  isTwoFactorEnabled Boolean @default(false)
+  id                 Int        @id @default(autoincrement())
+  userId             String     @unique
+  email              String     @unique
+  passwordHash       String
+  regNumber          String?    @unique
+  stNumber           String?    @unique
+  intake             String?
+  status             UserStatus @default(ACTIVE)
+  firstName          String
+  lastName           String
+  role               UserRole
+  centerId           Int?
+  isActive           Boolean    @default(true)
+  createdAt          DateTime   @default(now())
+  updatedAt          DateTime   @updatedAt
+  sessionVersion     Int        @default(0)
+  isTwoFactorEnabled Boolean    @default(false)
 
-  center          Center? @relation(fields: [centerId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  center          Center?             @relation(fields: [centerId], references: [id], onDelete: Restrict, onUpdate: Cascade)
   enrollments     StudentEnrollment[]
   academicRecords AcademicRecord[]
 

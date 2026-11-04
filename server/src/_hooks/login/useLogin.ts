@@ -7,13 +7,20 @@ interface LoginInput {
   password: string;
 }
 
-interface LoginResponse {
-  success: boolean;
-  message: string;
-  requiresOTP: boolean;
-  challenge: string;
-  expiresIn: number;
-}
+export type LoginResponse =
+  | {
+      success: true;
+      message: string;
+      requiresOTP: false;
+      redirectUrl: string;
+    }
+  | {
+      success: true;
+      message: string;
+      requiresOTP: true;
+      challenge: string;
+      expiresIn: number;
+    };
 
 export function useLogin() {
   return useMutation<LoginResponse, Error, LoginInput>({
@@ -29,25 +36,74 @@ export function useLogin() {
         credentials: "same-origin",
       });
 
-      const data = await response.json();
+      const data: unknown = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || "Login failed");
+        const errorMessage =
+          typeof data === "object" &&
+          data !== null &&
+          "error" in data &&
+          typeof data.error === "string"
+            ? data.error
+            : "Login failed";
+
+        throw new Error(errorMessage);
       }
 
       if (
-        data.requiresOTP !== true ||
-        typeof data.challenge !== "string" ||
-        typeof data.expiresIn !== "number"
+        typeof data !== "object" ||
+        data === null ||
+        !("success" in data) ||
+        data.success !== true ||
+        !("requiresOTP" in data)
       ) {
         throw new Error("Invalid authentication response");
       }
 
-      return data as LoginResponse;
+      // CASE 1: 2FA DISABLED
+      if (data.requiresOTP === false) {
+        if (
+          !("redirectUrl" in data) ||
+          typeof data.redirectUrl !== "string" ||
+          !data.redirectUrl.startsWith("/") ||
+          data.redirectUrl.startsWith("//")
+        ) {
+          throw new Error("Invalid login redirect");
+        }
+
+        return {
+          success: true,
+          message: "Login successful",
+          requiresOTP: false,
+          redirectUrl: data.redirectUrl,
+        };
+      }
+
+      // CASE 2: 2FA ENABLED
+      if (data.requiresOTP === true) {
+        if (
+          !("challenge" in data) ||
+          typeof data.challenge !== "string" ||
+          !("expiresIn" in data) ||
+          typeof data.expiresIn !== "number" ||
+          !Number.isFinite(data.expiresIn) ||
+          data.expiresIn <= 0
+        ) {
+          throw new Error("Invalid OTP authentication response");
+        }
+
+        return {
+          success: true,
+          message: "OTP verification required",
+          requiresOTP: true,
+          challenge: data.challenge,
+          expiresIn: data.expiresIn,
+        };
+      }
+
+      throw new Error("Invalid authentication response");
     },
 
-    // Authentication mutations should not
-    // automatically retry.
     retry: false,
   });
 }

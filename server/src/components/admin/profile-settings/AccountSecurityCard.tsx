@@ -1,19 +1,12 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
-import {
-  Eye,
-  EyeOff,
-  LockKeyhole,
-  ShieldCheck,
-} from "lucide-react";
+import { Eye, EyeOff, LockKeyhole, ShieldCheck } from "lucide-react";
 
-import {
-  FieldLabel,
-  PasswordField,
-  SectionHeading,
-} from "./fields";
+import { FieldLabel, PasswordField, SectionHeading } from "./fields";
 import { cardClass, primaryButtonClass } from "./styles";
+
+import { TwoFactorAuthSettings } from "./TwoFactorAuthSettings";
 
 export function AccountSecurityCard({ email }: { email: string }) {
   const [currentPassword, setCurrentPassword] = useState("");
@@ -24,9 +17,7 @@ export function AccountSecurityCard({ email }: { email: string }) {
   const [passwordError, setPasswordError] = useState("");
   const [passwordSuccess, setPasswordSuccess] = useState("");
 
-  const handleChangePassword = async (
-    event: FormEvent<HTMLFormElement>
-  ) => {
+  const handleChangePassword = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setPasswordError("");
     setPasswordSuccess("");
@@ -45,7 +36,7 @@ export function AccountSecurityCard({ email }: { email: string }) {
     ) {
       setPasswordError(
         "Use at least 8 characters with uppercase, lowercase, " +
-        "a number and a special character."
+          "a number and a special character.",
       );
       return;
     }
@@ -56,9 +47,7 @@ export function AccountSecurityCard({ email }: { email: string }) {
     }
 
     if (currentPassword === newPassword) {
-      setPasswordError(
-        "New password must differ from the current password."
-      );
+      setPasswordError("New password must differ from the current password.");
       return;
     }
 
@@ -83,8 +72,8 @@ export function AccountSecurityCard({ email }: { email: string }) {
       if (!response.ok) {
         throw new Error(
           result?.message ||
-          result?.detail ||
-          "Unable to change password. Check the backend connection."
+            result?.detail ||
+            "Unable to change password. Check the backend connection.",
         );
       }
 
@@ -94,9 +83,7 @@ export function AccountSecurityCard({ email }: { email: string }) {
       setPasswordSuccess("Password changed successfully.");
     } catch (error) {
       setPasswordError(
-        error instanceof Error
-          ? error.message
-          : "Password change failed."
+        error instanceof Error ? error.message : "Password change failed.",
       );
     } finally {
       setPasswordLoading(false);
@@ -118,14 +105,9 @@ export function AccountSecurityCard({ email }: { email: string }) {
         </div>
       </div>
 
-      <form
-        onSubmit={handleChangePassword}
-        className="mt-6 space-y-4"
-      >
+      <form onSubmit={handleChangePassword} className="mt-6 space-y-4">
         <div className="border-t border-slate-200 pt-5 dark:border-slate-700">
-          <h3 className="text-sm font-semibold">
-            Change Password
-          </h3>
+          <h3 className="text-sm font-semibold">Change Password</h3>
           <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
             Keep your account secure with a strong password.
           </p>
@@ -157,22 +139,16 @@ export function AccountSecurityCard({ email }: { email: string }) {
 
         <button
           type="button"
-          onClick={() =>
-            setShowPasswords((previous) => !previous)
-          }
+          onClick={() => setShowPasswords((previous) => !previous)}
           className="flex items-center gap-2 text-xs font-medium text-blue-600 dark:text-blue-400"
         >
-          {showPasswords ? (
-            <EyeOff size={15} />
-          ) : (
-            <Eye size={15} />
-          )}
+          {showPasswords ? <EyeOff size={15} /> : <Eye size={15} />}
           {showPasswords ? "Hide Passwords" : "Show Passwords"}
         </button>
 
         <p className="text-xs leading-relaxed text-slate-500 dark:text-slate-400">
-          Minimum 8 characters, including uppercase, lowercase, a
-          number and a special character.
+          Minimum 8 characters, including uppercase, lowercase, a number and a
+          special character.
         </p>
 
         {passwordError && (
@@ -199,6 +175,10 @@ export function AccountSecurityCard({ email }: { email: string }) {
           {passwordLoading ? "Updating..." : "Update Password"}
         </button>
       </form>
+      {/* TWO-FACTOR AUTHENTICATION */}
+      <div className="mt-6 border-t border-slate-200 pt-5 dark:border-slate-700">
+        <TwoFactorAuthSettings />
+      </div>
     </section>
   );
 }

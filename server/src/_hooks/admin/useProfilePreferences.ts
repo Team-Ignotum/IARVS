@@ -60,9 +60,7 @@ export function useProfilePreferences() {
     // hydration mismatch on the toggle and font-size controls.
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setPreferences(restored);
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     setSavedPreferences(restored);
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsLoaded(true);
   }, []);
 
