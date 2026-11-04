@@ -55,6 +55,7 @@ export type UserMinAggregateOutputType = {
   createdAt: Date | null
   updatedAt: Date | null
   sessionVersion: number | null
+  isTwoFactorEnabled: boolean | null
 }
 
 export type UserMaxAggregateOutputType = {
@@ -74,6 +75,7 @@ export type UserMaxAggregateOutputType = {
   createdAt: Date | null
   updatedAt: Date | null
   sessionVersion: number | null
+  isTwoFactorEnabled: boolean | null
 }
 
 export type UserCountAggregateOutputType = {
@@ -93,6 +95,7 @@ export type UserCountAggregateOutputType = {
   createdAt: number
   updatedAt: number
   sessionVersion: number
+  isTwoFactorEnabled: number
   _all: number
 }
 
@@ -126,6 +129,7 @@ export type UserMinAggregateInputType = {
   createdAt?: true
   updatedAt?: true
   sessionVersion?: true
+  isTwoFactorEnabled?: true
 }
 
 export type UserMaxAggregateInputType = {
@@ -145,6 +149,7 @@ export type UserMaxAggregateInputType = {
   createdAt?: true
   updatedAt?: true
   sessionVersion?: true
+  isTwoFactorEnabled?: true
 }
 
 export type UserCountAggregateInputType = {
@@ -164,6 +169,7 @@ export type UserCountAggregateInputType = {
   createdAt?: true
   updatedAt?: true
   sessionVersion?: true
+  isTwoFactorEnabled?: true
   _all?: true
 }
 
@@ -270,6 +276,7 @@ export type UserGroupByOutputType = {
   createdAt: Date
   updatedAt: Date
   sessionVersion: number
+  isTwoFactorEnabled: boolean
   _count: UserCountAggregateOutputType | null
   _avg: UserAvgAggregateOutputType | null
   _sum: UserSumAggregateOutputType | null
@@ -312,6 +319,7 @@ export type UserWhereInput = {
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
   sessionVersion?: Prisma.IntFilter<"User"> | number
+  isTwoFactorEnabled?: Prisma.BoolFilter<"User"> | boolean
   center?: Prisma.XOR<Prisma.CenterNullableScalarRelationFilter, Prisma.CenterWhereInput> | null
   enrollments?: Prisma.StudentEnrollmentListRelationFilter
   academicRecords?: Prisma.AcademicRecordListRelationFilter
@@ -334,6 +342,7 @@ export type UserOrderByWithRelationInput = {
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   sessionVersion?: Prisma.SortOrder
+  isTwoFactorEnabled?: Prisma.SortOrder
   center?: Prisma.CenterOrderByWithRelationInput
   enrollments?: Prisma.StudentEnrollmentOrderByRelationAggregateInput
   academicRecords?: Prisma.AcademicRecordOrderByRelationAggregateInput
@@ -359,6 +368,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
   sessionVersion?: Prisma.IntFilter<"User"> | number
+  isTwoFactorEnabled?: Prisma.BoolFilter<"User"> | boolean
   center?: Prisma.XOR<Prisma.CenterNullableScalarRelationFilter, Prisma.CenterWhereInput> | null
   enrollments?: Prisma.StudentEnrollmentListRelationFilter
   academicRecords?: Prisma.AcademicRecordListRelationFilter
@@ -381,6 +391,7 @@ export type UserOrderByWithAggregationInput = {
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   sessionVersion?: Prisma.SortOrder
+  isTwoFactorEnabled?: Prisma.SortOrder
   _count?: Prisma.UserCountOrderByAggregateInput
   _avg?: Prisma.UserAvgOrderByAggregateInput
   _max?: Prisma.UserMaxOrderByAggregateInput
@@ -408,6 +419,7 @@ export type UserScalarWhereWithAggregatesInput = {
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"User"> | Date | string
   sessionVersion?: Prisma.IntWithAggregatesFilter<"User"> | number
+  isTwoFactorEnabled?: Prisma.BoolWithAggregatesFilter<"User"> | boolean
 }
 
 export type UserCreateInput = {
@@ -425,6 +437,7 @@ export type UserCreateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   sessionVersion?: number
+  isTwoFactorEnabled?: boolean
   center?: Prisma.CenterCreateNestedOneWithoutUsersInput
   enrollments?: Prisma.StudentEnrollmentCreateNestedManyWithoutStudentInput
   academicRecords?: Prisma.AcademicRecordCreateNestedManyWithoutStudentInput
@@ -447,6 +460,7 @@ export type UserUncheckedCreateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   sessionVersion?: number
+  isTwoFactorEnabled?: boolean
   enrollments?: Prisma.StudentEnrollmentUncheckedCreateNestedManyWithoutStudentInput
   academicRecords?: Prisma.AcademicRecordUncheckedCreateNestedManyWithoutStudentInput
 }
@@ -466,6 +480,7 @@ export type UserUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessionVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  isTwoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   center?: Prisma.CenterUpdateOneWithoutUsersNestedInput
   enrollments?: Prisma.StudentEnrollmentUpdateManyWithoutStudentNestedInput
   academicRecords?: Prisma.AcademicRecordUpdateManyWithoutStudentNestedInput
@@ -488,6 +503,7 @@ export type UserUncheckedUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessionVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  isTwoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   enrollments?: Prisma.StudentEnrollmentUncheckedUpdateManyWithoutStudentNestedInput
   academicRecords?: Prisma.AcademicRecordUncheckedUpdateManyWithoutStudentNestedInput
 }
@@ -509,6 +525,7 @@ export type UserCreateManyInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   sessionVersion?: number
+  isTwoFactorEnabled?: boolean
 }
 
 export type UserUpdateManyMutationInput = {
@@ -526,6 +543,7 @@ export type UserUpdateManyMutationInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessionVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  isTwoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 export type UserUncheckedUpdateManyInput = {
@@ -545,6 +563,7 @@ export type UserUncheckedUpdateManyInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessionVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  isTwoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 export type UserCountOrderByAggregateInput = {
@@ -564,6 +583,7 @@ export type UserCountOrderByAggregateInput = {
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   sessionVersion?: Prisma.SortOrder
+  isTwoFactorEnabled?: Prisma.SortOrder
 }
 
 export type UserAvgOrderByAggregateInput = {
@@ -589,6 +609,7 @@ export type UserMaxOrderByAggregateInput = {
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   sessionVersion?: Prisma.SortOrder
+  isTwoFactorEnabled?: Prisma.SortOrder
 }
 
 export type UserMinOrderByAggregateInput = {
@@ -608,6 +629,7 @@ export type UserMinOrderByAggregateInput = {
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   sessionVersion?: Prisma.SortOrder
+  isTwoFactorEnabled?: Prisma.SortOrder
 }
 
 export type UserSumOrderByAggregateInput = {
@@ -756,6 +778,7 @@ export type UserCreateWithoutEnrollmentsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   sessionVersion?: number
+  isTwoFactorEnabled?: boolean
   center?: Prisma.CenterCreateNestedOneWithoutUsersInput
   academicRecords?: Prisma.AcademicRecordCreateNestedManyWithoutStudentInput
 }
@@ -777,6 +800,7 @@ export type UserUncheckedCreateWithoutEnrollmentsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   sessionVersion?: number
+  isTwoFactorEnabled?: boolean
   academicRecords?: Prisma.AcademicRecordUncheckedCreateNestedManyWithoutStudentInput
 }
 
@@ -811,6 +835,7 @@ export type UserUpdateWithoutEnrollmentsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessionVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  isTwoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   center?: Prisma.CenterUpdateOneWithoutUsersNestedInput
   academicRecords?: Prisma.AcademicRecordUpdateManyWithoutStudentNestedInput
 }
@@ -832,6 +857,7 @@ export type UserUncheckedUpdateWithoutEnrollmentsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessionVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  isTwoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   academicRecords?: Prisma.AcademicRecordUncheckedUpdateManyWithoutStudentNestedInput
 }
 
@@ -850,6 +876,7 @@ export type UserCreateWithoutAcademicRecordsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   sessionVersion?: number
+  isTwoFactorEnabled?: boolean
   center?: Prisma.CenterCreateNestedOneWithoutUsersInput
   enrollments?: Prisma.StudentEnrollmentCreateNestedManyWithoutStudentInput
 }
@@ -871,6 +898,7 @@ export type UserUncheckedCreateWithoutAcademicRecordsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   sessionVersion?: number
+  isTwoFactorEnabled?: boolean
   enrollments?: Prisma.StudentEnrollmentUncheckedCreateNestedManyWithoutStudentInput
 }
 
@@ -905,6 +933,7 @@ export type UserUpdateWithoutAcademicRecordsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessionVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  isTwoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   center?: Prisma.CenterUpdateOneWithoutUsersNestedInput
   enrollments?: Prisma.StudentEnrollmentUpdateManyWithoutStudentNestedInput
 }
@@ -926,6 +955,7 @@ export type UserUncheckedUpdateWithoutAcademicRecordsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessionVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  isTwoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   enrollments?: Prisma.StudentEnrollmentUncheckedUpdateManyWithoutStudentNestedInput
 }
 
@@ -944,6 +974,7 @@ export type UserCreateWithoutCenterInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   sessionVersion?: number
+  isTwoFactorEnabled?: boolean
   enrollments?: Prisma.StudentEnrollmentCreateNestedManyWithoutStudentInput
   academicRecords?: Prisma.AcademicRecordCreateNestedManyWithoutStudentInput
 }
@@ -964,6 +995,7 @@ export type UserUncheckedCreateWithoutCenterInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   sessionVersion?: number
+  isTwoFactorEnabled?: boolean
   enrollments?: Prisma.StudentEnrollmentUncheckedCreateNestedManyWithoutStudentInput
   academicRecords?: Prisma.AcademicRecordUncheckedCreateNestedManyWithoutStudentInput
 }
@@ -1014,6 +1046,7 @@ export type UserScalarWhereInput = {
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
   sessionVersion?: Prisma.IntFilter<"User"> | number
+  isTwoFactorEnabled?: Prisma.BoolFilter<"User"> | boolean
 }
 
 export type UserCreateManyCenterInput = {
@@ -1032,6 +1065,7 @@ export type UserCreateManyCenterInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   sessionVersion?: number
+  isTwoFactorEnabled?: boolean
 }
 
 export type UserUpdateWithoutCenterInput = {
@@ -1049,6 +1083,7 @@ export type UserUpdateWithoutCenterInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessionVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  isTwoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   enrollments?: Prisma.StudentEnrollmentUpdateManyWithoutStudentNestedInput
   academicRecords?: Prisma.AcademicRecordUpdateManyWithoutStudentNestedInput
 }
@@ -1069,6 +1104,7 @@ export type UserUncheckedUpdateWithoutCenterInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessionVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  isTwoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   enrollments?: Prisma.StudentEnrollmentUncheckedUpdateManyWithoutStudentNestedInput
   academicRecords?: Prisma.AcademicRecordUncheckedUpdateManyWithoutStudentNestedInput
 }
@@ -1089,6 +1125,7 @@ export type UserUncheckedUpdateManyWithoutCenterInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessionVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  isTwoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 
@@ -1148,6 +1185,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   createdAt?: boolean
   updatedAt?: boolean
   sessionVersion?: boolean
+  isTwoFactorEnabled?: boolean
   center?: boolean | Prisma.User$centerArgs<ExtArgs>
   enrollments?: boolean | Prisma.User$enrollmentsArgs<ExtArgs>
   academicRecords?: boolean | Prisma.User$academicRecordsArgs<ExtArgs>
@@ -1171,6 +1209,7 @@ export type UserSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   createdAt?: boolean
   updatedAt?: boolean
   sessionVersion?: boolean
+  isTwoFactorEnabled?: boolean
   center?: boolean | Prisma.User$centerArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
@@ -1191,6 +1230,7 @@ export type UserSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   createdAt?: boolean
   updatedAt?: boolean
   sessionVersion?: boolean
+  isTwoFactorEnabled?: boolean
   center?: boolean | Prisma.User$centerArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
@@ -1211,9 +1251,10 @@ export type UserSelectScalar = {
   createdAt?: boolean
   updatedAt?: boolean
   sessionVersion?: boolean
+  isTwoFactorEnabled?: boolean
 }
 
-export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "email" | "passwordHash" | "regNumber" | "stNumber" | "intake" | "status" | "firstName" | "lastName" | "role" | "centerId" | "isActive" | "createdAt" | "updatedAt" | "sessionVersion", ExtArgs["result"]["user"]>
+export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "email" | "passwordHash" | "regNumber" | "stNumber" | "intake" | "status" | "firstName" | "lastName" | "role" | "centerId" | "isActive" | "createdAt" | "updatedAt" | "sessionVersion" | "isTwoFactorEnabled", ExtArgs["result"]["user"]>
 export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   center?: boolean | Prisma.User$centerArgs<ExtArgs>
   enrollments?: boolean | Prisma.User$enrollmentsArgs<ExtArgs>
@@ -1251,6 +1292,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     createdAt: Date
     updatedAt: Date
     sessionVersion: number
+    isTwoFactorEnabled: boolean
   }, ExtArgs["result"]["user"]>
   composites: {}
 }
@@ -1693,6 +1735,7 @@ export interface UserFieldRefs {
   readonly createdAt: Prisma.FieldRef<"User", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"User", 'DateTime'>
   readonly sessionVersion: Prisma.FieldRef<"User", 'Int'>
+  readonly isTwoFactorEnabled: Prisma.FieldRef<"User", 'Boolean'>
 }
     
 
