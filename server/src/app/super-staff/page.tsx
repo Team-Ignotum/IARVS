@@ -1,6 +1,6 @@
 "use client";
 
-import { AdminSidebar } from "@/components/Asidebar1";
+import { SuperStaffSidebar } from "@/components/superStaffSideBar";
 import {
   SidebarInset,
   SidebarProvider,
@@ -10,7 +10,7 @@ import { Bell } from "lucide-react";
 export default function StaffPage() {
   return (
     <SidebarProvider>
-      <AdminSidebar />
+      <SuperStaffSidebar />
 
       <SidebarInset>
         <header className="sticky top-0 z-20 border-b border-slate-200 bg-white/95 backdrop-blur">

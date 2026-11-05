@@ -6,11 +6,11 @@ import crest from "../../src/app/favicon.ico";
 import {
   BriefcaseBusiness,
   CircleHelp,
-  GraduationCap,
   BookOpen, 
   ClipboardCheck,
   LayoutDashboard,
   Settings,
+  CalendarDays,
 } from "lucide-react";
 import {
   Sidebar,
@@ -28,41 +28,44 @@ import {
 const mainLinks = [
   {
     label: "Dashboard",
-    href: "/admin",
+    href: "/super-staff/dashboard",
     icon: LayoutDashboard,
   },
   {
     label: "Staff Management",
-    href: "/admin/staff",
+    href: "/super-staff/staff",
     icon: BriefcaseBusiness,
   },
+
   {
-    label: "Student Management",
-    href: "/admin/students",
-    icon: GraduationCap,
+    label: "Schedule Management",
+    href: "/super-staff/schedule",
+    icon: CalendarDays,
   },
   
   {
-  label: "Override Requests",
-  href: "/admin/over-requests",
-  icon: ClipboardCheck,
-},
-{
-  label: "Curriculum Management",
-  href: "/admin/curriculum",
-  icon: BookOpen,
-},
+    label: "Override Requests",
+    href: "/super-staff/over-requests",
+    icon: ClipboardCheck,
+  },
+
+  {
+    label: "Curriculum Management",
+    href: "/super-staff/curriculum",
+    icon: BookOpen,
+  },
+
 ];
 
 const bottomLinks = [
   {
     label: "Support",
-    href: "/admin/support",
+    href: "/super-staff/support",
     icon: CircleHelp,
   },
   {
     label: "Settings",
-    href: "/admin/settings",
+    href: "/super-staff/settings",
     icon: Settings,
   },
 ];
@@ -77,7 +80,7 @@ const menuBtnClass = (active: boolean) =>
   `${COLLAPSED_BASE} ${active ? ACTIVE_CLASS : INACTIVE_CLASS}`;
 
 const isActivePath = (pathname: string, href: string) =>
-  href === "/admin" ? pathname === "/admin" : pathname.startsWith(href);
+  href === "/super-staff" ? pathname === "/super-staff" : pathname.startsWith(href);
 
 function LogoHeader({ collapsed }: { collapsed: boolean }) {
   return (
@@ -158,7 +161,7 @@ function NavMenu({
   );
 }
 
-export function AdminSidebar() {
+export function SuperStaffSidebar() {
   const pathname = usePathname();
   const router = useRouter();
   const { setOpenMobile, state } = useSidebar();
