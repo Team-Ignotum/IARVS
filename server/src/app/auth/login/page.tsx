@@ -80,7 +80,6 @@ const LoginPage = () => {
     const formData = new FormData(e.currentTarget);
 
     const email = String(formData.get("email") ?? "").trim();
-
     const password = String(formData.get("password") ?? "");
 
     if (!email || !password) {
@@ -99,28 +98,46 @@ const LoginPage = () => {
         password,
       });
 
-      if (!result.requiresOTP) {
-        throw new Error("OTP verification was not initiated.");
+      // CASE 1: 2FA DISABLED
+      // Backend has already created the session.
+      if (result.requiresOTP === false) {
+        setOtpOpen(false);
+        setOtpChallenge("");
+
+        setToastData({
+          open: true,
+          title: "Login Successful",
+          description: "Redirecting to your dashboard...",
+          variant: "default",
+        });
+
+        router.replace(result.redirectUrl);
+        router.refresh();
+        return;
       }
 
-      // Store OTP challenge returned by the backend.
-      setOtpChallenge(result.challenge);
-      setOtpEmail(email);
-      setOtpExpiresIn(result.expiresIn);
+      // CASE 2: 2FA ENABLED
+      // User must verify the email OTP before a session is created.
+      if (result.requiresOTP === true) {
+        setOtpChallenge(result.challenge);
+        setOtpEmail(email);
+        setOtpExpiresIn(result.expiresIn);
 
-      // Clear previous verification errors.
-      verifyMutation.reset();
+        verifyMutation.reset();
+        setOtpOpen(true);
 
-      // Open OTP popup.
-      setOtpOpen(true);
+        setToastData({
+          open: true,
+          title: "Verification Required",
+          description:
+            "A verification code has been sent to your registered email.",
+          variant: "default",
+        });
 
-      setToastData({
-        open: true,
-        title: "Verification Required",
-        description:
-          "A verification code has been sent to your registered email.",
-        variant: "default",
-      });
+        return;
+      }
+
+      throw new Error("Unexpected authentication response.");
     } catch (error) {
       setToastData({
         open: true,
