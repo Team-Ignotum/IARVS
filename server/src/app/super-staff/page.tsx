@@ -1,6 +1,6 @@
 "use client";
 
-import { AdminSidebar } from "@/components/Asidebar1";
+import { AdminSidebar } from "@/components/superStaffSideBar";
 import {
   SidebarInset,
   SidebarProvider,
