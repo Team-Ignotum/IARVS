@@ -11,6 +11,7 @@ import {
   ClipboardCheck,
   LayoutDashboard,
   Settings,
+  CalendarDays,
 } from "lucide-react";
 import {
   Sidebar,
@@ -51,6 +52,11 @@ const mainLinks = [
   label: "Curriculum Management",
   href: "/admin/curriculum",
   icon: BookOpen,
+},
+{
+  label: "Schedule Management",
+  href: "/super-staff/schedule",
+  icon: CalendarDays,
 },
 ];
 
