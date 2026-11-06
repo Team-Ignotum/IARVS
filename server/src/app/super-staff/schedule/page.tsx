@@ -14,10 +14,10 @@ import {
   Hourglass,
   Lock,
 } from "lucide-react";
-import { AdminSidebar } from "@/components/Asidebar";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
-import { AdminBreadcrumb } from "@/components/admin/AdministrativeBreadcrumb";
-import { AdminHeader } from "@/components/admin/AdminHeader";
+import { SuperStaffSidebar } from "@/components/superStaffSideBar";
+import { SuperStaffHeader } from "@/components/super-staff/superStaffHeader";
+import { SuperStaffBreadcrumb } from "@/components/super-staff/superStaffBreadcrumb";
 
 type RegistrationType = "NEW_REGISTRATION" | "RE_REGISTRATION" | "ADD_DROP";
 type WindowStatus = "OPEN" | "SCHEDULED" | "CLOSED";
@@ -26,7 +26,7 @@ type RegistrationWindow = {
   batches: string;
   startAt: string;
   endAt: string;
-  status: WindowStatus;
+  manuallyClosed?: boolean;
 };
 
 type CardMap = Record<RegistrationType, RegistrationWindow>;
@@ -60,26 +60,46 @@ const STATUS_STYLES: Record<WindowStatus, string> = {
 
 // One fixed entry per registration type â€” saving always updates the
 // matching card instead of appending a new one.
-const initialCards: CardMap = {
-  NEW_REGISTRATION: {
-    batches: "2025",
-    startAt: "2026-07-01T00:00",
-    endAt: "2026-07-15T23:59",
-    status: "CLOSED",
-  },
-  RE_REGISTRATION: {
-    batches: "2022, 2023",
-    startAt: "2026-09-01T08:00",
-    endAt: "2026-09-14T23:59",
-    status: "SCHEDULED",
-  },
-  ADD_DROP: {
-    batches: "2024",
-    startAt: "2026-08-20T00:00",
-    endAt: "2026-08-27T23:59",
-    status: "OPEN",
-  },
-};
+function localDateTimeOffset(dayOffset: number, hour: number): string {
+  const date = new Date();
+  date.setDate(date.getDate() + dayOffset);
+  date.setHours(hour, 0, 0, 0);
+  return new Date(date.getTime() - date.getTimezoneOffset() * 60_000)
+    .toISOString()
+    .slice(0, 16);
+}
+
+function createInitialCards(): CardMap {
+  return {
+    NEW_REGISTRATION: {
+      batches: "2025",
+      startAt: localDateTimeOffset(-20, 8),
+      endAt: localDateTimeOffset(-10, 18),
+    },
+    RE_REGISTRATION: {
+      batches: "2022, 2023",
+      startAt: localDateTimeOffset(5, 8),
+      endAt: localDateTimeOffset(12, 18),
+    },
+    ADD_DROP: {
+      batches: "2024",
+      startAt: localDateTimeOffset(-1, 8),
+      endAt: localDateTimeOffset(5, 18),
+    },
+  };
+}
+
+function getWindowStatus(window: RegistrationWindow, now: number): WindowStatus {
+  if (window.manuallyClosed) return "CLOSED";
+
+  const start = new Date(window.startAt).getTime();
+  const end = new Date(window.endAt).getTime();
+  if (!Number.isFinite(start) || !Number.isFinite(end) || end <= now) {
+    return "CLOSED";
+  }
+  if (start > now) return "SCHEDULED";
+  return "OPEN";
+}
 
 const emptyForm: FormState = {
   registrationType: "NEW_REGISTRATION",
@@ -107,10 +127,12 @@ function formatRange(startAt?: string, endAt?: string): string {
 }
 
 export default function RegistrationWindowMock() {
-  const [cards, setCards] = useState<CardMap>(initialCards);
+  const [cards, setCards] = useState<CardMap>(createInitialCards);
+  const [currentTime, setCurrentTime] = useState(() => Date.now());
   const [open, setOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [typeMenuOpen, setTypeMenuOpen] = useState(false);
+  const [selectedStatus, setSelectedStatus] = useState<WindowStatus | null>(null);
   const [lockType, setLockType] = useState(false);
   const [form, setForm] = useState<FormState>(emptyForm);
   const [formError, setFormError] = useState("");
@@ -118,6 +140,11 @@ export default function RegistrationWindowMock() {
     useState<RegistrationType | null>(null);
   const [toast, setToast] = useState("");
   const typeMenuRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    const timer = window.setInterval(() => setCurrentTime(Date.now()), 30_000);
+    return () => window.clearInterval(timer);
+  }, []);
 
   // Close the type dropdown on any click outside it, so it can never be
   // left open and overlap/intercept clicks on fields rendered below it
@@ -177,7 +204,7 @@ export default function RegistrationWindowMock() {
   function closeNow(type: RegistrationType) {
     setCards((prev) => ({
       ...prev,
-      [type]: { ...prev[type], status: "CLOSED" },
+      [type]: { ...prev[type], manuallyClosed: true },
     }));
     flashUpdated(type, `${TYPES.find((t) => t.value === type)?.label} closed.`);
   }
@@ -229,16 +256,13 @@ export default function RegistrationWindowMock() {
     // useSaveRegistrationWindow().mutate(form)
     window.setTimeout(() => {
       const type = form.registrationType;
-      const status: WindowStatus =
-        new Date(form.startAt).getTime() <= Date.now() ? "OPEN" : "SCHEDULED";
-
       setCards((prev) => ({
         ...prev,
         [type]: {
           batches: form.batchIds.trim(),
           startAt: form.startAt,
           endAt: form.endAt,
-          status,
+          manuallyClosed: false,
         },
       }));
       setSaving(false);
@@ -253,6 +277,9 @@ export default function RegistrationWindowMock() {
 
   const typeLabel = TYPES.find((t) => t.value === form.registrationType)?.label;
   const windowValues = Object.values(cards);
+  const windowStatuses = Object.fromEntries(
+    TYPES.map((type) => [type.value, getWindowStatus(cards[type.value], currentTime)]),
+  ) as Record<RegistrationType, WindowStatus>;
   const summaryCards = [
     {
       label: "Total Windows",
@@ -262,32 +289,35 @@ export default function RegistrationWindowMock() {
     },
     {
       label: "Open",
-      value: windowValues.filter((window) => window.status === "OPEN").length,
+      value: windowValues.filter((window) => getWindowStatus(window, currentTime) === "OPEN").length,
       icon: DoorOpen,
       tile: "bg-emerald-50 text-emerald-600",
     },
     {
       label: "Scheduled",
-      value: windowValues.filter((window) => window.status === "SCHEDULED").length,
+      value: windowValues.filter((window) => getWindowStatus(window, currentTime) === "SCHEDULED").length,
       icon: Hourglass,
       tile: "bg-amber-50 text-amber-600",
     },
     {
       label: "Closed",
-      value: windowValues.filter((window) => window.status === "CLOSED").length,
+      value: windowValues.filter((window) => getWindowStatus(window, currentTime) === "CLOSED").length,
       icon: Lock,
       tile: "bg-slate-100 text-slate-500",
     },
   ];
+  const statusTypes = selectedStatus
+    ? TYPES.filter((type) => windowStatuses[type.value] === selectedStatus)
+    : [];
 
   return (
     <SidebarProvider>
-      <AdminSidebar />
+      <SuperStaffSidebar />
       <SidebarInset className="min-h-screen bg-slate-50 font-sans">
-        <AdminHeader />
+        <SuperStaffHeader />
         <main className="flex flex-1 flex-col gap-4 bg-[#f4f5f7] p-4 sm:p-6 lg:p-8">
           <div className="mb-1">
-            <AdminBreadcrumb currentPage="Schedule" />
+            <SuperStaffBreadcrumb currentPage="Schedule" />
           </div>
 
           <section className="w-full overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
@@ -314,29 +344,48 @@ export default function RegistrationWindowMock() {
             </div>
 
             <div className="grid grid-cols-2 gap-3 px-5 py-6 sm:grid-cols-2 sm:gap-4 sm:px-9 sm:py-8 lg:grid-cols-4">
-              {summaryCards.map(({ label, value, icon: Icon, tile }) => (
-                <div
-                  key={label}
-                  className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-5"
-                >
-                  <div className="flex items-center gap-3">
-                    <span className={`inline-flex h-10 w-10 items-center justify-center rounded-xl sm:h-11 sm:w-11 ${tile}`}>
-                      <Icon size={20} />
+              {summaryCards.map(({ label, value, icon: Icon, tile }) => {
+                const status: WindowStatus | null =
+                  label === "Open" ? "OPEN" :
+                  label === "Scheduled" ? "SCHEDULED" :
+                  label === "Closed" ? "CLOSED" : null;
+
+                return (
+                  <button
+                    key={label}
+                    type="button"
+                    disabled={!status}
+                    aria-pressed={status ? selectedStatus === status : undefined}
+                    onClick={() => {
+                      if (status) setSelectedStatus(status);
+                    }}
+                    className={`w-full rounded-2xl border bg-white p-4 text-left transition-colors sm:p-5 ${
+                      status ? "cursor-pointer hover:border-slate-400" : "cursor-default"
+                    } ${
+                      status && selectedStatus === status
+                        ? "border-blue-500 ring-2 ring-blue-100"
+                        : "border-slate-200"
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <span className={`inline-flex h-10 w-10 items-center justify-center rounded-xl sm:h-11 sm:w-11 ${tile}`}>
+                        <Icon size={20} />
+                      </span>
+                      <span className="text-[10px] font-semibold uppercase tracking-widest text-slate-500 sm:text-xs">
+                        {label}
+                      </span>
+                    </div>
+                    <span className="mt-4 block text-3xl font-semibold text-slate-900 sm:mt-5 sm:text-4xl">
+                      {value}
                     </span>
-                    <span className="text-[10px] font-semibold uppercase tracking-widest text-slate-500 sm:text-xs">
-                      {label}
-                    </span>
-                  </div>
-                  <p className="mt-4 text-3xl font-semibold text-slate-900 sm:mt-5 sm:text-4xl">
-                    {value}
-                  </p>
-                </div>
-              ))}
+                  </button>
+                );
+              })}
             </div>
 
-            <div className="border-t border-slate-200">
-              <h2 className="px-5 py-5 text-xl font-medium text-slate-900 sm:px-9 sm:py-7">
-                Window Schedule
+            <div className="mt-4 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+              <h2 className="border-b border-slate-200 bg-slate-50 px-5 py-5 text-xl font-medium text-slate-900 sm:px-9 sm:py-7">
+                All Registration Windows
               </h2>
               <div className="overflow-x-auto">
                 <table className="w-full min-w-[760px] text-left">
@@ -351,7 +400,8 @@ export default function RegistrationWindowMock() {
                   <tbody>
                     {TYPES.map((t) => {
                       const w = cards[t.value];
-                      const isOpen = w.status === "OPEN";
+                      const status = windowStatuses[t.value];
+                      const isOpen = status === "OPEN";
 
                       return (
                     <tr
@@ -375,8 +425,8 @@ export default function RegistrationWindowMock() {
                         {formatRange(w.startAt, w.endAt)}
                       </td>
                       <td className="px-4 py-5">
-                        <span className={`inline-block rounded-full px-3 py-1 text-xs font-semibold uppercase ${STATUS_STYLES[w.status]}`}>
-                          {w.status}
+                        <span className={`inline-block rounded-full px-3 py-1 text-xs font-semibold uppercase ${STATUS_STYLES[status]}`}>
+                          {status}
                         </span>
                       </td>
                       <td className="px-5 py-5 sm:px-9">
@@ -407,6 +457,65 @@ export default function RegistrationWindowMock() {
                 </table>
               </div>
             </div>
+
+            {selectedStatus && (
+              <div className="mt-10 overflow-hidden rounded-xl border border-indigo-200 bg-white shadow-lg ring-1 ring-indigo-100">
+                <div className="flex flex-wrap items-center justify-between gap-3 border-b border-indigo-100 bg-indigo-50 px-5 py-5 sm:px-9 sm:py-6">
+                  <div>
+                    <p className="text-xs font-bold uppercase tracking-[0.12em] text-indigo-700">Filtered Results</p>
+                    <h2 className="mt-1 text-xl font-semibold text-slate-900">
+                      {selectedStatus.charAt(0) + selectedStatus.slice(1).toLowerCase()} Registration Windows
+                    </h2>
+                  </div>
+                  <p className="rounded-full bg-white px-3 py-1.5 text-sm font-medium text-indigo-700 ring-1 ring-indigo-200">
+                    {statusTypes.length} {statusTypes.length === 1 ? "window" : "windows"} with this status.
+                  </p>
+                </div>
+                <div className="overflow-x-auto">
+                  <table className="w-full min-w-[640px] text-left">
+                    <thead>
+                      <tr className="border-y border-slate-200 bg-slate-50 text-xs font-semibold uppercase tracking-wider text-slate-600">
+                        <th className="px-5 py-4 sm:px-9">Registration Type</th>
+                        <th className="px-4 py-4">Batches</th>
+                        <th className="px-4 py-4">Schedule</th>
+                        <th className="px-5 py-4 sm:px-9">Status</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {statusTypes.length ? statusTypes.map((type) => {
+                        const registrationWindow = cards[type.value];
+                        const status = windowStatuses[type.value];
+
+                        return (
+                          <tr key={type.value} className="border-b border-slate-100 last:border-b-0">
+                            <td className="px-5 py-5 text-sm font-medium text-slate-900 sm:px-9">
+                              {type.label}
+                            </td>
+                            <td className="px-4 py-5 text-sm text-slate-600">
+                              {registrationWindow.batches || "No batches set"}
+                            </td>
+                            <td className="px-4 py-5 text-sm text-slate-600">
+                              {formatRange(registrationWindow.startAt, registrationWindow.endAt)}
+                            </td>
+                            <td className="px-5 py-5 sm:px-9">
+                              <span className={`inline-block rounded-full px-3 py-1 text-xs font-semibold uppercase ${STATUS_STYLES[status]}`}>
+                                {status}
+                              </span>
+                            </td>
+                          </tr>
+                        );
+                      }) : (
+                        <tr>
+                          <td colSpan={4} className="px-5 py-8 text-center text-sm text-slate-500">
+                            No {selectedStatus.toLowerCase()} registration windows.
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
           </section>
 
         {open && (
