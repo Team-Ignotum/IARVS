@@ -14,7 +14,6 @@ import {
 import {
   Sidebar,
   SidebarContent,
-  SidebarFooter,
   SidebarGroup,
   SidebarGroupLabel,
   SidebarHeader,
@@ -23,6 +22,7 @@ import {
   SidebarMenuItem,
   SidebarTrigger,
   useSidebar,
+  SidebarFooter,
 } from "@/components/ui/sidebar";
 
 const mainLinks = [
@@ -63,6 +63,7 @@ const bottomLinks = [
     href: "/super-staff/support",
     icon: CircleHelp,
   },
+  
 ];
 
 const COLLAPSED_BASE =
@@ -178,8 +179,6 @@ export function SuperStaffSidebar() {
           label="Main Menu"
           links={mainLinks}
         />
-      </SidebarContent>
-      <SidebarFooter className="mt-auto shrink-0 border-t border-slate-200 px-2 py-3">
         <NavMenu
           pathname={pathname}
           onNavigate={navigate}
@@ -187,7 +186,7 @@ export function SuperStaffSidebar() {
           label="Support"
           links={bottomLinks}
         />
-      </SidebarFooter>
+      </SidebarContent>
     </Sidebar>
   );
 }
