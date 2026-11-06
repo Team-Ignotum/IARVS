@@ -111,6 +111,7 @@ export default function RegistrationWindowMock() {
   const [open, setOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [typeMenuOpen, setTypeMenuOpen] = useState(false);
+  const [selectedStatus, setSelectedStatus] = useState<WindowStatus | null>(null);
   const [lockType, setLockType] = useState(false);
   const [form, setForm] = useState<FormState>(emptyForm);
   const [formError, setFormError] = useState("");
@@ -279,6 +280,9 @@ export default function RegistrationWindowMock() {
       tile: "bg-slate-100 text-slate-500",
     },
   ];
+  const statusTypes = selectedStatus
+    ? TYPES.filter((type) => cards[type.value].status === selectedStatus)
+    : [];
 
   return (
     <SidebarProvider>
@@ -314,24 +318,43 @@ export default function RegistrationWindowMock() {
             </div>
 
             <div className="grid grid-cols-2 gap-3 px-5 py-6 sm:grid-cols-2 sm:gap-4 sm:px-9 sm:py-8 lg:grid-cols-4">
-              {summaryCards.map(({ label, value, icon: Icon, tile }) => (
-                <div
-                  key={label}
-                  className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-5"
-                >
-                  <div className="flex items-center gap-3">
-                    <span className={`inline-flex h-10 w-10 items-center justify-center rounded-xl sm:h-11 sm:w-11 ${tile}`}>
-                      <Icon size={20} />
+              {summaryCards.map(({ label, value, icon: Icon, tile }) => {
+                const status: WindowStatus | null =
+                  label === "Open" ? "OPEN" :
+                  label === "Scheduled" ? "SCHEDULED" :
+                  label === "Closed" ? "CLOSED" : null;
+
+                return (
+                  <button
+                    key={label}
+                    type="button"
+                    disabled={!status}
+                    aria-pressed={status ? selectedStatus === status : undefined}
+                    onClick={() => {
+                      if (status) setSelectedStatus(status);
+                    }}
+                    className={`w-full rounded-2xl border bg-white p-4 text-left transition-colors sm:p-5 ${
+                      status ? "cursor-pointer hover:border-slate-400" : "cursor-default"
+                    } ${
+                      status && selectedStatus === status
+                        ? "border-blue-500 ring-2 ring-blue-100"
+                        : "border-slate-200"
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <span className={`inline-flex h-10 w-10 items-center justify-center rounded-xl sm:h-11 sm:w-11 ${tile}`}>
+                        <Icon size={20} />
+                      </span>
+                      <span className="text-[10px] font-semibold uppercase tracking-widest text-slate-500 sm:text-xs">
+                        {label}
+                      </span>
+                    </div>
+                    <span className="mt-4 block text-3xl font-semibold text-slate-900 sm:mt-5 sm:text-4xl">
+                      {value}
                     </span>
-                    <span className="text-[10px] font-semibold uppercase tracking-widest text-slate-500 sm:text-xs">
-                      {label}
-                    </span>
-                  </div>
-                  <p className="mt-4 text-3xl font-semibold text-slate-900 sm:mt-5 sm:text-4xl">
-                    {value}
-                  </p>
-                </div>
-              ))}
+                  </button>
+                );
+              })}
             </div>
 
             <div className="border-t border-slate-200">
@@ -407,6 +430,61 @@ export default function RegistrationWindowMock() {
                 </table>
               </div>
             </div>
+
+            {selectedStatus && (
+              <div className="mt-8 overflow-hidden rounded-2xl border-2 border-slate-300 bg-white shadow-sm">
+                <div className="px-5 py-5 sm:px-9 sm:py-7">
+                  <h2 className="text-xl font-medium text-slate-900">
+                    {selectedStatus.charAt(0) + selectedStatus.slice(1).toLowerCase()} Registration Windows
+                  </h2>
+                  <p className="mt-1 text-sm text-slate-500">
+                    {statusTypes.length} {statusTypes.length === 1 ? "window" : "windows"} with this status.
+                  </p>
+                </div>
+                <div className="overflow-x-auto">
+                  <table className="w-full min-w-[640px] text-left">
+                    <thead>
+                      <tr className="border-y border-slate-200 bg-slate-50 text-xs font-semibold uppercase tracking-wider text-slate-600">
+                        <th className="px-5 py-4 sm:px-9">Registration Type</th>
+                        <th className="px-4 py-4">Batches</th>
+                        <th className="px-4 py-4">Schedule</th>
+                        <th className="px-5 py-4 sm:px-9">Status</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {statusTypes.length ? statusTypes.map((type) => {
+                        const registrationWindow = cards[type.value];
+
+                        return (
+                          <tr key={type.value} className="border-b border-slate-100 last:border-b-0">
+                            <td className="px-5 py-5 text-sm font-medium text-slate-900 sm:px-9">
+                              {type.label}
+                            </td>
+                            <td className="px-4 py-5 text-sm text-slate-600">
+                              {registrationWindow.batches || "No batches set"}
+                            </td>
+                            <td className="px-4 py-5 text-sm text-slate-600">
+                              {formatRange(registrationWindow.startAt, registrationWindow.endAt)}
+                            </td>
+                            <td className="px-5 py-5 sm:px-9">
+                              <span className={`inline-block rounded-full px-3 py-1 text-xs font-semibold uppercase ${STATUS_STYLES[registrationWindow.status]}`}>
+                                {registrationWindow.status}
+                              </span>
+                            </td>
+                          </tr>
+                        );
+                      }) : (
+                        <tr>
+                          <td colSpan={4} className="px-5 py-8 text-center text-sm text-slate-500">
+                            No {selectedStatus.toLowerCase()} registration windows.
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
           </section>
 
         {open && (
