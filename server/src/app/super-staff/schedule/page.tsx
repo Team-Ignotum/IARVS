@@ -357,9 +357,9 @@ export default function RegistrationWindowMock() {
               })}
             </div>
 
-            <div className="border-t border-slate-200">
-              <h2 className="px-5 py-5 text-xl font-medium text-slate-900 sm:px-9 sm:py-7">
-                Window Schedule
+            <div className="mt-4 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+              <h2 className="border-b border-slate-200 bg-slate-50 px-5 py-5 text-xl font-medium text-slate-900 sm:px-9 sm:py-7">
+                All Registration Windows
               </h2>
               <div className="overflow-x-auto">
                 <table className="w-full min-w-[760px] text-left">
@@ -432,12 +432,15 @@ export default function RegistrationWindowMock() {
             </div>
 
             {selectedStatus && (
-              <div className="mt-8 overflow-hidden rounded-2xl border-2 border-slate-300 bg-white shadow-sm">
-                <div className="px-5 py-5 sm:px-9 sm:py-7">
-                  <h2 className="text-xl font-medium text-slate-900">
-                    {selectedStatus.charAt(0) + selectedStatus.slice(1).toLowerCase()} Registration Windows
-                  </h2>
-                  <p className="mt-1 text-sm text-slate-500">
+              <div className="mt-10 overflow-hidden rounded-xl border border-indigo-200 bg-white shadow-lg ring-1 ring-indigo-100">
+                <div className="flex flex-wrap items-center justify-between gap-3 border-b border-indigo-100 bg-indigo-50 px-5 py-5 sm:px-9 sm:py-6">
+                  <div>
+                    <p className="text-xs font-bold uppercase tracking-[0.12em] text-indigo-700">Filtered Results</p>
+                    <h2 className="mt-1 text-xl font-semibold text-slate-900">
+                      {selectedStatus.charAt(0) + selectedStatus.slice(1).toLowerCase()} Registration Windows
+                    </h2>
+                  </div>
+                  <p className="rounded-full bg-white px-3 py-1.5 text-sm font-medium text-indigo-700 ring-1 ring-indigo-200">
                     {statusTypes.length} {statusTypes.length === 1 ? "window" : "windows"} with this status.
                   </p>
                 </div>
