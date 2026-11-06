@@ -9,7 +9,6 @@ import {
   BookOpen, 
   ClipboardCheck,
   LayoutDashboard,
-  Settings,
   CalendarDays,
 } from "lucide-react";
 import {
@@ -63,11 +62,7 @@ const bottomLinks = [
     href: "/super-staff/support",
     icon: CircleHelp,
   },
-  {
-    label: "Settings",
-    href: "/super-staff/settings",
-    icon: Settings,
-  },
+  
 ];
 
 const COLLAPSED_BASE =
