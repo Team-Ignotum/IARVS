@@ -3,6 +3,7 @@ import { compare } from "bcrypt-ts";
 import { UserRepository } from "@/repositories/user_repository_impl";
 import { createOTPChallenge } from "@/lib/auth/otp";
 import { sendOTPEmail } from "@/lib/otp_email";
+import { createSession, getRedirectUrl } from "@/lib/auth/session";
 
 export async function POST(request: Request) {
   try {
@@ -50,6 +51,18 @@ export async function POST(request: Request) {
         { status: 403 },
       );
     }
+    //checking if user enabled 2 factor authentication 
+    if (!user.isTwoFactorEnabled) {
+      await createSession(user);
+
+      return NextResponse.json({
+        success: true,
+        message: "Login successful",
+        requiresOTP: false,
+        redirectUrl: getRedirectUrl(user.role),
+      });
+    }
+
 
     const { challenge, code, expiresIn } = await createOTPChallenge(
       "LOGIN",

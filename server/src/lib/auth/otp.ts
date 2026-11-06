@@ -3,7 +3,7 @@ import "server-only";
 import { createHmac, randomBytes, randomInt } from "node:crypto";
 import { getRedis } from "@/lib/redis";
 
-export type OTPPurpose = "LOGIN" | "RESET";
+export type OTPPurpose = "LOGIN" | "RESET" | "2FA_CHANGE";
 
 // =====================================================
 // CONFIGURATION
