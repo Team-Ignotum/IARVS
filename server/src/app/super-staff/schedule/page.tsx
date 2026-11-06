@@ -18,6 +18,9 @@ import { AdminSidebar } from "@/components/Asidebar";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { AdminBreadcrumb } from "@/components/admin/AdministrativeBreadcrumb";
 import { AdminHeader } from "@/components/admin/AdminHeader";
+import { SuperStaffSidebar } from "@/components/superStaffSideBar";
+import { SuperStaffHeader } from "@/components/super-staff/superStaffHeader";
+import { SuperStaffBreadcrumb } from "@/components/super-staff/superStaffBreadcrumb";
 
 type RegistrationType = "NEW_REGISTRATION" | "RE_REGISTRATION" | "ADD_DROP";
 type WindowStatus = "OPEN" | "SCHEDULED" | "CLOSED";
@@ -282,12 +285,12 @@ export default function RegistrationWindowMock() {
 
   return (
     <SidebarProvider>
-      <AdminSidebar />
+      <SuperStaffSidebar />
       <SidebarInset className="min-h-screen bg-slate-50 font-sans">
-        <AdminHeader />
+        <SuperStaffHeader />
         <main className="flex flex-1 flex-col gap-4 bg-[#f4f5f7] p-4 sm:p-6 lg:p-8">
           <div className="mb-1">
-            <AdminBreadcrumb currentPage="Schedule" />
+            <SuperStaffBreadcrumb currentPage="Schedule" />
           </div>
 
           <section className="w-full overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
