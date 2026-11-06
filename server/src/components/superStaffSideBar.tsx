@@ -9,7 +9,6 @@ import {
   BookOpen, 
   ClipboardCheck,
   LayoutDashboard,
-  Settings,
   CalendarDays,
 } from "lucide-react";
 import {
@@ -62,11 +61,6 @@ const bottomLinks = [
     label: "Support",
     href: "/super-staff/support",
     icon: CircleHelp,
-  },
-  {
-    label: "Settings",
-    href: "/super-staff/settings",
-    icon: Settings,
   },
 ];
 
@@ -187,7 +181,7 @@ export function SuperStaffSidebar() {
           pathname={pathname}
           onNavigate={navigate}
           collapsed={collapsed}
-          label="Settings"
+          label="Support"
           links={bottomLinks}
         />
       </SidebarContent>
