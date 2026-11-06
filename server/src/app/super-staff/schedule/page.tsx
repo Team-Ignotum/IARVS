@@ -14,10 +14,7 @@ import {
   Hourglass,
   Lock,
 } from "lucide-react";
-import { AdminSidebar } from "@/components/Asidebar";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
-import { AdminBreadcrumb } from "@/components/admin/AdministrativeBreadcrumb";
-import { AdminHeader } from "@/components/admin/AdminHeader";
 import { SuperStaffSidebar } from "@/components/superStaffSideBar";
 import { SuperStaffHeader } from "@/components/super-staff/superStaffHeader";
 import { SuperStaffBreadcrumb } from "@/components/super-staff/superStaffBreadcrumb";
