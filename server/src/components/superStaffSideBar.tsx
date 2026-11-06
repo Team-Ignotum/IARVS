@@ -22,6 +22,7 @@ import {
   SidebarMenuItem,
   SidebarTrigger,
   useSidebar,
+  SidebarFooter,
 } from "@/components/ui/sidebar";
 
 const mainLinks = [
@@ -182,7 +183,7 @@ export function SuperStaffSidebar() {
           pathname={pathname}
           onNavigate={navigate}
           collapsed={collapsed}
-          label="Settings"
+          label="Support"
           links={bottomLinks}
         />
       </SidebarContent>
