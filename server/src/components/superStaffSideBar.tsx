@@ -14,6 +14,7 @@ import {
 import {
   Sidebar,
   SidebarContent,
+  SidebarFooter,
   SidebarGroup,
   SidebarGroupLabel,
   SidebarHeader,
@@ -177,6 +178,8 @@ export function SuperStaffSidebar() {
           label="Main Menu"
           links={mainLinks}
         />
+      </SidebarContent>
+      <SidebarFooter className="mt-auto shrink-0 border-t border-slate-200 px-2 py-3">
         <NavMenu
           pathname={pathname}
           onNavigate={navigate}
@@ -184,7 +187,7 @@ export function SuperStaffSidebar() {
           label="Support"
           links={bottomLinks}
         />
-      </SidebarContent>
+      </SidebarFooter>
     </Sidebar>
   );
 }
