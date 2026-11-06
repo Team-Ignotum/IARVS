@@ -26,7 +26,7 @@ type RegistrationWindow = {
   batches: string;
   startAt: string;
   endAt: string;
-  status: WindowStatus;
+  manuallyClosed?: boolean;
 };
 
 type CardMap = Record<RegistrationType, RegistrationWindow>;
@@ -60,26 +60,46 @@ const STATUS_STYLES: Record<WindowStatus, string> = {
 
 // One fixed entry per registration type â€” saving always updates the
 // matching card instead of appending a new one.
-const initialCards: CardMap = {
-  NEW_REGISTRATION: {
-    batches: "2025",
-    startAt: "2026-07-01T00:00",
-    endAt: "2026-07-15T23:59",
-    status: "CLOSED",
-  },
-  RE_REGISTRATION: {
-    batches: "2022, 2023",
-    startAt: "2026-09-01T08:00",
-    endAt: "2026-09-14T23:59",
-    status: "SCHEDULED",
-  },
-  ADD_DROP: {
-    batches: "2024",
-    startAt: "2026-08-20T00:00",
-    endAt: "2026-08-27T23:59",
-    status: "OPEN",
-  },
-};
+function localDateTimeOffset(dayOffset: number, hour: number): string {
+  const date = new Date();
+  date.setDate(date.getDate() + dayOffset);
+  date.setHours(hour, 0, 0, 0);
+  return new Date(date.getTime() - date.getTimezoneOffset() * 60_000)
+    .toISOString()
+    .slice(0, 16);
+}
+
+function createInitialCards(): CardMap {
+  return {
+    NEW_REGISTRATION: {
+      batches: "2025",
+      startAt: localDateTimeOffset(-20, 8),
+      endAt: localDateTimeOffset(-10, 18),
+    },
+    RE_REGISTRATION: {
+      batches: "2022, 2023",
+      startAt: localDateTimeOffset(5, 8),
+      endAt: localDateTimeOffset(12, 18),
+    },
+    ADD_DROP: {
+      batches: "2024",
+      startAt: localDateTimeOffset(-1, 8),
+      endAt: localDateTimeOffset(5, 18),
+    },
+  };
+}
+
+function getWindowStatus(window: RegistrationWindow, now: number): WindowStatus {
+  if (window.manuallyClosed) return "CLOSED";
+
+  const start = new Date(window.startAt).getTime();
+  const end = new Date(window.endAt).getTime();
+  if (!Number.isFinite(start) || !Number.isFinite(end) || end <= now) {
+    return "CLOSED";
+  }
+  if (start > now) return "SCHEDULED";
+  return "OPEN";
+}
 
 const emptyForm: FormState = {
   registrationType: "NEW_REGISTRATION",
@@ -107,7 +127,8 @@ function formatRange(startAt?: string, endAt?: string): string {
 }
 
 export default function RegistrationWindowMock() {
-  const [cards, setCards] = useState<CardMap>(initialCards);
+  const [cards, setCards] = useState<CardMap>(createInitialCards);
+  const [currentTime, setCurrentTime] = useState(() => Date.now());
   const [open, setOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [typeMenuOpen, setTypeMenuOpen] = useState(false);
@@ -119,6 +140,11 @@ export default function RegistrationWindowMock() {
     useState<RegistrationType | null>(null);
   const [toast, setToast] = useState("");
   const typeMenuRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    const timer = window.setInterval(() => setCurrentTime(Date.now()), 30_000);
+    return () => window.clearInterval(timer);
+  }, []);
 
   // Close the type dropdown on any click outside it, so it can never be
   // left open and overlap/intercept clicks on fields rendered below it
@@ -178,7 +204,7 @@ export default function RegistrationWindowMock() {
   function closeNow(type: RegistrationType) {
     setCards((prev) => ({
       ...prev,
-      [type]: { ...prev[type], status: "CLOSED" },
+      [type]: { ...prev[type], manuallyClosed: true },
     }));
     flashUpdated(type, `${TYPES.find((t) => t.value === type)?.label} closed.`);
   }
@@ -230,16 +256,13 @@ export default function RegistrationWindowMock() {
     // useSaveRegistrationWindow().mutate(form)
     window.setTimeout(() => {
       const type = form.registrationType;
-      const status: WindowStatus =
-        new Date(form.startAt).getTime() <= Date.now() ? "OPEN" : "SCHEDULED";
-
       setCards((prev) => ({
         ...prev,
         [type]: {
           batches: form.batchIds.trim(),
           startAt: form.startAt,
           endAt: form.endAt,
-          status,
+          manuallyClosed: false,
         },
       }));
       setSaving(false);
@@ -254,6 +277,9 @@ export default function RegistrationWindowMock() {
 
   const typeLabel = TYPES.find((t) => t.value === form.registrationType)?.label;
   const windowValues = Object.values(cards);
+  const windowStatuses = Object.fromEntries(
+    TYPES.map((type) => [type.value, getWindowStatus(cards[type.value], currentTime)]),
+  ) as Record<RegistrationType, WindowStatus>;
   const summaryCards = [
     {
       label: "Total Windows",
@@ -263,25 +289,25 @@ export default function RegistrationWindowMock() {
     },
     {
       label: "Open",
-      value: windowValues.filter((window) => window.status === "OPEN").length,
+      value: windowValues.filter((window) => getWindowStatus(window, currentTime) === "OPEN").length,
       icon: DoorOpen,
       tile: "bg-emerald-50 text-emerald-600",
     },
     {
       label: "Scheduled",
-      value: windowValues.filter((window) => window.status === "SCHEDULED").length,
+      value: windowValues.filter((window) => getWindowStatus(window, currentTime) === "SCHEDULED").length,
       icon: Hourglass,
       tile: "bg-amber-50 text-amber-600",
     },
     {
       label: "Closed",
-      value: windowValues.filter((window) => window.status === "CLOSED").length,
+      value: windowValues.filter((window) => getWindowStatus(window, currentTime) === "CLOSED").length,
       icon: Lock,
       tile: "bg-slate-100 text-slate-500",
     },
   ];
   const statusTypes = selectedStatus
-    ? TYPES.filter((type) => cards[type.value].status === selectedStatus)
+    ? TYPES.filter((type) => windowStatuses[type.value] === selectedStatus)
     : [];
 
   return (
@@ -374,7 +400,8 @@ export default function RegistrationWindowMock() {
                   <tbody>
                     {TYPES.map((t) => {
                       const w = cards[t.value];
-                      const isOpen = w.status === "OPEN";
+                      const status = windowStatuses[t.value];
+                      const isOpen = status === "OPEN";
 
                       return (
                     <tr
@@ -398,8 +425,8 @@ export default function RegistrationWindowMock() {
                         {formatRange(w.startAt, w.endAt)}
                       </td>
                       <td className="px-4 py-5">
-                        <span className={`inline-block rounded-full px-3 py-1 text-xs font-semibold uppercase ${STATUS_STYLES[w.status]}`}>
-                          {w.status}
+                        <span className={`inline-block rounded-full px-3 py-1 text-xs font-semibold uppercase ${STATUS_STYLES[status]}`}>
+                          {status}
                         </span>
                       </td>
                       <td className="px-5 py-5 sm:px-9">
@@ -457,6 +484,7 @@ export default function RegistrationWindowMock() {
                     <tbody>
                       {statusTypes.length ? statusTypes.map((type) => {
                         const registrationWindow = cards[type.value];
+                        const status = windowStatuses[type.value];
 
                         return (
                           <tr key={type.value} className="border-b border-slate-100 last:border-b-0">
@@ -470,8 +498,8 @@ export default function RegistrationWindowMock() {
                               {formatRange(registrationWindow.startAt, registrationWindow.endAt)}
                             </td>
                             <td className="px-5 py-5 sm:px-9">
-                              <span className={`inline-block rounded-full px-3 py-1 text-xs font-semibold uppercase ${STATUS_STYLES[registrationWindow.status]}`}>
-                                {registrationWindow.status}
+                              <span className={`inline-block rounded-full px-3 py-1 text-xs font-semibold uppercase ${STATUS_STYLES[status]}`}>
+                                {status}
                               </span>
                             </td>
                           </tr>
