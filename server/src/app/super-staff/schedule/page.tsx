@@ -591,6 +591,7 @@ export default function RegistrationWindowMock() {
                     <input
                       type="datetime-local"
                       value={form.startAt}
+                      max={form.endAt || undefined}
                       onChange={(e) => update("startAt", e.target.value)}
                       className="w-full rounded-lg border border-slate-200 px-2.5 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-400 transition-shadow"
                     />
@@ -602,6 +603,7 @@ export default function RegistrationWindowMock() {
                     <input
                       type="datetime-local"
                       value={form.endAt}
+                      min={form.startAt || undefined}
                       onChange={(e) => update("endAt", e.target.value)}
                       className="w-full rounded-lg border border-slate-200 px-2.5 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-400 transition-shadow"
                     />
