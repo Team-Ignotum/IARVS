@@ -1,13 +1,8 @@
 ﻿"use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useEffect } from "react";
 import {
   Calendar,
-  X,
-  ChevronDown,
-  Check,
-  AlertCircle,
-  Power,
   CheckCircle2,
   Layers,
   DoorOpen,
@@ -18,54 +13,17 @@ import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { SuperStaffSidebar } from "@/components/superStaffSideBar";
 import { SuperStaffHeader } from "@/components/super-staff/superStaffHeader";
 import { SuperStaffBreadcrumb } from "@/components/super-staff/superStaffBreadcrumb";
-import AdminPagination from "@/components/admin/AdminPagination";
+import { RegistrationWindowModal } from "./RegistrationWindowModal";
+import { RegistrationWindowsTable } from "./RegistrationWindowsTable";
+import { getWindowStatus } from "./date-time";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-
-type RegistrationType = "NEW_REGISTRATION" | "RE_REGISTRATION" | "ADD_DROP";
-type WindowStatus = "OPEN" | "SCHEDULED" | "CLOSED";
-type WindowStatusFilter = "DEFAULT" | WindowStatus;
-
-type RegistrationWindow = {
-  id: string;
-  type: RegistrationType;
-  batches: string;
-  startAt: string;
-  endAt: string;
-  manuallyClosed?: boolean;
-};
-
-type FormState = {
-  registrationType: RegistrationType;
-  batchIds: string;
-  startAt: string;
-  endAt: string;
-  gracePeriodEndAt: string;
-  notifyStudents: boolean;
-};
-
-type TypeOption = {
-  value: RegistrationType;
-  label: string;
-  initials: string;
-};
-
-const TYPES: TypeOption[] = [
-  { value: "NEW_REGISTRATION", label: "New Registration", initials: "NR" },
-  { value: "RE_REGISTRATION", label: "Re-registration", initials: "RR" },
-  { value: "ADD_DROP", label: "Add / Drop Period", initials: "AD" },
-];
-
-const STATUS_STYLES: Record<WindowStatus, string> = {
-  OPEN: "bg-emerald-50 text-emerald-700 border-emerald-200",
-  SCHEDULED: "bg-amber-50 text-amber-700 border-amber-200",
-  CLOSED: "bg-slate-100 text-slate-600 border-slate-200",
-};
+  BATCHES_PATTERN,
+  EMPTY_FORM,
+  TYPES,
+  type FormState,
+  type RegistrationType,
+  type RegistrationWindow,
+} from "./types";
 
 // Creates sample windows to show the available registration types.
 function localDateTimeOffset(dayOffset: number, hour: number): string {
@@ -75,26 +33,6 @@ function localDateTimeOffset(dayOffset: number, hour: number): string {
   return new Date(date.getTime() - date.getTimezoneOffset() * 60_000)
     .toISOString()
     .slice(0, 16);
-}
-
-function shiftDateTimeLocal(value: string, minutes: number): string | undefined {
-  if (!value) return undefined;
-  const date = new Date(value);
-  date.setMinutes(date.getMinutes() + minutes);
-  const pad = (part: number) => String(part).padStart(2, "0");
-  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
-}
-
-function currentDateTimeLocal(): string {
-  const date = new Date();
-  const pad = (part: number) => String(part).padStart(2, "0");
-  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
-}
-
-function laterDateTimeLocal(first?: string, second?: string): string | undefined {
-  if (!first) return second;
-  if (!second) return first;
-  return new Date(first).getTime() >= new Date(second).getTime() ? first : second;
 }
 
 function createInitialCards(): RegistrationWindow[] {
@@ -123,97 +61,33 @@ function createInitialCards(): RegistrationWindow[] {
   ];
 }
 
-function getWindowStatus(window: RegistrationWindow, now: number): WindowStatus {
-  if (window.manuallyClosed) return "CLOSED";
-
-  const start = new Date(window.startAt).getTime();
-  const end = new Date(window.endAt).getTime();
-  if (!Number.isFinite(start) || !Number.isFinite(end) || end <= now) {
-    return "CLOSED";
-  }
-  if (start > now) return "SCHEDULED";
-  return "OPEN";
-}
-
-const emptyForm: FormState = {
-  registrationType: "NEW_REGISTRATION",
-  batchIds: "",
-  startAt: "",
-  endAt: "",
-  gracePeriodEndAt: "",
-  notifyStudents: true,
-};
-
-// Matches tokens like "2023" or "2023,2024" / "2023, 2024"
-const BATCHES_PATTERN = /^\d{4}(\s*,\s*\d{4})*$/;
-const WINDOWS_PER_PAGE = 5;
-
-function formatRange(startAt?: string, endAt?: string): string {
-  if (!startAt || !endAt) return "Not scheduled yet";
-  const opts: Intl.DateTimeFormatOptions = {
-    month: "short",
-    day: "numeric",
-    hour: "numeric",
-    minute: "2-digit",
-  };
-  const s = new Date(startAt).toLocaleString("en-US", opts);
-  const e = new Date(endAt).toLocaleString("en-US", opts);
-  return `${s} \u2192 ${e}`;
-}
-
 export default function RegistrationWindowMock() {
   const [cards, setCards] = useState<RegistrationWindow[]>(createInitialCards);
   const [currentTime, setCurrentTime] = useState(() => Date.now());
   const [open, setOpen] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [typeMenuOpen, setTypeMenuOpen] = useState(false);
-  const [statusFilter, setStatusFilter] = useState<WindowStatusFilter>("DEFAULT");
-  const [tablePage, setTablePage] = useState(1);
   const [lockType, setLockType] = useState(false);
-  const [form, setForm] = useState<FormState>(emptyForm);
+  const [form, setForm] = useState<FormState>(EMPTY_FORM);
   const [formError, setFormError] = useState("");
   const [editingWindowId, setEditingWindowId] = useState<string | null>(null);
   const [justUpdatedId, setJustUpdatedId] = useState<string | null>(null);
   const [toast, setToast] = useState("");
-  const typeMenuRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     const timer = window.setInterval(() => setCurrentTime(Date.now()), 30_000);
     return () => window.clearInterval(timer);
   }, []);
 
-  // Close the type dropdown on any click outside it, so it can never be
-  // left open and overlap/intercept clicks on fields rendered below it
-  // (including the Save & Schedule button).
-  useEffect(() => {
-    if (!typeMenuOpen) return;
-    function handleClickOutside(e: MouseEvent) {
-      if (
-        typeMenuRef.current &&
-        !typeMenuRef.current.contains(e.target as Node)
-      ) {
-        setTypeMenuOpen(false);
-      }
-    }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [typeMenuOpen]);
-
-  function update<K extends keyof FormState>(field: K, value: FormState[K]) {
-    setForm((prev) => ({ ...prev, [field]: value }));
-  }
-
   function closeModal() {
     if (saving) return;
     setOpen(false);
     setFormError("");
-    setTypeMenuOpen(false);
   }
 
   // Opens the generic "Manage Registration Window" flow Ã¢â‚¬â€ type stays
   // editable via the dropdown.
   function openGenericModal() {
-    setForm(emptyForm);
+    setForm(EMPTY_FORM);
     setLockType(false);
     setEditingWindowId(null);
     setFormError("");
@@ -311,7 +185,7 @@ export default function RegistrationWindowMock() {
         : [...prev, updatedWindow]);
       setSaving(false);
       setOpen(false);
-      setForm(emptyForm);
+      setForm(EMPTY_FORM);
       setEditingWindowId(null);
       flashUpdated(
         updatedWindow.id,
@@ -320,17 +194,7 @@ export default function RegistrationWindowMock() {
     }, 500);
   }
 
-  const typeLabel = TYPES.find((t) => t.value === form.registrationType)?.label;
   const windowValues = cards;
-  const filteredWindows = statusFilter === "DEFAULT"
-    ? cards
-    : cards.filter((item) => getWindowStatus(item, currentTime) === statusFilter);
-  const tablePageCount = Math.max(1, Math.ceil(filteredWindows.length / WINDOWS_PER_PAGE));
-  const activeTablePage = Math.min(tablePage, Math.max(1, tablePageCount));
-  const visibleWindows = filteredWindows.slice(
-    (activeTablePage - 1) * WINDOWS_PER_PAGE,
-    activeTablePage * WINDOWS_PER_PAGE,
-  );
   const summaryCards = [
     {
       label: "Total Windows",
