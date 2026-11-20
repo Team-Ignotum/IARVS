@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useRef, useEffect } from "react";
 import {
@@ -18,19 +18,27 @@ import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { SuperStaffSidebar } from "@/components/superStaffSideBar";
 import { SuperStaffHeader } from "@/components/super-staff/superStaffHeader";
 import { SuperStaffBreadcrumb } from "@/components/super-staff/superStaffBreadcrumb";
+import AdminPagination from "@/components/admin/AdminPagination";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 type RegistrationType = "NEW_REGISTRATION" | "RE_REGISTRATION" | "ADD_DROP";
 type WindowStatus = "OPEN" | "SCHEDULED" | "CLOSED";
 type WindowStatusFilter = "DEFAULT" | WindowStatus;
 
 type RegistrationWindow = {
+  id: string;
+  type: RegistrationType;
   batches: string;
   startAt: string;
   endAt: string;
   manuallyClosed?: boolean;
 };
-
-type CardMap = Record<RegistrationType, RegistrationWindow>;
 
 type FormState = {
   registrationType: RegistrationType;
@@ -59,8 +67,7 @@ const STATUS_STYLES: Record<WindowStatus, string> = {
   CLOSED: "bg-slate-100 text-slate-600 border-slate-200",
 };
 
-// One fixed entry per registration type â€” saving always updates the
-// matching card instead of appending a new one.
+// Creates sample windows to show the available registration types.
 function localDateTimeOffset(dayOffset: number, hour: number): string {
   const date = new Date();
   date.setDate(date.getDate() + dayOffset);
@@ -70,24 +77,30 @@ function localDateTimeOffset(dayOffset: number, hour: number): string {
     .slice(0, 16);
 }
 
-function createInitialCards(): CardMap {
-  return {
-    NEW_REGISTRATION: {
+function createInitialCards(): RegistrationWindow[] {
+  return [
+    {
+      id: "initial-new-registration",
+      type: "NEW_REGISTRATION",
       batches: "2025",
       startAt: localDateTimeOffset(-20, 8),
       endAt: localDateTimeOffset(-10, 18),
     },
-    RE_REGISTRATION: {
+    {
+      id: "initial-re-registration",
+      type: "RE_REGISTRATION",
       batches: "2022, 2023",
       startAt: localDateTimeOffset(5, 8),
       endAt: localDateTimeOffset(12, 18),
     },
-    ADD_DROP: {
+    {
+      id: "initial-add-drop",
+      type: "ADD_DROP",
       batches: "2024",
       startAt: localDateTimeOffset(-1, 8),
       endAt: localDateTimeOffset(5, 18),
     },
-  };
+  ];
 }
 
 function getWindowStatus(window: RegistrationWindow, now: number): WindowStatus {
@@ -113,6 +126,7 @@ const emptyForm: FormState = {
 
 // Matches tokens like "2023" or "2023,2024" / "2023, 2024"
 const BATCHES_PATTERN = /^\d{4}(\s*,\s*\d{4})*$/;
+const WINDOWS_PER_PAGE = 5;
 
 function formatRange(startAt?: string, endAt?: string): string {
   if (!startAt || !endAt) return "Not scheduled yet";
@@ -128,17 +142,18 @@ function formatRange(startAt?: string, endAt?: string): string {
 }
 
 export default function RegistrationWindowMock() {
-  const [cards, setCards] = useState<CardMap>(createInitialCards);
+  const [cards, setCards] = useState<RegistrationWindow[]>(createInitialCards);
   const [currentTime, setCurrentTime] = useState(() => Date.now());
   const [open, setOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [typeMenuOpen, setTypeMenuOpen] = useState(false);
   const [statusFilter, setStatusFilter] = useState<WindowStatusFilter>("DEFAULT");
+  const [tablePage, setTablePage] = useState(1);
   const [lockType, setLockType] = useState(false);
   const [form, setForm] = useState<FormState>(emptyForm);
   const [formError, setFormError] = useState("");
-  const [justUpdatedType, setJustUpdatedType] =
-    useState<RegistrationType | null>(null);
+  const [editingWindowId, setEditingWindowId] = useState<string | null>(null);
+  const [justUpdatedId, setJustUpdatedId] = useState<string | null>(null);
   const [toast, setToast] = useState("");
   const typeMenuRef = useRef<HTMLDivElement | null>(null);
 
@@ -175,45 +190,45 @@ export default function RegistrationWindowMock() {
     setTypeMenuOpen(false);
   }
 
-  // Opens the generic "Manage Registration Window" flow â€” type stays
+  // Opens the generic "Manage Registration Window" flow Ã¢â‚¬â€ type stays
   // editable via the dropdown.
   function openGenericModal() {
     setForm(emptyForm);
     setLockType(false);
+    setEditingWindowId(null);
     setFormError("");
     setOpen(true);
   }
 
-  // Triggered by a card's "Open now" switch â€” navigates straight into the
+  // Triggered by a card's "Open now" switch Ã¢â‚¬â€ navigates straight into the
   // form, pre-selected and pre-filled for that specific registration type.
-  function openModalForType(type: RegistrationType) {
-    const existing = cards[type];
+  function openModalForWindow(existing: RegistrationWindow) {
     setForm({
-      registrationType: type,
-      batchIds: existing?.batches ?? "",
-      startAt: existing?.startAt ?? "",
-      endAt: existing?.endAt ?? "",
+      registrationType: existing.type,
+      batchIds: existing.batches,
+      startAt: existing.startAt,
+      endAt: existing.endAt,
       gracePeriodEndAt: "",
       notifyStudents: true,
     });
+    setEditingWindowId(existing.id);
     setLockType(true);
     setFormError("");
     setOpen(true);
   }
 
-  // Direct close â€” no form needed to shut a window down.
-  function closeNow(type: RegistrationType) {
-    setCards((prev) => ({
-      ...prev,
-      [type]: { ...prev[type], manuallyClosed: true },
-    }));
-    flashUpdated(type, `${TYPES.find((t) => t.value === type)?.label} closed.`);
+  // Direct close Ã¢â‚¬â€ no form needed to shut a window down.
+  function closeNow(windowToClose: RegistrationWindow) {
+    setCards((prev) => prev.map((item) =>
+      item.id === windowToClose.id ? { ...item, manuallyClosed: true } : item,
+    ));
+    flashUpdated(windowToClose.id, `${TYPES.find((t) => t.value === windowToClose.type)?.label} closed.`);
   }
 
-  function flashUpdated(type: RegistrationType, message: string) {
-    setJustUpdatedType(type);
+  function flashUpdated(id: string, message: string) {
+    setJustUpdatedId(id);
     setToast(message);
-    window.setTimeout(() => setJustUpdatedType(null), 2200);
+    window.setTimeout(() => setJustUpdatedId(null), 2200);
     window.setTimeout(() => setToast(""), 3000);
   }
 
@@ -242,7 +257,7 @@ export default function RegistrationWindowMock() {
   // Triggered directly by the Save & Schedule button's onClick rather than
   // the form's onSubmit. Sandboxed preview iframes (this artifact preview
   // included) can silently block the native `submit` event, so we avoid
-  // depending on it entirely â€” the button calls this straight away.
+  // depending on it entirely Ã¢â‚¬â€ the button calls this straight away.
   function handleSave() {
     const validationError = validate();
     if (validationError) {
@@ -253,37 +268,43 @@ export default function RegistrationWindowMock() {
     setFormError("");
     setSaving(true);
 
-    // Mock async save â€” in the real app this calls
+    // Mock async save Ã¢â‚¬â€ in the real app this calls
     // useSaveRegistrationWindow().mutate(form)
     window.setTimeout(() => {
       const type = form.registrationType;
-      setCards((prev) => ({
-        ...prev,
-        [type]: {
-          batches: form.batchIds.trim(),
-          startAt: form.startAt,
-          endAt: form.endAt,
-          manuallyClosed: false,
-        },
-      }));
+      const updatedWindow: RegistrationWindow = {
+        id: editingWindowId ?? crypto.randomUUID(),
+        type,
+        batches: form.batchIds.trim(),
+        startAt: form.startAt,
+        endAt: form.endAt,
+        manuallyClosed: false,
+      };
+      setCards((prev) => editingWindowId
+        ? prev.map((item) => item.id === editingWindowId ? updatedWindow : item)
+        : [...prev, updatedWindow]);
       setSaving(false);
       setOpen(false);
       setForm(emptyForm);
+      setEditingWindowId(null);
       flashUpdated(
-        type,
+        updatedWindow.id,
         `${TYPES.find((t) => t.value === type)?.label} window scheduled.`,
       );
     }, 500);
   }
 
   const typeLabel = TYPES.find((t) => t.value === form.registrationType)?.label;
-  const windowValues = Object.values(cards);
-  const windowStatuses = Object.fromEntries(
-    TYPES.map((type) => [type.value, getWindowStatus(cards[type.value], currentTime)]),
-  ) as Record<RegistrationType, WindowStatus>;
-  const visibleTypes = statusFilter === "DEFAULT"
-    ? TYPES
-    : TYPES.filter((type) => windowStatuses[type.value] === statusFilter);
+  const windowValues = cards;
+  const filteredWindows = statusFilter === "DEFAULT"
+    ? cards
+    : cards.filter((item) => getWindowStatus(item, currentTime) === statusFilter);
+  const tablePageCount = Math.ceil(filteredWindows.length / WINDOWS_PER_PAGE);
+  const activeTablePage = Math.min(tablePage, Math.max(1, tablePageCount));
+  const visibleWindows = filteredWindows.slice(
+    (activeTablePage - 1) * WINDOWS_PER_PAGE,
+    activeTablePage * WINDOWS_PER_PAGE,
+  );
   const summaryCards = [
     {
       label: "Total Windows",
@@ -328,8 +349,8 @@ export default function RegistrationWindowMock() {
                     Registration Windows
                   </h1>
                   <p className="mt-2 text-sm text-slate-500">
-                    Control when the student portal accepts registrations. Each
-                    type has one window.
+                    Control when the student portal accepts registrations. You
+                    can schedule multiple windows for each registration type.
                   </p>
                 </div>
                 <button
@@ -369,18 +390,27 @@ export default function RegistrationWindowMock() {
                 <h2 className="text-xl font-medium text-slate-900">
                   All Registration Windows
                 </h2>
-                <label className="flex items-center gap-2 text-sm font-medium text-slate-600">
-                  Status
-                  <select
+                <label className="space-y-1">
+                  <span className="block text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                    Status
+                  </span>
+                  <Select
                     value={statusFilter}
-                    onChange={(event) => setStatusFilter(event.target.value as WindowStatusFilter)}
-                    className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-900/10"
+                    onValueChange={(value) => {
+                      setStatusFilter(value as WindowStatusFilter);
+                      setTablePage(1);
+                    }}
                   >
-                    <option value="DEFAULT">Default</option>
-                    <option value="OPEN">Open</option>
-                    <option value="SCHEDULED">Scheduled</option>
-                    <option value="CLOSED">Closed</option>
-                  </select>
+                    <SelectTrigger className="h-10 min-w-[170px] rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-700 transition-colors hover:bg-slate-50 dark:border-slate-600 dark:bg-[#0F172A] dark:text-slate-100 dark:hover:bg-slate-800">
+                      <SelectValue placeholder="Default" />
+                    </SelectTrigger>
+                    <SelectContent position="popper" align="start" side="bottom" className="border-slate-200 bg-white text-slate-900 dark:border-slate-700 dark:bg-[#1E293B] dark:text-slate-100">
+                      <SelectItem value="DEFAULT" className="cursor-pointer focus:bg-slate-100 focus:text-slate-900 data-[state=checked]:bg-slate-100 data-[state=checked]:text-slate-900 dark:text-slate-100 dark:focus:bg-slate-700 dark:focus:text-white dark:data-[state=checked]:bg-slate-700">Default</SelectItem>
+                      <SelectItem value="OPEN" className="cursor-pointer focus:bg-slate-100 focus:text-slate-900 data-[state=checked]:bg-slate-100 data-[state=checked]:text-slate-900 dark:text-slate-100 dark:focus:bg-slate-700 dark:focus:text-white dark:data-[state=checked]:bg-slate-700">Open</SelectItem>
+                      <SelectItem value="SCHEDULED" className="cursor-pointer focus:bg-slate-100 focus:text-slate-900 data-[state=checked]:bg-slate-100 data-[state=checked]:text-slate-900 dark:text-slate-100 dark:focus:bg-slate-700 dark:focus:text-white dark:data-[state=checked]:bg-slate-700">Scheduled</SelectItem>
+                      <SelectItem value="CLOSED" className="cursor-pointer focus:bg-slate-100 focus:text-slate-900 data-[state=checked]:bg-slate-100 data-[state=checked]:text-slate-900 dark:text-slate-100 dark:focus:bg-slate-700 dark:focus:text-white dark:data-[state=checked]:bg-slate-700">Closed</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </label>
               </div>
               <div className="overflow-x-auto">
@@ -394,15 +424,15 @@ export default function RegistrationWindowMock() {
                     </tr>
                   </thead>
                   <tbody>
-                    {visibleTypes.map((t) => {
-                      const w = cards[t.value];
-                      const status = windowStatuses[t.value];
+                    {visibleWindows.map((w) => {
+                      const t = TYPES.find((type) => type.value === w.type)!;
+                      const status = getWindowStatus(w, currentTime);
                       const isOpen = status === "OPEN";
 
                       return (
                     <tr
-                      key={t.value}
-                      className={`border-b border-slate-100 transition-colors duration-700 last:border-b-0 ${justUpdatedType === t.value ? "bg-slate-50" : "bg-white"}`}
+                      key={w.id}
+                      className={`border-b border-slate-100 transition-colors duration-700 last:border-b-0 ${justUpdatedId === w.id ? "bg-slate-50" : "bg-white"}`}
                     >
                       <td className="px-5 py-5 sm:px-9">
                         <div className="flex items-center gap-3">
@@ -430,7 +460,7 @@ export default function RegistrationWindowMock() {
                           {isOpen && (
                             <button
                               type="button"
-                              onClick={() => openModalForType(t.value)}
+                              onClick={() => openModalForWindow(w)}
                               className="rounded-lg border border-slate-200 bg-white px-3.5 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50"
                             >
                               Edit
@@ -438,7 +468,7 @@ export default function RegistrationWindowMock() {
                           )}
                           <button
                             type="button"
-                            onClick={() => (isOpen ? closeNow(t.value) : openModalForType(t.value))}
+                            onClick={() => (isOpen ? closeNow(w) : openModalForWindow(w))}
                             className={`inline-flex items-center gap-1.5 rounded-lg px-3.5 py-2 text-sm font-medium transition-colors ${isOpen ? "border border-slate-200 bg-white text-slate-700 hover:bg-slate-50" : "bg-[#1e3a6e] text-white hover:bg-[#182f59]"}`}
                           >
                             <Power size={14} />
@@ -449,16 +479,26 @@ export default function RegistrationWindowMock() {
                     </tr>
                       );
                     })}
-                    {!visibleTypes.length && (
+                    {!filteredWindows.length && (
                       <tr>
                         <td colSpan={4} className="px-5 py-8 text-center text-sm text-slate-500">
-                          No {statusFilter.toLowerCase()} registration windows.
+                          {statusFilter === "DEFAULT" ? "No registration windows." : `No ${statusFilter.toLowerCase()} registration windows.`}
                         </td>
                       </tr>
                     )}
                   </tbody>
                 </table>
               </div>
+              {tablePageCount > 1 && (
+                <AdminPagination
+                  page={activeTablePage}
+                  totalPages={tablePageCount}
+                  total={filteredWindows.length}
+                  itemsPerPage={WINDOWS_PER_PAGE}
+                  itemLabel="windows"
+                  onPageChange={setTablePage}
+                />
+              )}
             </div>
 
           </section>
