@@ -299,7 +299,7 @@ export default function RegistrationWindowMock() {
   const filteredWindows = statusFilter === "DEFAULT"
     ? cards
     : cards.filter((item) => getWindowStatus(item, currentTime) === statusFilter);
-  const tablePageCount = Math.ceil(filteredWindows.length / WINDOWS_PER_PAGE);
+  const tablePageCount = Math.max(1, Math.ceil(filteredWindows.length / WINDOWS_PER_PAGE));
   const activeTablePage = Math.min(tablePage, Math.max(1, tablePageCount));
   const visibleWindows = filteredWindows.slice(
     (activeTablePage - 1) * WINDOWS_PER_PAGE,
@@ -489,7 +489,7 @@ export default function RegistrationWindowMock() {
                   </tbody>
                 </table>
               </div>
-              {tablePageCount > 1 && (
+              {(statusFilter !== "DEFAULT" || tablePageCount > 1) && (
                 <AdminPagination
                   page={activeTablePage}
                   totalPages={tablePageCount}
