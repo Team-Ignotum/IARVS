@@ -1,8 +1,9 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useEffect, useState } from "react";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import crest from "../../src/app/favicon.ico";
 import {
   Bell,
@@ -148,7 +149,7 @@ function NavMenu({
   links,
 }: {
   pathname: string;
-  onNavigate: (href: string) => void;
+  onNavigate: () => void;
   collapsed: boolean;
   label: string;
   links: typeof mainLinks;
@@ -169,15 +170,17 @@ function NavMenu({
               className="group-data-[collapsible=icon]:flex group-data-[collapsible=icon]:justify-center"
             >
               <SidebarMenuButton
+                asChild
                 isActive={active}
                 title={collapsed ? item.label : undefined}
-                onClick={() => onNavigate(item.href)}
                 className={menuBtnClass(active)}
               >
-                <Icon strokeWidth={1.8} />
-                <span className="group-data-[collapsible=icon]:hidden">
-                  {item.label}
-                </span>
+                <Link href={item.href} onClick={onNavigate}>
+                  <Icon strokeWidth={1.8} />
+                  <span className="group-data-[collapsible=icon]:hidden">
+                    {item.label}
+                  </span>
+                </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
           );
@@ -189,7 +192,6 @@ function NavMenu({
 
 export function SuperStaffSidebar() {
   const pathname = usePathname();
-  const router = useRouter();
   const { setOpenMobile, state } = useSidebar();
   const collapsed = state === "collapsed";
   const [unreadCount, setUnreadCount] = useState(0);
@@ -211,8 +213,7 @@ export function SuperStaffSidebar() {
     };
   }, [pathname]);
 
-  const navigate = (href: string) => {
-    router.push(href);
+  const closeMobileMenu = () => {
     setOpenMobile(false);
   };
 
@@ -224,7 +225,7 @@ export function SuperStaffSidebar() {
       <SidebarContent className="flex-1 overflow-auto">
         <NavMenu
           pathname={pathname}
-          onNavigate={navigate}
+          onNavigate={closeMobileMenu}
           collapsed={collapsed}
           label="Main Menu"
           links={mainLinks}
@@ -234,34 +235,36 @@ export function SuperStaffSidebar() {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton
+              asChild
               isActive={supportActive}
               title={collapsed ? `Support${unreadCount > 0 ? ` (${unreadCount} unread)` : ""}` : undefined}
-              onClick={() => navigate("/super-staff/support")}
               className={`${menuBtnClass(supportActive)} relative`}
             >
-              <CircleHelp strokeWidth={1.8} />
-              <span className="group-data-[collapsible=icon]:hidden">Support</span>
-              {unreadCount > 0 && (
-                <span
-                  aria-label={`${unreadCount} unread student support messages`}
-                  className="ml-auto inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white group-data-[collapsible=icon]:absolute group-data-[collapsible=icon]:-right-1 group-data-[collapsible=icon]:-top-1 group-data-[collapsible=icon]:h-4 group-data-[collapsible=icon]:min-w-4"
-                >
-                  {unreadCount > 99 ? "99+" : unreadCount}
-                </span>
-              )}
+              <Link href="/super-staff/support" onClick={closeMobileMenu}>
+                <CircleHelp strokeWidth={1.8} />
+                <span className="group-data-[collapsible=icon]:hidden">Support</span>
+                {unreadCount > 0 && (
+                  <span
+                    aria-label={`${unreadCount} unread student support messages`}
+                    className="ml-auto inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white group-data-[collapsible=icon]:absolute group-data-[collapsible=icon]:-right-1 group-data-[collapsible=icon]:-top-1 group-data-[collapsible=icon]:h-4 group-data-[collapsible=icon]:min-w-4"
+                  >
+                    {unreadCount > 99 ? "99+" : unreadCount}
+                  </span>
+                )}
+              </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
 
         {!collapsed && unreadCount > 0 && (
-          <button
-            type="button"
-            onClick={() => navigate("/super-staff/support")}
+          <Link
+            href="/super-staff/support"
+            onClick={closeMobileMenu}
             className="mt-1 flex w-full items-center gap-2 rounded-md px-2 text-left text-xs text-slate-500 hover:text-blue-600"
           >
             <Bell size={13} />
             {unreadCount} unread student {unreadCount === 1 ? "message" : "messages"}
-          </button>
+          </Link>
         )}
       </SidebarFooter>
     </Sidebar>
