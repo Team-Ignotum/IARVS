@@ -77,6 +77,26 @@ function localDateTimeOffset(dayOffset: number, hour: number): string {
     .slice(0, 16);
 }
 
+function shiftDateTimeLocal(value: string, minutes: number): string | undefined {
+  if (!value) return undefined;
+  const date = new Date(value);
+  date.setMinutes(date.getMinutes() + minutes);
+  const pad = (part: number) => String(part).padStart(2, "0");
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+}
+
+function currentDateTimeLocal(): string {
+  const date = new Date();
+  const pad = (part: number) => String(part).padStart(2, "0");
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+}
+
+function laterDateTimeLocal(first?: string, second?: string): string | undefined {
+  if (!first) return second;
+  if (!second) return first;
+  return new Date(first).getTime() >= new Date(second).getTime() ? first : second;
+}
+
 function createInitialCards(): RegistrationWindow[] {
   return [
     {
@@ -241,8 +261,14 @@ export default function RegistrationWindowMock() {
     }
     if (!form.startAt) return "Choose when the portal opens.";
     if (!form.endAt) return "Choose when the portal closes.";
+    if (new Date(form.startAt).getTime() <= Date.now()) {
+      return "The open date and time must be after the present date and time.";
+    }
+    if (new Date(form.endAt).getTime() <= Date.now()) {
+      return "The close date and time must be after the present date and time.";
+    }
     if (new Date(form.endAt).getTime() <= new Date(form.startAt).getTime()) {
-      return "Close date must be after the open date.";
+      return "The close date and time must be after the open date and time.";
     }
     if (
       form.gracePeriodEndAt &&
@@ -591,7 +617,8 @@ export default function RegistrationWindowMock() {
                     <input
                       type="datetime-local"
                       value={form.startAt}
-                      max={form.endAt || undefined}
+                      min={shiftDateTimeLocal(currentDateTimeLocal(), 1)}
+                      max={shiftDateTimeLocal(form.endAt, -1)}
                       onChange={(e) => update("startAt", e.target.value)}
                       className="w-full rounded-lg border border-slate-200 px-2.5 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-400 transition-shadow"
                     />
@@ -603,7 +630,10 @@ export default function RegistrationWindowMock() {
                     <input
                       type="datetime-local"
                       value={form.endAt}
-                      min={form.startAt || undefined}
+                      min={laterDateTimeLocal(
+                        shiftDateTimeLocal(form.startAt, 1),
+                        shiftDateTimeLocal(currentDateTimeLocal(), 1),
+                      )}
                       onChange={(e) => update("endAt", e.target.value)}
                       className="w-full rounded-lg border border-slate-200 px-2.5 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-400 transition-shadow"
                     />
